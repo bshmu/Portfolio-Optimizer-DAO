@@ -5,9 +5,9 @@
   "proxy": "http://localhost:5000",
   "scripts": {
     "dev": "next dev",
+    "dev-start-flask": "cd flask-backend && env/bin/flask run --no-debugger",
     "build": "next build",
     "start": "next start",
-    "start-backend": "cd flask-backend && env/bin/flask run --no-debugger",
     "lint": "next lint"
   },
   "dependencies": {

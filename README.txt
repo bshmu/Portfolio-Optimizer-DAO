@@ -1,4 +1,4 @@
-Python Dependencies:
+Backend Dependencies:
  - Numpy
  - Pandas
  - Scipy
@@ -15,3 +15,27 @@ https://codeburst.io/deploy-a-smart-contract-using-python-how-to-b62de0124b
 Black-Litterman Model Resources:
  - PyPortfolioOpt Repo: https://pyportfolioopt.readthedocs.io/en/latest/BlackLitterman.html
  - "The Black-Litterman Model in Detail": https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1314585
+
+
+Front-end Dependencies:
+- NextJs
+- Yarn 
+- Flask
+- Axios
+
+Starting NextJs: 
+cd portfolio-frontend
+run yarn dev 
+
+Installing Flask: 
+cd portfolio-frontend/flask-backend
+run python -m venv env 
+run source env/bin/activate
+run pip install flask
+run pip install python-dotenv
+
+Starting Flask Backend: 
+cd portfolio-frontend/flask-backend
+run dev-start-flask
+
+Navigate to the url http://127.0.0.1:5000/profile for preview of the response_body rendered in JSON format
