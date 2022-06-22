@@ -96,6 +96,8 @@ contract OptimizerDAO is ERC20 {
     // Maps Token string to array of total token amount
     mapping(string => uint[]) userViews;
     mapping(string => uint[]) userConfidenceLevel;
+    mapping(string => string[]) userViewsType;
+    mapping(string => string[]) userViewsRelativeToken;
   }
 
   // Array of Proposals
@@ -117,7 +119,7 @@ contract OptimizerDAO is ERC20 {
 
   function joinDAO() public payable {
     // What is the minimum buy in for the DAO?
-    require(msg.value >= 1 ether, "Minimum buy in is 1 ether");
+    require(msg.value >= 41217007 gwei, "Minimum buy in is 0.1 ether");
 
     if (treasuryEth == 0) {
 
@@ -171,18 +173,22 @@ contract OptimizerDAO is ERC20 {
     }
   }
 
-  function getProposalVotes(string memory _token) public view returns (uint[] memory, uint[] memory, uint[] memory){
+  function getProposalVotes(string memory _token) public view returns (uint[] memory, uint[] memory, uint[] memory, string[] memory, string[] memory){
       Proposal storage proposal = proposals[proposals.length - 1];
       uint length = proposal.numOfUserTokens[_token].length;
       uint[]    memory _numOfUserTokens = new uint[](length);
       uint[]  memory _userViews = new uint[](length);
       uint[]    memory _userConfidenceLevel = new uint[](length);
+      string[] memory _userViewsType = new string[](length);
+      string[] memory _userViewsRelativeToken = new string[](length);
 
       for (uint i = 0; i < length; i++) {
           console.log(proposal.numOfUserTokens[_token][i]);
           _numOfUserTokens[i] = proposal.numOfUserTokens[_token][i];
           _userViews[i] = proposal.userViews[_token][i];
           _userConfidenceLevel[i] = proposal.userConfidenceLevel[_token][i];
+          _userViewsType[i] = proposal.userViewsType[_token][i];
+          _userViewsRelativeToken[i] = proposal.userViewsRelativeToken[_token][i];
       }
 
       return (_numOfUserTokens, _userViews, _userConfidenceLevel);
@@ -299,7 +305,8 @@ contract OptimizerDAO is ERC20 {
         //then we will call swapExactTokensForTokens
         //for the deadline we will pass in block.timestamp
         //the deadline is the latest time the trade is valid for
-        IUniswapV2Router(UNISWAP_V2_ROUTER).swapExactTokensForTokens(_amountIn, _amountOutMin, path, _to, block.timestamp);
+      IUniswapV2Router(UNISWAP_V2_ROUTER).ExactInputParams(path, address(this), block.timestamp, _amountIn, 0);
+        //IUniswapV2Router(UNISWAP_V2_ROUTER).swapExactTokensForTokens(_amountIn, _amountOutMin, path, _to, block.timestamp);
     }
 
 
