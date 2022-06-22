@@ -23,6 +23,8 @@ Front-end Dependencies:
 - Flask
 - Axios
 - Tailwind
+- Web3modal
+- WalletConnect
 
 Starting NextJs: 
 cd portfolio-frontend
@@ -30,6 +32,9 @@ run npm install axios
 run npm install -D tailwindcss postcss autoprefixer
 run npx tailwindcss init -p
 run npm install --save web3modal
+run npm install --save ethers
+run npm install --save @walletconnect/web3-provider
+run npm install react-toastify
 run npm run dev 
 
 Installing Flask: 
