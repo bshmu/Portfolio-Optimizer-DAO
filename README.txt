@@ -22,9 +22,13 @@ Front-end Dependencies:
 - Yarn 
 - Flask
 - Axios
+- Tailwind
 
 Starting NextJs: 
 cd portfolio-frontend
+run npm install axios
+run npm install -D tailwindcss postcss autoprefixer
+run npx tailwindcss init -p
 run yarn dev 
 
 Installing Flask: 
