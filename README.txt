@@ -19,7 +19,7 @@ Black-Litterman Model Resources:
 
 Front-end Dependencies:
 - NextJs
-- Yarn 
+- Npm 
 - Flask
 - Axios
 - Tailwind
@@ -29,7 +29,8 @@ cd portfolio-frontend
 run npm install axios
 run npm install -D tailwindcss postcss autoprefixer
 run npx tailwindcss init -p
-run yarn dev 
+run npm install --save web3modal
+run npm run dev 
 
 Installing Flask: 
 cd portfolio-frontend/flask-backend
