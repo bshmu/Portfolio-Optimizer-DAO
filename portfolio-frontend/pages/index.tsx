@@ -1,9 +1,15 @@
+import React, {useState} from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
-import Join from "./joindao";
+import Button from "../components/button";
+
 
 const Home: NextPage = () => {
+  const joinDAO = () => {
+    console.log("hiiii")
+  }
+
   return (
     <div className={styles.container}>
       <Head>
@@ -14,8 +20,10 @@ const Home: NextPage = () => {
 
       <main className={styles.main}>
         <h1 className={styles.title}>Welcome to Portfolio Optimizer DAO</h1>
-
-        <Join />
+        
+        <div className="mt-48">
+          <Button buttonLabel="JOIN" onClickHandler={joinDAO}/>
+        </div>
         {/* <p className={styles.description}>
           Get started by editing{" "}
           <code className={styles.code}>pages/index.tsx</code>
