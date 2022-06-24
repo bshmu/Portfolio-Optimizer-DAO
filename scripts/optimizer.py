@@ -98,10 +98,10 @@ class BlackLittermanOptimizer:
             for i, view in enumerate(views_series.items()):
                 ticker = view[0]
                 ticker_view = view[1]
-                if len(ticker_view) == 1:  # Case of absolute views
+                if len(ticker_view[1]) == 0:  # Case of absolute views
                     Q[i] = views_series[ticker][0]
                     P[i, list(self.tickers).index(ticker)] = 1
-                elif len(ticker_view) == 2:  # Case of relative views
+                else:  # Case of relative views
                     ticker_relative = ticker_view[1]
                     Q[i] = views_series[ticker][0]
                     P[i, list(self.tickers).index(ticker)] = 1
@@ -274,7 +274,7 @@ class BlackLittermanOptimizer:
 # # Uncomment to create a sample BlackLittermanOptimizer object
 # if __name__ == '__main__':
 #     tickers = ['BTC', 'ETH', 'LTC', 'AVAX', 'ATOM']
-#     views = {'BTC': (-0.1, 'ETH'), 'LTC': (0.1,)}  # BTC down 10% relative to ETH, LTC up 10% in absolute terms
+#     views = {'BTC': (-0.1, 'ETH'), 'LTC': (0.1, '')}  # BTC down 10% relative to ETH, LTC up 10% in absolute terms
 #     views_confidences = {'BTC': 0.5, 'LTC': 0.5}
 #     x = BlackLittermanOptimizer(tickers, views, views_confidences)
 #     print('Optimal weights:', x.optimalWeights)
