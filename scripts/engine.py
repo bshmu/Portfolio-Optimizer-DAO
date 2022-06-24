@@ -82,7 +82,7 @@ def engine():
 
     # Get the contract object
     deployed_contract_address = cu.contract_address
-    json_path = r'C:\Users\User\repos\chainshotdev\utils\compiled_sol.json'
+    json_path = os.path.dirname(__file__) + '/compiled_sol.json'
     with open(json_path, 'r') as file:
         output_file = file.read()
     abi = json.loads(output_file)["abi"]
