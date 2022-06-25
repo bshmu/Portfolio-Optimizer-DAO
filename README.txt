@@ -2,6 +2,7 @@ Backend Dependencies:
  - Numpy
  - Pandas
  - Scipy
+ - Flask
  - Web3 (https://web3py.readthedocs.io/en/stable/quickstart.html)
  - Brownie (https://eth-brownie.readthedocs.io/en/latest/index.html)
 
