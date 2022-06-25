@@ -189,7 +189,7 @@ contract OptimizerDAO is ERC20 {
   }
 
 
-  function submbitVote(string[] memory _token, uint[] memory _perfOfToken, uint[] memory _confidenceLevels, string[] memory _userViewsType, string[] memory _userViewsRelativeToken) public onlyMember {
+  function submitVote(string[] memory _token, uint[] memory _perfOfToken, uint[] memory _confidenceLevels, string[] memory _userViewsType, string[] memory _userViewsRelativeToken) public onlyMember {
     // User inputs token they'd like to vote on, the expected performance of token over time period and their confidence level
     // Loop through each token in list and provide a +1 on list
     // If token is in proposal, include in Struct and output average for Performance & confidence levels
@@ -295,7 +295,8 @@ contract OptimizerDAO is ERC20 {
 
       // 5. Reallocate all WETH based on new weightings
       for (uint i = 0; i < _assets.length; i++) {
-        if (_percentage[i] != 0 || (keccak256(abi.encodePacked(_assets[i])) != wethRepresentation)) {
+        assetWeightings[_assets[i]] = _percentage[i];
+        if (_percentage[i] != 0 && tokenAddresses[_assets[i]] != tokenAddresses["WETH"]) {
           if (tokenAddresses[_assets[i]] != address(0) && _percentage[i] != 0) {
             uint allocation = (lastSnapshotEth * _percentage[i]) / 100;
             _swap(WETH, tokenAddresses[_assets[i]], allocation, 0, address(this));
@@ -340,7 +341,8 @@ contract OptimizerDAO is ERC20 {
 
 
       for (uint i = 0; i < _assets.length; i++) {
-        if (_percentage[i] != 0 || (keccak256(abi.encodePacked(_assets[i])) != wethRepresentation)) {
+        assetWeightings[_assets[i]] = _percentage[i];
+        if (_percentage[i] != 0 && (keccak256(abi.encodePacked(_assets[i])) != wethRepresentation)) {
           if (tokenAddresses[_assets[i]] != address(0)) {
             uint allocation = (wethBalance * _percentage[i]) / 100;
             _swap(WETH, tokenAddresses[_assets[i]], allocation, 0, address(this));
@@ -400,6 +402,27 @@ contract OptimizerDAO is ERC20 {
       //router.exactInput(ISwapRouter.ExactInputParams(path, address(this), block.timestamp, _amountIn, 0));
       //IUniswapV2Router(UNISWAP_V2_ROUTER).ExactInputParams(path, address(this), block.timestamp, _amountIn, 0);
       IUniswapV2Router(UNISWAP_V2_ROUTER).swapExactTokensForTokens(_amountIn, _amountOutMin, path, _to, block.timestamp);
+    }
+
+    function getHoldingsData() public view returns(string[10] memory, uint[10] memory, uint[10] memory) {
+      string[10] memory _tokens = ["WETH", "BAT", "WBTC", "UNI", "USDT", "sWETH", "sBAT", "sWBTC", "sUNI", "sUSDT"];
+      uint[10] memory actualHoldings;
+      uint[10] memory fundAssetWeightings;
+      // Percentage of fund taken from storage
+      for (uint i = 0; i < _tokens.length; i++) {
+        fundAssetWeightings[i] = assetWeightings[_tokens[i]];
+        if (tokenAddresses[_tokens[i]] != address(0) && tokenAddresses[_tokens[i]] != WETH) {
+          actualHoldings[i] = ERC20(tokenAddresses[_tokens[i]]).balanceOf(address(this));
+        } // if the token is WETH, which is not an ERC20 contract
+        else if (tokenAddresses[_tokens[i]] == WETH) {
+          actualHoldings[i] = proposals[proposals.length -1].startEth;
+        }
+        else if (shortTokenAddresses[_tokens[i]] != address(0)) {
+          actualHoldings[i] = ERC20short(shortTokenAddresses[_tokens[i]]).balanceOf(address(this));
+        }
+
+      }
+      return (_tokens, actualHoldings,fundAssetWeightings);
     }
 
 
