@@ -269,7 +269,7 @@ contract OptimizerDAO is ERC20 {
       // 1. Sell off existing holdings
       for (uint i = 0; i < _assets.length; i++) {
         if (tokenAddresses[_assets[i]] != address(0)) {
-          if (ERC20(tokenAddresses[_assets[i]]).balanceOf(address(this)) > 0 || (keccak256(abi.encodePacked(_assets[i])) != wethRepresentation)) {
+          if (ERC20(tokenAddresses[_assets[i]]).balanceOf(address(this)) > 0 && (keccak256(abi.encodePacked(_assets[i])) != wethRepresentation)) {
             _swap(tokenAddresses[_assets[i]], WETH, ERC20(tokenAddresses[_assets[i]]).balanceOf(address(this)), 0, address(this));
           }
 
