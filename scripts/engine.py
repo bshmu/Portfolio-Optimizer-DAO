@@ -53,15 +53,17 @@ def parse_optimal_weights(optimal_weights):
     """
     Parses optimal weights from the optimizer for pass-through to initiate trades on Uniswap.
     """
-    assets = list(optimal_weights.keys())
-    full_assets = assets + ['S' + asset for asset in assets]
+    inverse_contract_tokens_mapping = {v: k for k, v in cu.contract_tokens_mapping.items()}
+    assets = [inverse_contract_tokens_mapping[asset] if asset in list(inverse_contract_tokens_mapping.keys())
+              else asset for asset in list(optimal_weights.keys())]
+    full_assets = assets + ['s' + asset for asset in assets]
     ref = dict.fromkeys(full_assets, None)
     for asset in assets:
         if optimal_weights[asset][1] == 'long':
             ref[asset] = int(np.round(optimal_weights[asset][0] * 100))
-            ref['S' + asset] = 0
+            ref['s' + asset] = 0
         else:
-            ref['S' + asset] = int(np.round(optimal_weights[asset][0] * 100))
+            ref['s' + asset] = int(np.round(optimal_weights[asset][0] * 100))
             ref[asset] = 0
     full_percentages = list(ref.values())
 
@@ -82,10 +84,7 @@ def engine():
 
     # Get the contract object
     deployed_contract_address = cu.contract_address
-    json_path = os.path.dirname(__file__) + '/compiled_sol.json'
-    with open(json_path, 'r') as file:
-        output_file = file.read()
-    abi = json.loads(output_file)["abi"]
+    abi = cu.get_contract_abi()
     dao = w3.eth.contract(address=deployed_contract_address, abi=abi)
 
     # For each token, parse the views and confidences
