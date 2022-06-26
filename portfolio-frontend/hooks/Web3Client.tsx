@@ -2,6 +2,7 @@ import { useEffect, useReducer, useCallback } from "react";
 import { ethers } from "ethers";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
+import abi from "../utils/abi.json";
 
 import {
   Web3ProviderState,
@@ -32,7 +33,11 @@ if (typeof window !== "undefined") {
 
 export const useWeb3 = () => {
   const [state, dispatch] = useReducer(web3Reducer, web3InitialState);
-  const { provider, web3Provider, address, network } = state;
+  const { provider, web3Provider, address, network, lpBalance } = state;
+
+  const contractAddress = "0xEA4Ac9058B8C3f615768Fb5E8EBeacc780e6b6a5";
+  const RPC_URL =
+    "https://rinkeby.infura.io/v3/2dea9cadae1f45f7930e57184ada09e6";
 
   const connect = useCallback(async () => {
     if (web3Modal) {
@@ -51,6 +56,7 @@ export const useWeb3 = () => {
           address,
           network,
         } as Web3Action);
+        tokenBalance(address);
       } catch (e) {
         console.log("connect error", e);
       }
@@ -76,20 +82,42 @@ export const useWeb3 = () => {
 
   const joinDAO = useCallback(async () => {
     try {
-      {/* add balance of lp tokens check */}
-      if (state.address) {
-        toast.success("Welcome to the DAO");
-        dispatch({
-          type: "SET_IS_NEW_MEMBER",
-          newMember: true,
-        } as Web3Action);
-      } else {
-        console.error("No address or balance to join");
-      }
+      const signer = web3Provider?.getSigner();
+      const writeContract = new ethers.Contract(contractAddress, abi, signer);
+      const txn = await writeContract.joinDAO({
+        value: ethers.utils.parseEther("0.1")._hex,
+      });
+
+      const receipt = await txn.wait();
+      console.log(receipt);
+      toast.success("Welcome to the DAO");
     } catch (e) {
-      console.log("error joining dao", e);
+      console.log("Error joining DAO", e);
+      console.error("Unable to join DAO");
     }
   }, []);
+
+  const tokenBalance = useCallback(async (address: string) => {
+    try {
+      const signer = state.web3Provider?.getSigner();
+      const readContract = new ethers.Contract(
+        contractAddress,
+        abi,
+        signer
+      );
+      const balanceOf = await readContract.balanceOf(address) / 10 ** 18;
+
+      dispatch({
+        type: "SET_LP_BALANCE",
+        lpBalance: balanceOf.toString(),
+      } as Web3Action);
+
+    } catch (err) {
+      console.log(err);
+    }
+  }, []);
+
+  useEffect(() => {}, [lpBalance]);
 
   // Auto connect to the cached provider
   useEffect(() => {
@@ -98,7 +126,6 @@ export const useWeb3 = () => {
     }
   }, [connect]);
 
-  // EIP-1193 events
   useEffect(() => {
     if (provider?.on) {
       const handleAccountsChanged = (accounts: string[]) => {
@@ -109,7 +136,6 @@ export const useWeb3 = () => {
         } as Web3Action);
       };
 
-      // https://docs.ethers.io/v5/concepts/best-practices/#best-practices--network-changes
       const handleChainChanged = (_hexChainId: string) => {
         if (typeof window !== "undefined") {
           console.log("switched to chain...", _hexChainId);
@@ -146,6 +172,7 @@ export const useWeb3 = () => {
     web3Provider,
     address,
     network,
+    lpBalance,
     connect,
     disconnect,
     joinDAO,
