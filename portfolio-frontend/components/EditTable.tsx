@@ -48,7 +48,7 @@ const EditTable = () => {
   }, []);
 
   useEffect(() => {
-    setViewRelativeToken(viewType === "relative" ? token : "")
+    setViewRelativeToken((viewType === "relative" && viewType === "USDT") || (viewType === "absolute") ? "" : token)
   },[viewRelativeToken])
 
   return (
@@ -75,10 +75,11 @@ const EditTable = () => {
           <tr>
             <td>
               <select onChange={(e) => setToken(e.target.value)}>
-                <option value="WBTC">WBTC</option>
                 <option value="WETH">WETH</option>
-                <option value="UNI">UNI</option>
                 <option value="BAT">BAT</option>
+                <option value="WBTC">WBTC</option>
+                <option value="UNI">UNI</option>
+                <option value="USDT">USDT</option>
               </select>
             </td>
             <td>
