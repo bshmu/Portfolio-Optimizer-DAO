@@ -30,12 +30,14 @@ const Home: NextPage = () => {
         {!address ? (
           <h1 className={styles.title}>Welcome to Portfolio Optimizer DAO</h1>
         ) : (
-          <StaticTable />
+          // <StaticTable />
+          ""
         )}
        
 
         {/* add balance of lp tokens check */}
-        <div className="mt-24 mb-24">{lpBalance == "0" || lpBalance == "" || lpBalance == undefined ? <JoinDAOButton /> :<div><hr className="border-black pb-24"/> <EditTable /></div>}</div>
+        {/* <hr className="border-black pb-24"/> */}
+        <div className="mt-24 mb-24">{lpBalance == "0" || lpBalance == "" || lpBalance == undefined ? <JoinDAOButton /> :<div> <EditTable /></div>}</div>
         
       </main>
 
