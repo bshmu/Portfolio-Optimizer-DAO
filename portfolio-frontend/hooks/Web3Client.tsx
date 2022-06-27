@@ -11,7 +11,7 @@ import {
   web3Reducer,
 } from "../reducer";
 
-import { toast } from "react-toastify";
+import { toast } from "react-toastify"; 
 
 const providerOptions = {
   walletconnect: {
@@ -84,7 +84,7 @@ export const useWeb3 = () => {
   }, [provider]);
 
   const joinDAO = useCallback(async () => {
-    const signer = web3Provider?.getSigner();
+    const signer = !web3Provider?.getSigner() ? await web3Provider?.getSigner() : web3Provider?.getSigner();
     try {
       const writeContract = new ethers.Contract(contractAddress, abi, signer);
       const txn = await writeContract.joinDAO({
@@ -119,6 +119,7 @@ export const useWeb3 = () => {
         type: "SET_LP_BALANCE",
         lpBalance: balanceOf.toString(),
       } as Web3Action);
+      toast.success("LPToken Updated");
     } catch (err) {
       console.log(err);
     }
@@ -126,7 +127,6 @@ export const useWeb3 = () => {
 
   useEffect(() => {}, [lpBalance]);
 
-  // Auto connect to the cached provider
   useEffect(() => {
     if (web3Modal && web3Modal.cachedProvider) {
       connect();
@@ -163,7 +163,6 @@ export const useWeb3 = () => {
       provider.on("chainChanged", handleChainChanged);
       provider.on("disconnect", handleDisconnect);
 
-      // Subscription Cleanup
       return () => {
         if (provider.removeListener) {
           provider.removeListener("accountsChanged", handleAccountsChanged);

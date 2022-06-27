@@ -27,7 +27,7 @@ const Home: NextPage = () => {
       </div>
 
       <main className={styles.main}>
-        {!address ? (
+        {lpBalance == "0" || lpBalance == "" || lpBalance == undefined ? (
           <h1 className={styles.title}>Welcome to Portfolio Optimizer DAO</h1>
         ) : (
           // <StaticTable />
