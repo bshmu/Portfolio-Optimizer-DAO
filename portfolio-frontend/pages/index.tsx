@@ -4,12 +4,13 @@ import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import { JoinDAOButton } from "../components/JoinButton";
 import { Web3Button } from "../components/web3button";
-import Table from "../components/table";
+import StaticTable from "../components/StaticTable";
 import { useWeb3Context } from "../context";
+import EditTable from "../components/EditTable";
 
 const Home: NextPage = () => {
-  const { address } = useWeb3Context();
-
+  const { address, lpBalance } = useWeb3Context();
+console.log(lpBalance)
   return (
     <div className={styles.container}>
       <Head>
@@ -22,12 +23,21 @@ const Home: NextPage = () => {
         <Web3Button />
       </div>
 
+      <div className="mt-4 flex justify-end font-bold">
+       Balance of LP Tokens: {lpBalance == "0" || lpBalance == undefined || lpBalance == null ? "0" : lpBalance} OPD
+      </div>
+
       <main className={styles.main}>
-        <h1 className={styles.title}>Welcome to Portfolio Optimizer DAO</h1>
+        {!address ? (
+          <h1 className={styles.title}>Welcome to Portfolio Optimizer DAO</h1>
+        ) : (
+          <StaticTable />
+        )}
+       
 
         {/* add balance of lp tokens check */}
-        <div className="mt-24">{!address ? <JoinDAOButton /> : ""}</div>
-        <Table />
+        <div className="mt-24 mb-24">{lpBalance == "0" || lpBalance == undefined ? <JoinDAOButton /> : ""}</div>
+        <EditTable />
       </main>
 
       <footer className={styles.footer}>
