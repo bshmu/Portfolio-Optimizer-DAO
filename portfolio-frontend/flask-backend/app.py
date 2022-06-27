@@ -4,7 +4,7 @@ from scripts.performance import get_cumulative_performance
 
 api = Flask(__name__)
 
-@api.route('/optimizeFundWeights')
+@api.route('/optimizeFundWeights', methods=["POST"])
 
 def optimizeFundWeights():
     assets, percentages = engine()  # call the engine
@@ -12,4 +12,7 @@ def optimizeFundWeights():
 @api.route('/getCumulativePerformance')
 
 def getCumulativePerformance():
-    return get_cumulative_performance()  # [1, 1.05, 0.99, ...]
+    return get_cumulative_performance()
+
+if __name__ == "__main__":
+    api.run("localhost", 6000)
