@@ -10,19 +10,17 @@ export type Web3ProviderState = {
   connect: (() => Promise<void>) | null;
   disconnect: (() => Promise<void>) | null;
   joinDAO: (() => Promise<void>) | null;
-  submitProposal: (() => Promise<void>) | null;
 };
 
 export const web3InitialState: Web3ProviderState = {
   provider: null,
   web3Provider: null,
-  address: null,
+  address: "",
   network: null,
   connect: null,
   disconnect: null,
   joinDAO: null,
-  submitProposal: null,
-  lpBalance: null,
+  lpBalance: "",
 };
 
 export type Web3Action =
@@ -46,7 +44,7 @@ export type Web3Action =
     }
   | {
       type: "SET_LP_BALANCE";
-      lpBalance: Web3ProviderState["lpBalance"];
+      lpBalance?: Web3ProviderState["lpBalance"];
     };
 
 export function web3Reducer(

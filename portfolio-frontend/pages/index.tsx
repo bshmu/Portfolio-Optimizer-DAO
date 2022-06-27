@@ -10,7 +10,6 @@ import EditTable from "../components/EditTable";
 
 const Home: NextPage = () => {
   const { address, lpBalance } = useWeb3Context();
-console.log(lpBalance)
   return (
     <div className={styles.container}>
       <Head>
@@ -36,7 +35,7 @@ console.log(lpBalance)
        
 
         {/* add balance of lp tokens check */}
-        <div className="mt-24 mb-24">{lpBalance == "0" || lpBalance == undefined ? <JoinDAOButton /> :<div><hr className="border-black pb-24"/> <EditTable /></div>}</div>
+        <div className="mt-24 mb-24">{lpBalance == "0" || lpBalance == "" || lpBalance == undefined ? <JoinDAOButton /> :<div><hr className="border-black pb-24"/> <EditTable /></div>}</div>
         
       </main>
 

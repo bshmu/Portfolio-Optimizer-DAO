@@ -34,9 +34,9 @@ if (typeof window !== "undefined") {
 export const useWeb3 = () => {
   const [state, dispatch] = useReducer(web3Reducer, web3InitialState);
 
-  const { provider, web3Provider, address, network, lpBalance, token, view, confidence, viewType, viewToken } = state;
+  const { provider, web3Provider, address, network, lpBalance } = state;
 
-  const contractAddress = "0xEA4Ac9058B8C3f615768Fb5E8EBeacc780e6b6a5";
+  const contractAddress = "0x9a0DcA515dB6d9A97804e8364F3eF9e5cA817E4c";
   const RPC_URL =
     "https://rinkeby.infura.io/v3/2dea9cadae1f45f7930e57184ada09e6";
 
@@ -45,11 +45,8 @@ export const useWeb3 = () => {
       try {
         const provider = await web3Modal.connect();
         const web3Provider = new ethers.providers.Web3Provider(provider);
-        let addresses = await web3Provider.listAccounts();
-        let address = "";
-        if (addresses) {
-          address = addresses[0];
-        }
+        const signer = web3Provider.getSigner();
+        const address = await signer.getAddress();
         const network = await web3Provider.getNetwork();
         toast.success("Connected to Web3");
 
@@ -87,7 +84,7 @@ export const useWeb3 = () => {
   }, [provider]);
 
   const joinDAO = useCallback(async () => {
-    const signer = state.web3Provider?.getSigner();
+    const signer = web3Provider?.getSigner();
     try {
       const writeContract = new ethers.Contract(contractAddress, abi, signer);
       const txn = await writeContract.joinDAO({
@@ -104,26 +101,18 @@ export const useWeb3 = () => {
     }
   }, []);
 
-  const submitProposal = useCallback(async () => {
-    const signer = state.web3Provider?.getSigner();
-    try {
-      const writeContract = new ethers.Contract(contractAddress, abi, signer);
-      const txn = await writeContract.submitVote(token, view, confidence, viewType, viewToken);
-    } catch (err) {
-      console.log(err);
-    }
-  }, []);
-
   const tokenBalance = useCallback(async () => {
-    const address = state.address;
-    console.log("address", address);
     try {
       const readContract = new ethers.Contract(
         contractAddress,
         abi,
         new ethers.providers.JsonRpcProvider(RPC_URL)
       );
-      const balanceOf = (await readContract.balanceOf(address)) / 10 ** 18;
+      const balanceOf =
+        (await readContract.balanceOf(
+          "0xc570040758Ff8eEe0c4655dB364a65988e3eD616"
+        )) /
+        10 ** 18;
       console.log("address", address);
       console.log(balanceOf);
       dispatch({
@@ -194,6 +183,5 @@ export const useWeb3 = () => {
     connect,
     disconnect,
     joinDAO,
-    submitProposal
   } as Web3ProviderState;
 };

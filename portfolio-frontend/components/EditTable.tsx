@@ -19,7 +19,7 @@ const EditTable = () => {
   const [confidence, setConfidence] = useState<EditTableData | any>();
   const [viewType, setViewType] = useState<EditTableData | any>("");
 
-  const contractAddress = "0xEA4Ac9058B8C3f615768Fb5E8EBeacc780e6b6a5";
+  const contractAddress = "0x9a0DcA515dB6d9A97804e8364F3eF9e5cA817E4c";
 
   // creating proposal with this and each will be sent as an array [] sent to the contract
   // submit vote
@@ -79,20 +79,20 @@ const EditTable = () => {
               <input
                 onChange={(e) => setView(e.target.value)}
                 type="number"
-                defaultValue="0"
-                min="0"
-                max="100"
+                defaultValue={1}
+                min={0}
+                max={100}
                 className="border-black border-2"
               />
             </td>
             <td className="flex justify-center">
               <select onChange={(e) => setConfidence(e.target.value)}>
                 {/* sne as a number  */}
-                <option value="0">Not Confident</option>
-                <option value="25">Somewhat Confident</option>
-                <option value="50">Neutral</option>
-                <option value="75">Confident</option>
-                <option value="100">Fully Confident</option>
+                <option value={0}>Not Confident</option>
+                <option value={25}>Somewhat Confident</option>
+                <option value={50}>Neutral</option>
+                <option value={75}>Confident</option>
+                <option value={100}>Fully Confident</option>
               </select>
             </td>
             <td>
@@ -103,7 +103,7 @@ const EditTable = () => {
             </td>
             <td>
               <select>
-                <option value="">{viewType === "relative" ? token : ""}</option>
+                <option value={viewType === "relative" ? token : ""}>{viewType === "relative" ? token : ""}</option>
               </select>
             </td>
           </tr>
