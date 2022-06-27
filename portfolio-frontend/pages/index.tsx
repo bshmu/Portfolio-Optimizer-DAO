@@ -10,7 +10,6 @@ import EditTable from "../components/EditTable";
 
 const Home: NextPage = () => {
   const { address, lpBalance } = useWeb3Context();
-console.log(lpBalance)
   return (
     <div className={styles.container}>
       <Head>
@@ -24,20 +23,22 @@ console.log(lpBalance)
       </div>
 
       <div className="mt-4 flex justify-end font-bold">
-       Balance of LP Tokens: {lpBalance == "0" || lpBalance == undefined || lpBalance == null ? "0" : lpBalance} OPD
+       Balance of LP Tokens: {lpBalance} {" "} OPD
       </div>
 
       <main className={styles.main}>
-        {!address ? (
+        {lpBalance == "0" || lpBalance == "" || lpBalance == undefined ? (
           <h1 className={styles.title}>Welcome to Portfolio Optimizer DAO</h1>
         ) : (
-          <StaticTable />
+          // <StaticTable />
+          ""
         )}
        
 
         {/* add balance of lp tokens check */}
-        <div className="mt-24 mb-24">{lpBalance == "0" || lpBalance == undefined ? <JoinDAOButton /> : ""}</div>
-        <EditTable />
+        {/* <hr className="border-black pb-24"/> */}
+        <div className="mt-24 mb-24">{lpBalance == "0" || lpBalance == "" || lpBalance == undefined ? <JoinDAOButton /> :<div> <EditTable /></div>}</div>
+        
       </main>
 
       <footer className={styles.footer}>

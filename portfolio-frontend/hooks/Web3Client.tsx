@@ -11,7 +11,7 @@ import {
   web3Reducer,
 } from "../reducer";
 
-import { toast } from "react-toastify";
+import { toast } from "react-toastify"; 
 
 const providerOptions = {
   walletconnect: {
@@ -33,9 +33,10 @@ if (typeof window !== "undefined") {
 
 export const useWeb3 = () => {
   const [state, dispatch] = useReducer(web3Reducer, web3InitialState);
+
   const { provider, web3Provider, address, network, lpBalance } = state;
 
-  const contractAddress = "0xEA4Ac9058B8C3f615768Fb5E8EBeacc780e6b6a5";
+  const contractAddress = "0x9a0DcA515dB6d9A97804e8364F3eF9e5cA817E4c";
   const RPC_URL =
     "https://rinkeby.infura.io/v3/2dea9cadae1f45f7930e57184ada09e6";
 
@@ -56,17 +57,18 @@ export const useWeb3 = () => {
           address,
           network,
         } as Web3Action);
-        tokenBalance(address);
+        tokenBalance();
       } catch (e) {
         console.log("connect error", e);
       }
     } else {
       console.error("No Web3Modal");
     }
-  }, []);
+  }, [address]);
 
   const disconnect = useCallback(async () => {
     if (web3Modal) {
+      let address = "";
       web3Modal.clearCachedProvider();
       if (provider?.disconnect && typeof provider.disconnect === "function") {
         await provider.disconnect();
@@ -74,6 +76,7 @@ export const useWeb3 = () => {
       toast.error("Disconnected from Web3");
       dispatch({
         type: "RESET_WEB3_PROVIDER",
+        address,
       } as Web3Action);
     } else {
       console.error("No Web3Modal");
@@ -81,14 +84,15 @@ export const useWeb3 = () => {
   }, [provider]);
 
   const joinDAO = useCallback(async () => {
+    const signer = !web3Provider?.getSigner() ? await web3Provider?.getSigner() : web3Provider?.getSigner();
     try {
-      const signer = web3Provider?.getSigner();
       const writeContract = new ethers.Contract(contractAddress, abi, signer);
       const txn = await writeContract.joinDAO({
         value: ethers.utils.parseEther("0.1")._hex,
       });
 
       const receipt = await txn.wait();
+      tokenBalance();
       console.log(receipt);
       toast.success("Welcome to the DAO");
     } catch (e) {
@@ -97,21 +101,25 @@ export const useWeb3 = () => {
     }
   }, []);
 
-  const tokenBalance = useCallback(async (address: string) => {
+  const tokenBalance = useCallback(async () => {
     try {
-      const signer = state.web3Provider?.getSigner();
       const readContract = new ethers.Contract(
         contractAddress,
         abi,
-        signer
+        new ethers.providers.JsonRpcProvider(RPC_URL)
       );
-      const balanceOf = await readContract.balanceOf(address) / 10 ** 18;
-
+      const balanceOf =
+        (await readContract.balanceOf(
+          "0xc570040758Ff8eEe0c4655dB364a65988e3eD616"
+        )) /
+        10 ** 18;
+      console.log("address", address);
+      console.log(balanceOf);
       dispatch({
         type: "SET_LP_BALANCE",
         lpBalance: balanceOf.toString(),
       } as Web3Action);
-
+      toast.success("LPToken Updated");
     } catch (err) {
       console.log(err);
     }
@@ -119,7 +127,6 @@ export const useWeb3 = () => {
 
   useEffect(() => {}, [lpBalance]);
 
-  // Auto connect to the cached provider
   useEffect(() => {
     if (web3Modal && web3Modal.cachedProvider) {
       connect();
@@ -156,7 +163,6 @@ export const useWeb3 = () => {
       provider.on("chainChanged", handleChainChanged);
       provider.on("disconnect", handleDisconnect);
 
-      // Subscription Cleanup
       return () => {
         if (provider.removeListener) {
           provider.removeListener("accountsChanged", handleAccountsChanged);

@@ -4,9 +4,8 @@ export type Web3ProviderState = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   provider: any;
   web3Provider: ethers.providers.Web3Provider | null | undefined;
-  address: string | null;
+  address: string | null | undefined;
   network: ethers.providers.Network | null | undefined;
-  newMember: boolean | null | undefined;
   lpBalance: string | null | undefined;
   connect: (() => Promise<void>) | null;
   disconnect: (() => Promise<void>) | null;
@@ -16,13 +15,12 @@ export type Web3ProviderState = {
 export const web3InitialState: Web3ProviderState = {
   provider: null,
   web3Provider: null,
-  address: null,
+  address: "",
   network: null,
   connect: null,
   disconnect: null,
   joinDAO: null,
-  newMember: null,
-  lpBalance: null,
+  lpBalance: "",
 };
 
 export type Web3Action =
@@ -45,12 +43,8 @@ export type Web3Action =
       type: "RESET_WEB3_PROVIDER";
     }
   | {
-      type: "SET_IS_NEW_MEMBER";
-      newMember: Web3ProviderState["newMember"];
-    }
-  | {
       type: "SET_LP_BALANCE";
-      lpBalance: Web3ProviderState["lpBalance"];
+      lpBalance?: Web3ProviderState["lpBalance"];
     };
 
 export function web3Reducer(
@@ -71,11 +65,6 @@ export function web3Reducer(
         ...state,
         address: action.address,
       };
-    case "SET_IS_NEW_MEMBER":
-      return {
-        ...state,
-        newMember: action.newMember,
-      };
     case "SET_NETWORK":
       return {
         ...state,
@@ -84,8 +73,8 @@ export function web3Reducer(
     case "SET_LP_BALANCE":
       return {
         ...state,
-        lpBalance: action.lpBalance
-      }
+        lpBalance: action.lpBalance,
+      };
     case "RESET_WEB3_PROVIDER":
       return web3InitialState;
     default:
