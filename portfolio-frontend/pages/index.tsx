@@ -24,7 +24,7 @@ console.log(lpBalance)
       </div>
 
       <div className="mt-4 flex justify-end font-bold">
-       Balance of LP Tokens: {lpBalance == "0" || lpBalance == undefined || lpBalance == null ? "0" : lpBalance} OPD
+       Balance of LP Tokens: {lpBalance} {" "} OPD
       </div>
 
       <main className={styles.main}>
@@ -36,8 +36,8 @@ console.log(lpBalance)
        
 
         {/* add balance of lp tokens check */}
-        <div className="mt-24 mb-24">{lpBalance == "0" || lpBalance == undefined ? <JoinDAOButton /> : ""}</div>
-        <EditTable />
+        <div className="mt-24 mb-24">{lpBalance == "0" || lpBalance == undefined ? <JoinDAOButton /> :<div><hr className="border-black pb-24"/> <EditTable /></div>}</div>
+        
       </main>
 
       <footer className={styles.footer}>

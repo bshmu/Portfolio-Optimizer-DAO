@@ -33,7 +33,8 @@ if (typeof window !== "undefined") {
 
 export const useWeb3 = () => {
   const [state, dispatch] = useReducer(web3Reducer, web3InitialState);
-  const { provider, web3Provider, address, network, lpBalance } = state;
+
+  const { provider, web3Provider, address, network, lpBalance, token, view, confidence, viewType, viewToken } = state;
 
   const contractAddress = "0xEA4Ac9058B8C3f615768Fb5E8EBeacc780e6b6a5";
   const RPC_URL =
@@ -44,8 +45,11 @@ export const useWeb3 = () => {
       try {
         const provider = await web3Modal.connect();
         const web3Provider = new ethers.providers.Web3Provider(provider);
-        const signer = web3Provider.getSigner();
-        const address = await signer.getAddress();
+        let addresses = await web3Provider.listAccounts();
+        let address = "";
+        if (addresses) {
+          address = addresses[0];
+        }
         const network = await web3Provider.getNetwork();
         toast.success("Connected to Web3");
 
@@ -56,17 +60,18 @@ export const useWeb3 = () => {
           address,
           network,
         } as Web3Action);
-        tokenBalance(address);
+        tokenBalance();
       } catch (e) {
         console.log("connect error", e);
       }
     } else {
       console.error("No Web3Modal");
     }
-  }, []);
+  }, [address]);
 
   const disconnect = useCallback(async () => {
     if (web3Modal) {
+      let address = "";
       web3Modal.clearCachedProvider();
       if (provider?.disconnect && typeof provider.disconnect === "function") {
         await provider.disconnect();
@@ -74,6 +79,7 @@ export const useWeb3 = () => {
       toast.error("Disconnected from Web3");
       dispatch({
         type: "RESET_WEB3_PROVIDER",
+        address,
       } as Web3Action);
     } else {
       console.error("No Web3Modal");
@@ -81,14 +87,15 @@ export const useWeb3 = () => {
   }, [provider]);
 
   const joinDAO = useCallback(async () => {
+    const signer = state.web3Provider?.getSigner();
     try {
-      const signer = web3Provider?.getSigner();
       const writeContract = new ethers.Contract(contractAddress, abi, signer);
       const txn = await writeContract.joinDAO({
         value: ethers.utils.parseEther("0.1")._hex,
       });
 
       const receipt = await txn.wait();
+      tokenBalance();
       console.log(receipt);
       toast.success("Welcome to the DAO");
     } catch (e) {
@@ -97,21 +104,32 @@ export const useWeb3 = () => {
     }
   }, []);
 
-  const tokenBalance = useCallback(async (address: string) => {
+  const submitProposal = useCallback(async () => {
+    const signer = state.web3Provider?.getSigner();
     try {
-      const signer = state.web3Provider?.getSigner();
+      const writeContract = new ethers.Contract(contractAddress, abi, signer);
+      const txn = await writeContract.submitVote(token, view, confidence, viewType, viewToken);
+    } catch (err) {
+      console.log(err);
+    }
+  }, []);
+
+  const tokenBalance = useCallback(async () => {
+    const address = state.address;
+    console.log("address", address);
+    try {
       const readContract = new ethers.Contract(
         contractAddress,
         abi,
-        signer
+        new ethers.providers.JsonRpcProvider(RPC_URL)
       );
-      const balanceOf = await readContract.balanceOf(address) / 10 ** 18;
-
+      const balanceOf = (await readContract.balanceOf(address)) / 10 ** 18;
+      console.log("address", address);
+      console.log(balanceOf);
       dispatch({
         type: "SET_LP_BALANCE",
         lpBalance: balanceOf.toString(),
       } as Web3Action);
-
     } catch (err) {
       console.log(err);
     }
@@ -176,5 +194,6 @@ export const useWeb3 = () => {
     connect,
     disconnect,
     joinDAO,
+    submitProposal
   } as Web3ProviderState;
 };
