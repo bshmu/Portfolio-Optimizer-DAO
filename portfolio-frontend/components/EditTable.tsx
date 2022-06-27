@@ -53,7 +53,7 @@ const EditTable = () => {
 
   return (
     <div>
-      <h1 className="text-black text-xl font-bold mb-12 text-center">
+      <h1 className="text-black text-[100px] font-bold mb-12 text-center">
         Proposal
       </h1>
       <table className="table-auto">
