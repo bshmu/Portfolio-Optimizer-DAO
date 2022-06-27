@@ -5,6 +5,9 @@ import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import '@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol';
 
+
+
+
 interface IERC20Master {
     function totalSupply() external view returns (uint);
     function balanceOf(address account) external view returns (uint);
@@ -119,9 +122,7 @@ contract OptimizerDAO is ERC20 {
     string[] tokens;
     uint[] qtyOfTokensAcq;
     uint[] tokensWeightings;
-    // Maps Token (i.e 'btc') to array
     mapping(string => uint[]) numOfUserTokens;
-    // Maps Token string to array of total token amount
     mapping(string => uint[]) userViews;
     mapping(string => uint[]) userConfidenceLevel;
     mapping(string => string[]) userViewsType;
@@ -151,7 +152,7 @@ contract OptimizerDAO is ERC20 {
 
 
   function joinDAO() public payable {
-    // What is the minimum buy in for the DAO?
+    // Minimum buy in at 0.1 Eth
     require(msg.value >= 41217007 gwei, "Minimum buy in is 0.1 ether");
 
     if (treasuryEth == 0) {
@@ -161,7 +162,6 @@ contract OptimizerDAO is ERC20 {
       treasuryEth = msg.value;
       startingEth = treasuryEth;
 
-      // change to _mint
       _mint(msg.sender, treasuryEth);
 
     } else {
@@ -170,7 +170,6 @@ contract OptimizerDAO is ERC20 {
       startingEth = treasuryEth;
       uint ethReserve =  treasuryEth - msg.value;
       uint proportionOfTokens = (msg.value * totalSupply()) / ethReserve;
-      // change to _mint
       _mint(msg.sender, proportionOfTokens);
     }
   }
@@ -196,7 +195,6 @@ contract OptimizerDAO is ERC20 {
 
     uint numberOfVoterTokens = balanceOf(msg.sender);
     for (uint i = 0; i < _token.length; i++) {
-      // get each value out of array
       proposals[proposals.length - 1].tokens.push(_token[i]);
       proposals[proposals.length - 1].userViews[_token[i]].push(_perfOfToken[i]);
 
@@ -229,9 +227,6 @@ contract OptimizerDAO is ERC20 {
       return (_numOfUserTokens, _userViews, _userConfidenceLevel, _userViewsType, _userViewsRelativeToken);
 
   }
-
-  // Event to emit for Python script to pick up data for model?
-
 
   /**
   function findTokenWeight() public  {
@@ -279,7 +274,7 @@ contract OptimizerDAO is ERC20 {
           ERC20short(shortTokenAddresses[_assets[i]]).burn(address(this), ERC20short(shortTokenAddresses[_assets[i]]).balanceOf(address(this)));
         }
       }
-      // 2. Take a snapshot of the proceedings in WETH
+      // 2. Take a snapshot of the proceedings in WETH & time for each proposal
       proposals[proposals.length - 2].endEth = WETH9(WETH).balanceOf(address(this));
       proposals[proposals.length - 2].endTime = block.timestamp;
       proposals[proposals.length - 1].startEth = WETH9(WETH).balanceOf(address(this));
@@ -287,12 +282,8 @@ contract OptimizerDAO is ERC20 {
 
       lastSnapshotEth = WETH9(WETH).balanceOf(address(this));
 
-      // 3. Convert any Eth in treasury to WETH
+      // 3. Convert any Eth in contract from new members to WETH
       WETH9(WETH).deposit{value: address(this).balance}();
-
-
-      console.log("Proposals length:");
-      console.log(proposals.length);
 
 
       // 5. Reallocate all WETH based on new weightings
@@ -310,18 +301,12 @@ contract OptimizerDAO is ERC20 {
             _swap(WETH, tokenAddresses[_assets[i]], allocation, 0, address(this));
             proposals[proposals.length - 1].tokens.push(_assets[i]);
             proposals[proposals.length - 1].qtyOfTokensAcq.push(ERC20(tokenAddresses[_assets[i]]).balanceOf(address(this)));
-
-            console.log("made it");
-            //console.log(ERC20(tokenAddresses[_assets[i]]).balanceOf(address(this)));
           }
           if (shortTokenAddresses[_assets[i]] != address(0)) {
             uint allocation = (lastSnapshotEth * _percentage[i]) / 100;
             ERC20short(shortTokenAddresses[_assets[i]]).mint(address(this), allocation);
             proposals[proposals.length - 1].tokens.push(_assets[i]);
             proposals[proposals.length - 1].qtyOfTokensAcq.push(ERC20short(shortTokenAddresses[_assets[i]]).balanceOf(address(this)));
-
-            console.log(proposals[proposals.length - 1].tokens[i]);
-            console.log(proposals[proposals.length - 1].tokensWeightings[i]);
           }
 
         }
@@ -341,6 +326,8 @@ contract OptimizerDAO is ERC20 {
       proposals[proposals.length - 1].startEth = wethBalance;
 
       /**
+      The original, unsuccessful approach
+
       (bool success, ) = WETH9(WETH).call{value: address(this).balance}(abi.encodeWithSignature("deposit()"));
       require(success, "The transaction failed");
       console.log("this is an error");
@@ -384,8 +371,6 @@ contract OptimizerDAO is ERC20 {
 
   }
 
-  //this swap function is used to trade from one token to another
-    //the inputs are self explainatory
     //token in = the token address you want to trade out of
     //token out = the token address you want as the output of this trade
     //amount in = the amount of tokens you are sending in
@@ -394,15 +379,10 @@ contract OptimizerDAO is ERC20 {
 
   function _swap(address _tokenIn, address _tokenOut, uint256 _amountIn, uint256 _amountOutMin, address _to) public {
 
-    //first we need to transfer the amount in tokens from the msg.sender to this contract
-    //this contract will have the amount of in tokens
-    //IERC20Master(_tokenIn).transferFrom(msg.sender, address(this), _amountIn);
 
-    //next we need to allow the uniswapv2 router to spend the token we just sent to this contract
-    //by calling IERC20 approve you allow the uniswap contract to spend the tokens in this contract
+    // Calling ERC20 approve you allow the uniswap contract to spend the tokens in this contract
     ERC20(_tokenIn).approve(UNISWAP_V2_ROUTER, _amountIn);
 
-    //path is an array of addresses.
     //this path array will have 3 addresses [tokenIn, WETH, tokenOut]
     //the if statement below takes into account if token in or token out is WETH.  then the path is only 2 addresses
     address[] memory path;
@@ -416,15 +396,12 @@ contract OptimizerDAO is ERC20 {
       path[1] = WETH;
       path[2] = _tokenOut;
     }
-        //then we will call swapExactTokensForTokens
-        //for the deadline we will pass in block.timestamp
-        //the deadline is the latest time the trade is valid for
-      //router.exactInput(ISwapRouter.ExactInputParams(path, address(this), block.timestamp, _amountIn, 0));
-      //IUniswapV2Router(UNISWAP_V2_ROUTER).ExactInputParams(path, address(this), block.timestamp, _amountIn, 0);
+
       IUniswapV2Router(UNISWAP_V2_ROUTER).swapExactTokensForTokens(_amountIn, _amountOutMin, path, _to, block.timestamp);
     }
 
     function getHoldingsDataOfProposal(uint _index) public view returns(string[10] memory, uint[10] memory, uint[10] memory, uint[2] memory) {
+      // Get Holdings data allows the input of an index of a proposal to get all the data from the Struct
       string[10] memory _tokens = ["WETH", "BAT", "WBTC", "UNI", "USDT", "sWETH", "sBAT", "sWBTC", "sUNI", "sUSDT"];
       uint[10] memory actualHoldings;
       uint[10] memory fundAssetWeightings;
