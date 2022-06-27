@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useWeb3Context } from "../context";
 import abi from "../utils/abi.json";
 import { ethers } from "ethers";
@@ -18,6 +18,7 @@ const EditTable = () => {
   const [view, setView] = useState<EditTableData | any>();
   const [confidence, setConfidence] = useState<EditTableData | any>();
   const [viewType, setViewType] = useState<EditTableData | any>("");
+  const [viewRelativeToken, setViewRelativeToken] = useState<EditTableData | any>("");
 
   const contractAddress = "0x9a0DcA515dB6d9A97804e8364F3eF9e5cA817E4c";
 
@@ -38,12 +39,17 @@ const EditTable = () => {
         [viewType],
         [viewRelativeToken]
       );
+      console.log("viewRelativeToken", viewRelativeToken)
       const receipt = await txn.wait();
       console.log(receipt);
     } catch (err) {
       console.log(err);
     }
   }, []);
+
+  useEffect(() => {
+    setViewRelativeToken(viewType === "relative" ? token : "")
+  },[viewRelativeToken])
 
   return (
     <div>
@@ -102,9 +108,8 @@ const EditTable = () => {
               </select>
             </td>
             <td>
-              <select>
-                <option value={viewType === "relative" ? token : ""}>{viewType === "relative" ? token : ""}</option>
-              </select>
+              
+                <input value={viewRelativeToken} disabled={true}/>
             </td>
           </tr>
         </tbody>
