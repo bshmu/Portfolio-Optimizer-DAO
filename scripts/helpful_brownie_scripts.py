@@ -34,15 +34,15 @@ def deploy():
 
 deploy()
 
-# ABI and address
-abi_path = r"C:\Users\User\repos\chainshotdev\utils\test_abi.json"
-with open(abi_path, 'r') as j:
-    abi = json.loads(j.read())
-deployed_address = "0xd5a2DcdE322549AC9A71a55e1686ec4B8B739583"
-
-# Connect to infura
-load_dotenv()
-w3 = Web3(Web3.HTTPProvider("https://rinkeby.infura.io/v3/" + os.getenv('WEB3_INFURA_PROJECT_ID')))
-
-# Contract
-optimizerDAO = w3.eth.contract(address=deployed_address, abi=abi)
+# # ABI and address
+# abi_path = r"C:\Users\User\repos\chainshotdev\utils\test_abi.json"
+# with open(abi_path, 'r') as j:
+#     abi = json.loads(j.read())
+# deployed_address = "0xd5a2DcdE322549AC9A71a55e1686ec4B8B739583"
+#
+# # Connect to infura
+# load_dotenv()
+# w3 = Web3(Web3.HTTPProvider("https://rinkeby.infura.io/v3/" + os.getenv('WEB3_INFURA_PROJECT_ID')))
+#
+# # Contract
+# optimizerDAO = w3.eth.contract(address=deployed_address, abi=abi)
