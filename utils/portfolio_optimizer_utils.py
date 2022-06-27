@@ -3,6 +3,18 @@ import pandas as pd
 from scipy.interpolate import interp1d
 import requests
 
+# API GLOBAL VARIABLES
+# AlphaVantage market caps are incorrect, so we will calculate the market cap based on these hardcoded supply values
+# (as of 6/26).
+
+API_KEY = 'U144ZFRL1VUG5JYY'
+
+TOKEN_SUPPLY = {'ETH': 121313867,
+                'BTC': 19077962,
+                'UNI': 1000000000,
+                'BAT': 1500000000,
+                'USDT': 68610622657}
+
 # API Utils
 def get_crypto_time_series(symbol, exchange='USD', start_date=None):
     """
@@ -11,8 +23,13 @@ def get_crypto_time_series(symbol, exchange='USD', start_date=None):
     :param start_date: str, date
     :return: dataframe of price and market cap from AlphaVantage API
     """
-    api_key = '2HT2PCFAZ56G0383'
-    api_url = f'https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol={symbol}&market={exchange}&apikey={api_key}'
+    # AlphaVantage doesn't have a time series for USDT, so we will pull for ETH and override the values
+    if symbol != 'USDT':
+        api_url = f'https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol={symbol}&market={exchange}&apikey={API_KEY}'
+    else:
+        api_url = f'https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol=ETH&market={exchange}&apikey={API_KEY}'
+
+    # Get the price series formatted for the optimizer
     raw_df = requests.get(api_url).json()
     df = pd.DataFrame(raw_df['Time Series (Digital Currency Daily)']).T
     for i in df.columns:
@@ -20,9 +37,81 @@ def get_crypto_time_series(symbol, exchange='USD', start_date=None):
     df.index = pd.to_datetime(df.index)
     df = df.iloc[::-1][['4a. close (USD)', '6. market cap (USD)']]
     df.rename(columns={'4a. close (USD)': 'price', '6. market cap (USD)': 'market cap'}, inplace=True)
-    if start_date:
+
+    # Override the market cap data and price data for USDT (we can override the whole series as we're only pulling the most recent value)
+    if symbol == 'USDT':
+        # Add fake variance to USDT series to avoid singular matrix error
+        df['price'] = [1 + np.random.randn() * 0.0001 for i in range(df.shape[0])]
+        df['market cap'] = TOKEN_SUPPLY[symbol]
+    else:
+        df['market cap'] = TOKEN_SUPPLY[symbol] * df['price'].iloc[-1]
+
+    if start_date is not None:
         df = df[df.index >= pd.to_datetime(start_date)]
+
     return df
+
+def get_intraday_crypto_time_series(symbol, exchange='USD', start_time=None, end_time=None, interval='5min', output_size='compact'):
+    """
+    :param symbol: str, coin ticker
+    :param exchange: str, default to USD
+    :param start_time: datetime
+    :param end_time: datetime
+    :param interval: str, can accept '1min', '5min', '15min', '30min', '60min'
+    :param output_size: str, 'compact' or 'full'. Default to 'compact' for most recent 100 entries.
+    :return: dataframe of price and market cap from AlphaVantage API
+    """
+    if symbol != 'USDT':
+        api_url = f'https://www.alphavantage.co/query?function=CRYPTO_INTRADAY&symbol={symbol}&market={exchange}&interval={interval}&apikey={API_KEY}&outputsize={output_size}'
+    else:
+        api_url = f'https://www.alphavantage.co/query?function=CRYPTO_INTRADAY&symbol=ETH&market={exchange}&interval={interval}&apikey={API_KEY}&outputsize={output_size}'
+
+    # Get the price series formatted for the optimizer
+    raw_df = requests.get(api_url).json()
+    df = pd.DataFrame(raw_df['Time Series Crypto (' + interval + ')']).T
+    for i in df.columns:
+        df[i] = df[i].astype(float)
+    df.index = pd.to_datetime(df.index)
+    df = df.iloc[::-1]['4. close']
+
+    if symbol == 'USDT':
+        # Add fake variance to USDT series
+        df = pd.Series([1 + np.random.randn() * 0.0001 for i in range(df.shape[0])], index=df.index.to_list())
+    else:
+        pass
+
+    # Filter based on the provided start/end times
+    if start_time is not None:
+        df = df[df.index >= start_time]
+    if end_time is not None:
+        df = df[df.index < end_time]
+    return df
+
+    # # AlphaVantage doesn't have a time series for USDT, so we will pull for ETH and override the values
+    # if symbol != 'USDT':
+    #     api_url = f'https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol={symbol}&market={exchange}&apikey={API_KEY}'
+    # else:
+    #     api_url = f'https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol=ETH&market={exchange}&apikey={API_KEY}'
+    #
+    # # Get the price series formatted for the optimizer
+    # raw_df = requests.get(api_url).json()
+    # df = pd.DataFrame(raw_df['Time Series (Digital Currency Daily)']).T
+    # for i in df.columns:
+    #     df[i] = df[i].astype(float)
+    # df.index = pd.to_datetime(df.index)
+    # df = df.iloc[::-1][['4a. close (USD)', '6. market cap (USD)']]
+    # df.rename(columns={'4a. close (USD)': 'price', '6. market cap (USD)': 'market cap'}, inplace=True)
+    #
+    # # Override the market cap data and price data for USDT (we can override the whole series as we're only pulling the most recent value)
+    # if symbol == 'USDT':
+    #     # Add fake variance to USDT series to avoid singular matrix error
+    #     df['price'] = [1 + np.random.randn() * 0.0001 for i in range(df.shape[0])]
+    #     df['market cap'] = TOKEN_SUPPLY[symbol]
+    # else:
+    #     df['market cap'] = TOKEN_SUPPLY[symbol] * df['price'].iloc[-1]
+    #
+    # if start_date:
+    #     df = df[df.index >= pd.to_datetime(start_date)]
 
 # Statistics
 def get_covariance_matrix_time_series(df, decay_factor, window, shrinkage):

@@ -2,9 +2,9 @@ import os
 import json
 
 # Addresses
-contract_address = '0x0fCb9B452c49b681E59A0EB0D1DEA85341A1A4f4'
+metamask_address = '0x52299706E6aC1d97e3d8d4526Fa8554903e16a1d'  # Update to your metamask address
 
-metamask_address = '0x52299706E6aC1d97e3d8d4526Fa8554903e16a1d'
+contract_address = '0x5411Af80B34484F2ded92998205AAB4f68599959'
 
 contract_tokens = ['WBTC', 'WETH', 'UNI', 'BAT', 'USDT']
 

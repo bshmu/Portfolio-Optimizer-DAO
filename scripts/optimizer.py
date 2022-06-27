@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
 import warnings
+import utils.contract_utils as cu
 from utils.portfolio_optimizer_utils import get_crypto_time_series, get_covariance_matrix_time_series
+
 
 class BlackLittermanOptimizer:
     def __init__(self,
@@ -96,13 +98,13 @@ class BlackLittermanOptimizer:
             P = np.zeros((self.K, self.N))
 
             for i, view in enumerate(views_series.items()):
-                ticker = view[0]
+                ticker = view[0] if view[0] not in list(cu.contract_tokens_mapping.keys()) else cu.contract_tokens_mapping[view[0]]
                 ticker_view = view[1]
                 if len(ticker_view[1]) == 0:  # Case of absolute views
                     Q[i] = views_series[ticker][0]
                     P[i, list(self.tickers).index(ticker)] = 1
                 else:  # Case of relative views
-                    ticker_relative = ticker_view[1]
+                    ticker_relative = ticker_view[1] if ticker_view[1] not in list(cu.contract_tokens_mapping.keys()) else cu.contract_tokens_mapping[ticker_view[1]]
                     Q[i] = views_series[ticker][0]
                     P[i, list(self.tickers).index(ticker)] = 1
                     P[i, list(self.tickers).index(ticker_relative)] = -1
