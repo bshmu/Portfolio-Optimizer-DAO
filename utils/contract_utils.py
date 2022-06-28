@@ -4,7 +4,7 @@ import json
 # Addresses
 metamask_address = '0x52299706E6aC1d97e3d8d4526Fa8554903e16a1d'  # Update to your metamask address
 
-contract_address = '0x9a0DcA515dB6d9A97804e8364F3eF9e5cA817E4c'  # Update to deployed contract address
+contract_address = '0x77D0efdC60E6b1cA842d382d12d3fa9Bb69833f1'  # Update to deployed contract address
 
 contract_tokens = ['WETH', 'BAT', 'WBTC', 'UNI', 'USDT']  # Order matters for initiateTradesOnUniswap()
 

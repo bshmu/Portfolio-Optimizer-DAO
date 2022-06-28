@@ -153,7 +153,7 @@ contract OptimizerDAO is ERC20 {
 
   function joinDAO() public payable {
     // Minimum buy in at 0.1 Eth
-    require(msg.value >= 41217007 gwei, "Minimum buy in is 0.1 ether");
+    require(msg.value >= 50000000 gwei, "Minimum buy in is 0.1 ether");
 
     if (treasuryEth == 0) {
 
@@ -290,26 +290,30 @@ contract OptimizerDAO is ERC20 {
       for (uint i = 0; i < _assets.length; i++) {
         assetWeightings[_assets[i]] = _percentage[i];
         proposals[proposals.length - 1].tokensWeightings.push(_percentage[i]);
-        if (tokenAddresses[_assets[i]] == WETH) {
-            proposals[proposals.length - 1].tokens.push("WETH");
-            proposals[proposals.length - 1].qtyOfTokensAcq.push(WETH9(WETH).balanceOf(address(this)));
+        proposals[proposals.length - 1].tokens.push(_assets[i]);
 
-          }
-        if (_percentage[i] != 0 && (keccak256(abi.encodePacked(_assets[i])) != wethRepresentation)) {
-          if (tokenAddresses[_assets[i]] != address(0) && _percentage[i] != 0) {
+        if (_percentage[i] == 0) {
+          proposals[proposals.length - 1].qtyOfTokensAcq.push(0);
+        } else {
+          if (tokenAddresses[_assets[i]] == WETH) {
             uint allocation = (lastSnapshotEth * _percentage[i]) / 100;
-            _swap(WETH, tokenAddresses[_assets[i]], allocation, 0, address(this));
-            proposals[proposals.length - 1].tokens.push(_assets[i]);
-            proposals[proposals.length - 1].qtyOfTokensAcq.push(ERC20(tokenAddresses[_assets[i]]).balanceOf(address(this)));
+            proposals[proposals.length - 1].qtyOfTokensAcq.push(allocation);
           }
-          if (shortTokenAddresses[_assets[i]] != address(0)) {
-            uint allocation = (lastSnapshotEth * _percentage[i]) / 100;
-            ERC20short(shortTokenAddresses[_assets[i]]).mint(address(this), allocation);
-            proposals[proposals.length - 1].tokens.push(_assets[i]);
-            proposals[proposals.length - 1].qtyOfTokensAcq.push(ERC20short(shortTokenAddresses[_assets[i]]).balanceOf(address(this)));
+          if (_percentage[i] != 0 && (keccak256(abi.encodePacked(_assets[i])) != wethRepresentation)) {
+            if (tokenAddresses[_assets[i]] != address(0) && _percentage[i] != 0) {
+              uint allocation = (lastSnapshotEth * _percentage[i]) / 100;
+              _swap(WETH, tokenAddresses[_assets[i]], allocation, 0, address(this));
+              proposals[proposals.length - 1].qtyOfTokensAcq.push(ERC20(tokenAddresses[_assets[i]]).balanceOf(address(this)));
+          }
+            if (shortTokenAddresses[_assets[i]] != address(0)) {
+              uint allocation = (lastSnapshotEth * _percentage[i]) / 100;
+              ERC20short(shortTokenAddresses[_assets[i]]).mint(address(this), allocation);
+              proposals[proposals.length - 1].qtyOfTokensAcq.push(ERC20short(shortTokenAddresses[_assets[i]]).balanceOf(address(this)));
           }
 
         }
+        }
+
       }
 
     }
@@ -319,11 +323,11 @@ contract OptimizerDAO is ERC20 {
 
       WETH9(WETH).deposit{value: address(this).balance}();
 
-      uint wethBalance = WETH9(WETH).balanceOf(address(this));
+      lastSnapshotEth = WETH9(WETH).balanceOf(address(this));
 
       // Snapshot captured of WETH at beggining of proposal w/ timestamp
       proposals[proposals.length - 1].startTime = block.timestamp;
-      proposals[proposals.length - 1].startEth = wethBalance;
+      proposals[proposals.length - 1].startEth = lastSnapshotEth;
 
       /**
       The original, unsuccessful approach
@@ -344,28 +348,33 @@ contract OptimizerDAO is ERC20 {
       for (uint i = 0; i < _assets.length; i++) {
         assetWeightings[_assets[i]] = _percentage[i];
         proposals[proposals.length - 1].tokensWeightings.push(_percentage[i]);
-        if (tokenAddresses[_assets[i]] == WETH) {
-            proposals[proposals.length - 1].tokens.push("WETH");
-            proposals[proposals.length - 1].qtyOfTokensAcq.push(WETH9(WETH).balanceOf(address(this)));
+        proposals[proposals.length - 1].tokens.push(_assets[i]);
 
+        if (_percentage[i] == 0) {
+          proposals[proposals.length - 1].qtyOfTokensAcq.push(0);
+        } else {
+          if (tokenAddresses[_assets[i]] == WETH) {
+            uint allocation = (lastSnapshotEth * _percentage[i]) / 100;
+            proposals[proposals.length - 1].qtyOfTokensAcq.push(allocation);
           }
-        if (_percentage[i] != 0 && (keccak256(abi.encodePacked(_assets[i])) != wethRepresentation)) {
-          if (tokenAddresses[_assets[i]] != address(0)) {
-            uint allocation = (wethBalance * _percentage[i]) / 100;
-            _swap(WETH, tokenAddresses[_assets[i]], allocation, 0, address(this));
-            proposals[proposals.length - 1].tokens.push(_assets[i]);
-            proposals[proposals.length - 1].qtyOfTokensAcq.push(ERC20(tokenAddresses[_assets[i]]).balanceOf(address(this)));
-          }
-          else if (shortTokenAddresses[_assets[i]] != address(0)) {
-            uint allocation = (wethBalance * _percentage[i]) / 100;
-            ERC20short(shortTokenAddresses[_assets[i]]).mint(address(this), allocation);
-            proposals[proposals.length - 1].tokens.push(_assets[i]);
-            proposals[proposals.length - 1].qtyOfTokensAcq.push(ERC20short(shortTokenAddresses[_assets[i]]).balanceOf(address(this)));
-          }
+          if (_percentage[i] != 0 && (keccak256(abi.encodePacked(_assets[i])) != wethRepresentation)) {
+            if (tokenAddresses[_assets[i]] != address(0)) {
+              uint allocation = (lastSnapshotEth * _percentage[i]) / 100;
+              _swap(WETH, tokenAddresses[_assets[i]], allocation, 0, address(this));
+              proposals[proposals.length - 1].qtyOfTokensAcq.push(ERC20(tokenAddresses[_assets[i]]).balanceOf(address(this)));
+            }
+            else if (shortTokenAddresses[_assets[i]] != address(0)) {
+              uint allocation = (lastSnapshotEth * _percentage[i]) / 100;
+              ERC20short(shortTokenAddresses[_assets[i]]).mint(address(this), allocation);
+              proposals[proposals.length - 1].qtyOfTokensAcq.push(ERC20short(shortTokenAddresses[_assets[i]]).balanceOf(address(this)));
+            }
 
         }
+        }
+
 
       }
+
 
     }
 
