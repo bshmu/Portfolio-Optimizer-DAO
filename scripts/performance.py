@@ -113,3 +113,6 @@ def get_cumulative_performance():
     cumulative_performance_history = [c * 100 for c in cumulative_performance_history]
 
     return cumulative_performance_history
+
+if __name__ == '__main__':
+    c = get_cumulative_performance()

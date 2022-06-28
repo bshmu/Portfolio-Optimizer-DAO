@@ -151,5 +151,5 @@ def initiateTradesOnUniswap(assets, percentages):
 
     return txn_receipt
 
-# if __name__ == '__main__':
-#     assets, percentages = engine()
+if __name__ == '__main__':
+    assets, percentages = engine()

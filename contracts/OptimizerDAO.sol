@@ -135,7 +135,7 @@ contract OptimizerDAO is ERC20 {
 
   constructor() ERC20("Optimizer DAO Token", "ODP") {
     // On DAO creation, a vote/proposal is created which automatically creates a new one every x amount of time
-
+    Proposal storage newProposal = proposals.push();
     string[5] memory _tokens = ["WETH", "BAT", "WBTC", "UNI", "USDT"];
     address[5] memory _addresses = [0xc778417E063141139Fce010982780140Aa0cD5Ab, 0xDA5B056Cfb861282B4b59d29c9B395bcC238D29B, 0x577D296678535e4903D59A4C929B718e1D575e0A, 0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984, 0x2fB298BDbeF468638AD6653FF8376575ea41e768];
 
@@ -195,7 +195,6 @@ contract OptimizerDAO is ERC20 {
 
     uint numberOfVoterTokens = balanceOf(msg.sender);
     for (uint i = 0; i < _token.length; i++) {
-      proposals[proposals.length - 1].tokens.push(_token[i]);
       proposals[proposals.length - 1].userViews[_token[i]].push(_perfOfToken[i]);
 
       proposals[proposals.length - 1].numOfUserTokens[_token[i]].push(numberOfVoterTokens);
@@ -259,9 +258,9 @@ contract OptimizerDAO is ERC20 {
   function initiateTradesOnUniswap(string[] memory _assets, uint[] memory _percentage) public {
     bytes32 wethRepresentation = keccak256(abi.encodePacked("WETH"));
 
-    if (proposals.length >= 1) {
+    if (proposals.length > 1) {
       // 1. Sell off existing holdings
-      Proposal storage newProposal = proposals.push();
+
 
       for (uint i = 0; i < _assets.length; i++) {
         if (tokenAddresses[_assets[i]] != address(0)) {
@@ -317,9 +316,8 @@ contract OptimizerDAO is ERC20 {
       }
 
     }
-    if (proposals.length == 0) {
+    if (proposals.length == 1) {
       // 1. If first Proposal, convert all Eth to WETH
-      Proposal storage newProposal = proposals.push();
 
       WETH9(WETH).deposit{value: address(this).balance}();
 
@@ -328,6 +326,7 @@ contract OptimizerDAO is ERC20 {
       // Snapshot captured of WETH at beggining of proposal w/ timestamp
       proposals[proposals.length - 1].startTime = block.timestamp;
       proposals[proposals.length - 1].startEth = lastSnapshotEth;
+
 
       /**
       The original, unsuccessful approach
@@ -374,7 +373,7 @@ contract OptimizerDAO is ERC20 {
 
 
       }
-
+      Proposal storage newProposal = proposals.push();
 
     }
 
@@ -444,7 +443,7 @@ contract OptimizerDAO is ERC20 {
     }
 
   function lengthOfProposals() public view returns(uint256) {
-    return proposals.length;
+    return proposals.length - 1;
   }
 
 
