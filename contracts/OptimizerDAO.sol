@@ -135,7 +135,7 @@ contract OptimizerDAO is ERC20 {
 
   constructor() ERC20("Optimizer DAO Token", "ODP") {
     // On DAO creation, a vote/proposal is created which automatically creates a new one every x amount of time
-
+    Proposal storage newProposal = proposals.push();
     string[5] memory _tokens = ["WETH", "BAT", "WBTC", "UNI", "USDT"];
     address[5] memory _addresses = [0xc778417E063141139Fce010982780140Aa0cD5Ab, 0xDA5B056Cfb861282B4b59d29c9B395bcC238D29B, 0x577D296678535e4903D59A4C929B718e1D575e0A, 0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984, 0x2fB298BDbeF468638AD6653FF8376575ea41e768];
 
@@ -153,7 +153,7 @@ contract OptimizerDAO is ERC20 {
 
   function joinDAO() public payable {
     // Minimum buy in at 0.1 Eth
-    require(msg.value >= 41217007 gwei, "Minimum buy in is 0.1 ether");
+    require(msg.value >= 50000000 gwei, "Minimum buy in is 0.1 ether");
 
     if (treasuryEth == 0) {
 
@@ -195,7 +195,6 @@ contract OptimizerDAO is ERC20 {
 
     uint numberOfVoterTokens = balanceOf(msg.sender);
     for (uint i = 0; i < _token.length; i++) {
-      proposals[proposals.length - 1].tokens.push(_token[i]);
       proposals[proposals.length - 1].userViews[_token[i]].push(_perfOfToken[i]);
 
       proposals[proposals.length - 1].numOfUserTokens[_token[i]].push(numberOfVoterTokens);
@@ -259,9 +258,9 @@ contract OptimizerDAO is ERC20 {
   function initiateTradesOnUniswap(string[] memory _assets, uint[] memory _percentage) public {
     bytes32 wethRepresentation = keccak256(abi.encodePacked("WETH"));
 
-    if (proposals.length >= 1) {
+    if (proposals.length > 1) {
       // 1. Sell off existing holdings
-      Proposal storage newProposal = proposals.push();
+
 
       for (uint i = 0; i < _assets.length; i++) {
         if (tokenAddresses[_assets[i]] != address(0)) {
@@ -290,40 +289,44 @@ contract OptimizerDAO is ERC20 {
       for (uint i = 0; i < _assets.length; i++) {
         assetWeightings[_assets[i]] = _percentage[i];
         proposals[proposals.length - 1].tokensWeightings.push(_percentage[i]);
-        if (tokenAddresses[_assets[i]] == WETH) {
-            proposals[proposals.length - 1].tokens.push("WETH");
-            proposals[proposals.length - 1].qtyOfTokensAcq.push(WETH9(WETH).balanceOf(address(this)));
+        proposals[proposals.length - 1].tokens.push(_assets[i]);
 
-          }
-        if (_percentage[i] != 0 && (keccak256(abi.encodePacked(_assets[i])) != wethRepresentation)) {
-          if (tokenAddresses[_assets[i]] != address(0) && _percentage[i] != 0) {
+        if (_percentage[i] == 0) {
+          proposals[proposals.length - 1].qtyOfTokensAcq.push(0);
+        } else {
+          if (tokenAddresses[_assets[i]] == WETH) {
             uint allocation = (lastSnapshotEth * _percentage[i]) / 100;
-            _swap(WETH, tokenAddresses[_assets[i]], allocation, 0, address(this));
-            proposals[proposals.length - 1].tokens.push(_assets[i]);
-            proposals[proposals.length - 1].qtyOfTokensAcq.push(ERC20(tokenAddresses[_assets[i]]).balanceOf(address(this)));
+            proposals[proposals.length - 1].qtyOfTokensAcq.push(allocation);
           }
-          if (shortTokenAddresses[_assets[i]] != address(0)) {
-            uint allocation = (lastSnapshotEth * _percentage[i]) / 100;
-            ERC20short(shortTokenAddresses[_assets[i]]).mint(address(this), allocation);
-            proposals[proposals.length - 1].tokens.push(_assets[i]);
-            proposals[proposals.length - 1].qtyOfTokensAcq.push(ERC20short(shortTokenAddresses[_assets[i]]).balanceOf(address(this)));
+          if (_percentage[i] != 0 && (keccak256(abi.encodePacked(_assets[i])) != wethRepresentation)) {
+            if (tokenAddresses[_assets[i]] != address(0) && _percentage[i] != 0) {
+              uint allocation = (lastSnapshotEth * _percentage[i]) / 100;
+              _swap(WETH, tokenAddresses[_assets[i]], allocation, 0, address(this));
+              proposals[proposals.length - 1].qtyOfTokensAcq.push(ERC20(tokenAddresses[_assets[i]]).balanceOf(address(this)));
+          }
+            if (shortTokenAddresses[_assets[i]] != address(0)) {
+              uint allocation = (lastSnapshotEth * _percentage[i]) / 100;
+              ERC20short(shortTokenAddresses[_assets[i]]).mint(address(this), allocation);
+              proposals[proposals.length - 1].qtyOfTokensAcq.push(ERC20short(shortTokenAddresses[_assets[i]]).balanceOf(address(this)));
           }
 
         }
+        }
+
       }
 
     }
-    if (proposals.length == 0) {
+    if (proposals.length == 1) {
       // 1. If first Proposal, convert all Eth to WETH
-      Proposal storage newProposal = proposals.push();
 
       WETH9(WETH).deposit{value: address(this).balance}();
 
-      uint wethBalance = WETH9(WETH).balanceOf(address(this));
+      lastSnapshotEth = WETH9(WETH).balanceOf(address(this));
 
       // Snapshot captured of WETH at beggining of proposal w/ timestamp
       proposals[proposals.length - 1].startTime = block.timestamp;
-      proposals[proposals.length - 1].startEth = wethBalance;
+      proposals[proposals.length - 1].startEth = lastSnapshotEth;
+
 
       /**
       The original, unsuccessful approach
@@ -344,28 +347,33 @@ contract OptimizerDAO is ERC20 {
       for (uint i = 0; i < _assets.length; i++) {
         assetWeightings[_assets[i]] = _percentage[i];
         proposals[proposals.length - 1].tokensWeightings.push(_percentage[i]);
-        if (tokenAddresses[_assets[i]] == WETH) {
-            proposals[proposals.length - 1].tokens.push("WETH");
-            proposals[proposals.length - 1].qtyOfTokensAcq.push(WETH9(WETH).balanceOf(address(this)));
+        proposals[proposals.length - 1].tokens.push(_assets[i]);
 
+        if (_percentage[i] == 0) {
+          proposals[proposals.length - 1].qtyOfTokensAcq.push(0);
+        } else {
+          if (tokenAddresses[_assets[i]] == WETH) {
+            uint allocation = (lastSnapshotEth * _percentage[i]) / 100;
+            proposals[proposals.length - 1].qtyOfTokensAcq.push(allocation);
           }
-        if (_percentage[i] != 0 && (keccak256(abi.encodePacked(_assets[i])) != wethRepresentation)) {
-          if (tokenAddresses[_assets[i]] != address(0)) {
-            uint allocation = (wethBalance * _percentage[i]) / 100;
-            _swap(WETH, tokenAddresses[_assets[i]], allocation, 0, address(this));
-            proposals[proposals.length - 1].tokens.push(_assets[i]);
-            proposals[proposals.length - 1].qtyOfTokensAcq.push(ERC20(tokenAddresses[_assets[i]]).balanceOf(address(this)));
-          }
-          else if (shortTokenAddresses[_assets[i]] != address(0)) {
-            uint allocation = (wethBalance * _percentage[i]) / 100;
-            ERC20short(shortTokenAddresses[_assets[i]]).mint(address(this), allocation);
-            proposals[proposals.length - 1].tokens.push(_assets[i]);
-            proposals[proposals.length - 1].qtyOfTokensAcq.push(ERC20short(shortTokenAddresses[_assets[i]]).balanceOf(address(this)));
-          }
+          if (_percentage[i] != 0 && (keccak256(abi.encodePacked(_assets[i])) != wethRepresentation)) {
+            if (tokenAddresses[_assets[i]] != address(0)) {
+              uint allocation = (lastSnapshotEth * _percentage[i]) / 100;
+              _swap(WETH, tokenAddresses[_assets[i]], allocation, 0, address(this));
+              proposals[proposals.length - 1].qtyOfTokensAcq.push(ERC20(tokenAddresses[_assets[i]]).balanceOf(address(this)));
+            }
+            else if (shortTokenAddresses[_assets[i]] != address(0)) {
+              uint allocation = (lastSnapshotEth * _percentage[i]) / 100;
+              ERC20short(shortTokenAddresses[_assets[i]]).mint(address(this), allocation);
+              proposals[proposals.length - 1].qtyOfTokensAcq.push(ERC20short(shortTokenAddresses[_assets[i]]).balanceOf(address(this)));
+            }
 
         }
+        }
+
 
       }
+      Proposal storage newProposal = proposals.push();
 
     }
 
@@ -435,7 +443,7 @@ contract OptimizerDAO is ERC20 {
     }
 
   function lengthOfProposals() public view returns(uint256) {
-    return proposals.length;
+    return proposals.length - 1;
   }
 
 
