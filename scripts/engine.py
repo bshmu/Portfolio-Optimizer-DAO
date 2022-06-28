@@ -108,11 +108,16 @@ def engine():
         views[token] = (token_view, token_relative_token)
         views_confidences[token] = token_confidence
 
+    # Print parsed views
+    print("Views:", views)
+    print("Confidences:", views_confidences)
+
     # Call the optimizer
     contract_tokens = [cu.contract_tokens_mapping[token] if token in list(cu.contract_tokens_mapping.keys())
                        else token for token in cu.contract_tokens]
     optimizer = BlackLittermanOptimizer(contract_tokens, views, views_confidences)
     weights = optimizer.normalizedWeights
+    print("Optimal weights:", weights)
 
     # Read the optimal weights back into values that can enter the contract to execute Uniswap trades
     assets, percentages = parse_optimal_weights(weights)
@@ -120,16 +125,31 @@ def engine():
     print('Percentages:', percentages)
     return assets, percentages
 
-    # # Create transaction to call initiateTradesOnUniswap -- the transaction may take several minutes to clear
-    # nonce = w3.eth.get_transaction_count(cu.metamask_address) + 1
-    # transaction_dict = {'gas': 70000,
-    #                     'gasPrice': w3.toWei('21', 'gwei'),
-    #                     'from': cu.metamask_address,
-    #                     'nonce': nonce}
-    # txn = dao.functions.initiateTradesOnUniswap(assets, percentages).buildTransaction(transaction_dict)
-    # signed_txn = w3.eth.account.signTransaction(txn, private_key=os.getenv('PRIVATE_KEY'))
-    # result = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
-    # txn_receipt = w3.eth.waitForTransactionReceipt(result)
-    #
-    # return txn_receipt
+def initiateTradesOnUniswap(assets, percentages):
+    # Load dotenv
+    load_dotenv()
 
+    # Connect to infura
+    w3 = Web3(Web3.HTTPProvider("https://rinkeby.infura.io/v3/" + os.getenv('WEB3_INFURA_PROJECT_ID')))
+
+    # Get the contract object
+    deployed_contract_address = cu.contract_address
+    abi = cu.get_contract_abi()
+    dao = w3.eth.contract(address=deployed_contract_address, abi=abi)
+
+    # Create transaction to call initiateTradesOnUniswap -- the transaction may take several minutes to clear
+    nonce = w3.eth.get_transaction_count(cu.metamask_address)
+    transaction_dict = {'chainId': w3.eth.chain_id,
+                        'gas': 2000000,
+                        'gasPrice': w3.toWei('50', 'gwei'),
+                        'from': cu.metamask_address,
+                        'nonce': nonce}
+    txn = dao.functions.initiateTradesOnUniswap(assets, percentages).buildTransaction(transaction_dict)
+    signed_txn = w3.eth.account.signTransaction(txn, private_key=os.getenv('PRIVATE_KEY'))
+    result = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+    txn_receipt = w3.eth.waitForTransactionReceipt(result)
+
+    return txn_receipt
+
+if __name__ == '__main__':
+    assets, percentages = engine()

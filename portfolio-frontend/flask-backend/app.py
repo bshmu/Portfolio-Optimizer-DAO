@@ -1,5 +1,5 @@
 from flask import Flask
-from scripts.engine import engine
+from scripts.engine import engine, initiateTradesOnUniswap
 from scripts.performance import get_cumulative_performance
 
 api = Flask(__name__)
@@ -8,6 +8,7 @@ api = Flask(__name__)
 
 def optimizeFundWeights():
     assets, percentages = engine()  # call the engine
+    initiateTradesOnUniswap(assets, percentages)  # initiate trades
 
 @api.route('/getCumulativePerformance')
 

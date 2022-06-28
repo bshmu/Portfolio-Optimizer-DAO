@@ -61,6 +61,12 @@ def get_cumulative_performance():
         holdings = proposal_i[1]
         timestamps = proposal_i[3]
 
+        # For debugging, make sure end time is not zero
+        if timestamps[1] == 0:
+            timestamps[1] = timestamps[0] + 300
+        else:
+            pass
+
         # Convert the timestamps
         timestamps = [datetime.utcfromtimestamp(int(ts)) for ts in timestamps]
         start_time = timestamps[0]
@@ -84,7 +90,7 @@ def get_cumulative_performance():
         asset_performance_dict = dict.fromkeys(cu.contract_tokens)
         for asset in list(asset_performance_dict.keys()):
             mapped_asset = asset if asset not in list(cu.contract_tokens_mapping.keys()) else cu.contract_tokens_mapping[asset]
-            asset_price_series = get_intraday_crypto_time_series(mapped_asset, start_time=start_time, end_time=end_time, output_size='full')
+            asset_price_series = get_intraday_crypto_time_series(mapped_asset, start_time=start_time, end_time=end_time)
             start_price = asset_price_series.iloc[0]
             end_price = asset_price_series.iloc[-1]
             weight = asset_weights_dict[asset][0]
@@ -107,3 +113,6 @@ def get_cumulative_performance():
     cumulative_performance_history = [c * 100 for c in cumulative_performance_history]
 
     return cumulative_performance_history
+
+if __name__ == '__main__':
+    c = get_cumulative_performance()
