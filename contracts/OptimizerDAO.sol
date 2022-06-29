@@ -315,6 +315,8 @@ contract OptimizerDAO is ERC20 {
 
       }
 
+      Proposal storage newProposal = proposals.push();
+
     }
     if (proposals.length == 1) {
       // 1. If first Proposal, convert all Eth to WETH
