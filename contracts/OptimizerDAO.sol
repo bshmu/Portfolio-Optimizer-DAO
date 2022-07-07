@@ -450,7 +450,7 @@ contract OptimizerDAO is ERC20 {
 
 
   modifier onlyMember {
-      require(balanceOf(msg.sender) > 0);
+      require(balanceOf(msg.sender) > 0, "Must be a member to use DAO function");
       _;
    }
 
