@@ -275,8 +275,8 @@ class BlackLittermanOptimizer:
 
 # # Uncomment to create a sample BlackLittermanOptimizer object
 # if __name__ == '__main__':
-#     tickers = ['BTC', 'ETH', 'LTC', 'AVAX', 'ATOM']
-#     views = {'BTC': (-0.1, 'ETH'), 'LTC': (0.1, '')}  # BTC down 10% relative to ETH, LTC up 10% in absolute terms
-#     views_confidences = {'BTC': 0.5, 'LTC': 0.5}
+#     tickers = ['BTC', 'ETH', 'UNI']
+#     views = {'BTC': (-0.05, 'ETH'), 'UNI': (0.05, '')}
+#     views_confidences = {'BTC': 0.5, 'UNI': 0.5}
 #     x = BlackLittermanOptimizer(tickers, views, views_confidences)
 #     print('Optimal weights:', x.optimalWeights)
