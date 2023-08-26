@@ -1,0 +1,6 @@
+[package]
+name = "Quantswain"
+version = "0.1.0"
+
+[dependencies]
+orion = { git = "https://github.com/gizatechxyz/onnx-cairo" }
