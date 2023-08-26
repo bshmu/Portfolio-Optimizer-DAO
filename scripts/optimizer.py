@@ -1,11 +1,84 @@
+import os
+import sys
+sys.path.append(r'/Users/benjaminshmulevsky/repos/Portfolio-Optimizer-DAO/v1/') # Fix this later
+
 import numpy as np
 import pandas as pd
+import cvxpy as cp
 import warnings
-import utils.contract_utils as cu
+from utils import contract_utils as cu
 from utils.portfolio_optimizer_utils import get_crypto_time_series, get_covariance_matrix_time_series
 
+class MeanVarianceOptimizer:
 
-class BlackLittermanOptimizer:
+    def __init__(self, tickers, expected_returns, cov_matrix, bounds):
+
+        # Parameters for optimization
+        self.tickers = tickers
+        self.N = len(self.tickers)
+        self.w = cp.Variable(self.N)
+        self.expected_returns = expected_returns
+        self.cov_matrix = cov_matrix
+
+        # # Risk limit
+        # assert isinstance(risk_limit, (float, int)) and risk_limit > 0
+        # self.vol_min = np.sqrt(1/np.sum(np.linalg.pinv(self.cov_matrix)))
+        # self.risk_limit = self.vol_min if risk_limit < self.vol_min else risk_limit
+
+        # Objective Function
+        self.mu = self.w @ self.expected_returns
+        self.objective = self.getObjectiveValue(self.w, self.mu)
+
+        # Bounds
+        if isinstance(bounds, (tuple, list)) \
+                and isinstance(bounds[0], (int, float)) \
+                and isinstance(bounds[1], (int, float)) \
+                and len(bounds) == 2:
+            self.lower_bound, self.upper_bound = bounds
+        else:
+            raise TypeError("Bounds must be a 2 element list.")
+
+        # Constaints
+        self.constraints = self.setConstraints()
+
+        # Run optimization
+        self.optimum = cp.Problem(cp.Minimize(self.objective), self.constraints)
+        self.optimum.solve()
+        assert self.optimum.status in ['optimal', 'optimal_inaccurate']
+
+        # Compute weights
+        self.weights = self.w.value.round(16) + 0.0
+        self.optimal_weights = {t: w.round(4) for t, w in zip(self.tickers, self.weights)}
+
+    def addConstraint(self, newConstraint):
+        return newConstraint(self.w)
+
+    def setConstraints(self):
+        constraints = []
+
+        # Bounds
+        constraints.append(self.addConstraint(lambda x: x >= self.lower_bound))
+        constraints.append(self.addConstraint(lambda x: x <= self.upper_bound))
+
+        # Weights sum to 1
+        constraints.append(self.addConstraint(lambda x: cp.sum(x) == 1))
+
+        # Risk constraint?
+
+        return constraints
+
+    def getObjectiveValue(self, w, obj):
+        if isinstance(w, np.ndarray):
+            if np.isscalar(obj):
+                return obj
+            elif np.isscalar(obj.value):
+                return obj.value
+            else:
+                return obj.value.item()
+        else:
+            return obj
+
+class BlackLittermanOptimizer(MeanVarianceOptimizer):
     def __init__(self,
                  tickers,
                  views,
@@ -16,7 +89,8 @@ class BlackLittermanOptimizer:
                  prior=True,
                  decay_factor=0.97,
                  window=(1, 'years'),
-                 shrinkage=True):
+                 shrinkage=True,
+                 long_only=True):
         """
         :param tickers: list of N assets in the portfolio
         :type tickers: list of str
@@ -61,6 +135,8 @@ class BlackLittermanOptimizer:
         self.risk_free = risk_free
         self.cov_matrix = self.getCovarianceMatrix(decay_factor, window, shrinkage)
         self.prior = prior
+        self.long_only = long_only
+        self.bounds = (0, 0.5) if self.long_only else (-1, 1)  # Do these make sense?
 
         # Check attribute errors
         self.checkErrors()
@@ -69,10 +145,12 @@ class BlackLittermanOptimizer:
         self.Q, self.P = self.parseViews(self.views)
         self.pi = self.priorReturns()
         self.omega = self.buildOmega(self.views_confidences)
-        self.posteriorReturns = self.posteriorReturns()
-        self.posteriorCovariance = self.posteriorCovariance()
-        self.optimalWeights = self.optimalWeights()
-        self.normalizedWeights = self.normalizedWeights()
+        self.posterior_returns = self.posteriorReturns()
+        self.posterior_covariance = self.posteriorCovariance()
+        self.bl_optimal_weights = self.optimalBLWeights()
+        
+        # Run MVO on posterior returns
+        super().__init__(self.tickers, self.posterior_returns, self.posterior_covariance, self.bounds)
 
 ########################################################################################################################
 # Black-Litterman Model Parameters
@@ -178,8 +256,7 @@ class BlackLittermanOptimizer:
         price_data = pd.DataFrame({ticker: self.data[ticker]['price'] for ticker in self.tickers})
         returns_data = (price_data / price_data.shift(1)).dropna()
         covariance_matrix_ts = get_covariance_matrix_time_series(returns_data, decay_factor, window, shrinkage)
-        covariance_matrix = covariance_matrix_ts.loc[covariance_matrix_ts.index ==
-                                                     pd.Series(covariance_matrix_ts.index.to_list()).max()].to_numpy()
+        covariance_matrix = covariance_matrix_ts.loc[covariance_matrix_ts.index == pd.Series(covariance_matrix_ts.index.to_list()).max()].to_numpy()
 
         # Final sanity check
         assert covariance_matrix.shape == (self.N, self.N)
@@ -215,13 +292,13 @@ class BlackLittermanOptimizer:
 # Weights
 ########################################################################################################################
 
-    def optimalWeights(self):
+    def optimalBLWeights(self):
         """
         :return: dictionary of optimal weights implied by the posterior returns corresponding to each asset.
-                 (Gross sum may exceed 100%).
+                 (Gross sum may exceed 100%).e
         """
         A = self.risk_aversion * self.cov_matrix
-        raw_weights = np.linalg.solve(A, self.posteriorReturns)
+        raw_weights = np.linalg.solve(A, self.posterior_returns)
         weights = raw_weights / raw_weights.sum()
         weights_dict = {ticker: weight for ticker, weight in zip(self.tickers, weights)}
         return weights_dict
@@ -241,6 +318,57 @@ class BlackLittermanOptimizer:
         normalized_weights = {ticker: (abs(weight)/gross_weight, self.ls(ticker))
                               for ticker, weight in self.optimalWeights.items()}
         return normalized_weights
+    
+    def postProcessWeights(self, optimalWeights):
+        """
+        :param optimalWeights: optimalWeights dictionary.
+        :return: dictionary of long-only weights, derived from the long only weights corresponding to each asset.
+        The values are 2-element tuples:
+            1) float, weight
+            2) string, long or short flag
+        """
+
+        long_positions = {t: w for t, w in list(optimalWeights.items()) if w >= 0}
+        short_positions = {t: -w for t, w in list(optimalWeights.items()) if w < 0}
+        if len(short_positions) == 0:
+            return optimalWeights
+        else:
+            # Compute short ratio
+            if self.short_ratio is None:
+                short_ratio = sum([-w for w in list(optimalWeights.values()) if w < 0])
+            else:
+                short_ratio = self.short_ratio
+
+        # Normalize weights
+        total_long = sum(long_positions.values())
+        total_short = sum(short_positions.values())
+        long_positions = {t: w / total_long for t, w in list(long_positions.items())}
+        short_positions = {t: w / total_short for t, w in list(short_positions.items())}
+        long_value = self.portfolio_value
+        short_value = self.portfolio_value * short_ratio
+
+        # Run IP for longs/shorts separately?
+
+        # Set up linear program
+        full_allocation = {t: 0 for t in zip(list(optimalWeights.keys()))}
+        for positions in [long_positions, short_positions]:
+            p = np.array([get_crypto_time_series(t)['price'].iloc[-1] for t in list(optimalWeights.keys())])
+            w = np.array(list(positions.values()))
+            x = cp.Variable(len(p), integer=True)
+            u = cp.Variable(len(p))
+            total_value = long_value if positions == long_positions else short_value  # ToDo: fix this logic
+            r = total_value - p.T @ x  # Remaining amount
+            eta = w * self.portfolio_value - cp.multiply(x, p)
+            constraints = [eta <= u, eta >= -u, x >= 0, r >= 0]
+            objective = cp.sum(u) + r
+
+            optimizer = cp.Problem(cp.Minimize(objective), constraints)
+            optimizer.solve(solver="ECOS_BB")
+            values = np.rint(x.value).astype(int)
+            allocation = {t: w for t, w in zip(list(positions.keys()), values) if w != 0}
+            full_allocation.update(allocation)
+
+        return full_allocation
 
     def ls(self, ticker):
         """
@@ -274,9 +402,10 @@ class BlackLittermanOptimizer:
                     raise ValueError("View confidences must be in (0, 1]")
 
 # # Uncomment to create a sample BlackLittermanOptimizer object
-# if __name__ == '__main__':
-#     tickers = ['BTC', 'ETH', 'UNI']
-#     views = {'BTC': (-0.05, 'ETH'), 'UNI': (0.05, '')}
-#     views_confidences = {'BTC': 0.5, 'UNI': 0.5}
-#     x = BlackLittermanOptimizer(tickers, views, views_confidences)
-#     print('Optimal weights:', x.optimalWeights)
+if __name__ == '__main__':
+    tickers = ['BTC', 'ETH', 'UNI', 'BAT']
+    views = {'BTC': (0.02, 'ETH'), 'UNI': (0.03, '')}
+    views_confidences = {'BTC': 1.0, 'UNI': 1.0}
+    x = BlackLittermanOptimizer(tickers, views, views_confidences)
+    print('Black-Litterman Optimal Weights:', x.bl_optimal_weights)
+    print('Constrained MVO weights:', x.optimal_weights)

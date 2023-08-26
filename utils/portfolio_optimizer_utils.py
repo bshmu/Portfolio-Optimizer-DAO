@@ -3,54 +3,92 @@ import pandas as pd
 from scipy.interpolate import interp1d
 import requests
 
-# API GLOBAL VARIABLES
-# AlphaVantage market caps are incorrect, so we will calculate the market cap based on these hardcoded supply values
-# (as of 6/26).
-
 API_KEY = 'U144ZFRL1VUG5JYY'
 
-TOKEN_SUPPLY = {'ETH': 121313867,
-                'BTC': 19077962,
-                'UNI': 1000000000,
-                'BAT': 1500000000,
-                'USDT': 68610622657}
-
 # API Utils
-def get_crypto_time_series(symbol, exchange='USD', start_date=None):
+def api_data_grab(symbol, exchange, function, start_date=None):
     """
     :param symbol: str, coin ticker
-    :param exchange: str, default to USD
+    :param exchange: str, "USD" or "CNY"
+    :param function: str, "DIGITAL_CURRENCY_DAILY" or "CRYPTO_INTRADAY"
     :param start_date: str, date
     :return: dataframe of price and market cap from AlphaVantage API
     """
-    # AlphaVantage doesn't have a time series for USDT, so we will pull for ETH and override the values
-    if symbol != 'USDT':
-        api_url = f'https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol={symbol}&market={exchange}&apikey={API_KEY}'
-    else:
-        api_url = f'https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol=ETH&market={exchange}&apikey={API_KEY}'
+    api_url = f'https://www.alphavantage.co/query?function={function}&symbol={symbol}&market={exchange}&apikey={API_KEY}'
+    raw_data = requests.get(api_url).json()
+    try:
+        assert('Error Message' not in list(raw_data.keys()))
+        print('API data successfully retrieved for', symbol, 'on the', exchange, 'exchange.')
+        return raw_data
+    except AssertionError:
+        print('Error - API data cannot be retrieved for', symbol, 'on the', exchange, 'exchange.')
+        return 0
 
-    # Get the price series formatted for the optimizer
-    raw_df = requests.get(api_url).json()
-    df = pd.DataFrame(raw_df['Time Series (Digital Currency Daily)']).T
-    for i in df.columns:
-        df[i] = df[i].astype(float)
-    df.index = pd.to_datetime(df.index)
-    df = df.iloc[::-1][['4a. close (USD)', '6. market cap (USD)']]
-    df.rename(columns={'4a. close (USD)': 'price', '6. market cap (USD)': 'market cap'}, inplace=True)
-
-    # Override the market cap data and price data for USDT (we can override the whole series as we're only pulling the most recent value)
-    if symbol == 'USDT':
-        # Add fake variance to USDT series to avoid singular matrix error
-        df['price'] = [1 + np.random.randn() * 0.0001 for i in range(df.shape[0])]
-        df['market cap'] = TOKEN_SUPPLY[symbol]
-    else:
-        df['market cap'] = TOKEN_SUPPLY[symbol] * df['price'].iloc[-1]
-
+def get_crypto_time_series(symbol, start_date=None):
+    """
+    :param symbol: str, coin ticker
+    :param exchange: str, "USD" or "CNY"
+    :param start_date: str, date
+    :return: dataframe of price and market cap from AlphaVantage API
+    """
+    # API parameters
+    exchanges = ['USD', 'CNY']
+    raw_field = 'Time Series (Digital Currency Daily)'
+    func = 'DIGITAL_CURRENCY_DAILY'
+    
+    # Get raw data
+    for e in exchanges:
+        raw_data = api_data_grab(symbol, e, func)
+        if raw_data != 0:
+            break
+        else:
+            continue
+    
+    # Make sure we got data back after looping through exchanges
+    if raw_data == 0:
+        return 0
+    
+    cts = pd.DataFrame(raw_data[raw_field]).T
+    cts_fields = []    
+    
+    for f in cts.columns.to_list():
+        if 'close (USD)' in f or 'market cap (USD)' in f:
+            cts_fields.append(f)
+            cts[f] = cts[f].astype(float)
+        else:
+            continue
+    
+    # Filter dataframe, rename fields, change index to datetime and sort ascending
+    cts = cts[cts_fields]   
+    for f in cts_fields:
+        if 'close' in f:
+            cts.rename(columns={f: 'price'}, inplace=True)
+        if 'market cap' in f:
+            cts.rename(columns={f: 'market cap'}, inplace=True)
+    cts.index = pd.to_datetime(cts.index)
+    cts = cts.iloc[::-1]
     if start_date is not None:
-        df = df[df.index >= pd.to_datetime(start_date)]
+        cts = cts[cts.index >= pd.to_datetime(start_date)]
+    cts = cts.loc[:,~cts.columns.duplicated()].copy()
+        
+    return cts     
+    
+    # If we have escaped the loop
+    # for e in exchanges:
+    #     raw_data = api_data_grab(symbol, e, func)
+    #     if 'Error Message' not in list(raw_data.keys()):
+    #         for i in df.columns:
+    #             df[i] = df[i].astype(float)
+    #         df.index = pd.to_datetime(df.index)
+    #         df = df.iloc[::-1][['4b. close (USD)', '6. market cap (USD)']]
+    #         df.rename(columns={'4b. close (USD)': 'price', '6. market cap (USD)': 'market cap'}, inplace=True)
+    #         if start_date is not None:
+    #             df = df[df.index >= pd.to_datetime(start_date)]
+    #     else:
+    #         continue
 
-    return df
 
+# ToDo: edit this code to fit in with new API call functionality assuming performance need
 def get_intraday_crypto_time_series(symbol, exchange='USD', start_time=None, end_time=None, interval='5min', output_size='compact'):
     """
     :param symbol: str, coin ticker
@@ -87,33 +125,8 @@ def get_intraday_crypto_time_series(symbol, exchange='USD', start_time=None, end
         df = df[df.index < end_time]
     return df
 
-    # # AlphaVantage doesn't have a time series for USDT, so we will pull for ETH and override the values
-    # if symbol != 'USDT':
-    #     api_url = f'https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol={symbol}&market={exchange}&apikey={API_KEY}'
-    # else:
-    #     api_url = f'https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol=ETH&market={exchange}&apikey={API_KEY}'
-    #
-    # # Get the price series formatted for the optimizer
-    # raw_df = requests.get(api_url).json()
-    # df = pd.DataFrame(raw_df['Time Series (Digital Currency Daily)']).T
-    # for i in df.columns:
-    #     df[i] = df[i].astype(float)
-    # df.index = pd.to_datetime(df.index)
-    # df = df.iloc[::-1][['4a. close (USD)', '6. market cap (USD)']]
-    # df.rename(columns={'4a. close (USD)': 'price', '6. market cap (USD)': 'market cap'}, inplace=True)
-    #
-    # # Override the market cap data and price data for USDT (we can override the whole series as we're only pulling the most recent value)
-    # if symbol == 'USDT':
-    #     # Add fake variance to USDT series to avoid singular matrix error
-    #     df['price'] = [1 + np.random.randn() * 0.0001 for i in range(df.shape[0])]
-    #     df['market cap'] = TOKEN_SUPPLY[symbol]
-    # else:
-    #     df['market cap'] = TOKEN_SUPPLY[symbol] * df['price'].iloc[-1]
-    #
-    # if start_date:
-    #     df = df[df.index >= pd.to_datetime(start_date)]
-
 # Statistics
+
 def get_covariance_matrix_time_series(df, decay_factor, window, shrinkage):
     """
     :param df: (m,n) dataframe of returns
