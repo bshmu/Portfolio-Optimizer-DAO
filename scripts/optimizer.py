@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.append(r'/Users/benjaminshmulevsky/repos/Portfolio-Optimizer-DAO/v1/') # Fix this later
+sys.path.append(r'/Users/benjaminshmulevsky/repos/Portfolio-Optimizer-DAO/') # Fix this later
 
 import numpy as np
 import pandas as pd
@@ -253,6 +253,11 @@ class BlackLittermanOptimizer(MeanVarianceOptimizer):
         :param shrinkage: applies shrinkage to EWM covariance estimate via eigenvalue spectrum fit to the Marchenko-Pastur distribution
         :return: Most recent covariance matrix estimated from historical market returns
         """
+        # for ticker in self.tickers:
+        #     print(ticker)
+        #     print(self.data[ticker])
+        #     print(self.data[ticker]['price'])
+        #     print('\n')
         price_data = pd.DataFrame({ticker: self.data[ticker]['price'] for ticker in self.tickers})
         returns_data = (price_data / price_data.shift(1)).dropna()
         covariance_matrix_ts = get_covariance_matrix_time_series(returns_data, decay_factor, window, shrinkage)
@@ -403,8 +408,8 @@ class BlackLittermanOptimizer(MeanVarianceOptimizer):
 
 # # Uncomment to create a sample BlackLittermanOptimizer object
 if __name__ == '__main__':
-    tickers = ['BTC', 'ETH', 'UNI', 'BAT']
-    views = {'BTC': (0.02, 'ETH'), 'UNI': (0.03, '')}
+    tickers = ['BTC', 'MKR', 'UNI', 'BAT']
+    views = {'BTC': (0.02, 'MKR'), 'UNI': (0.03, '')}
     views_confidences = {'BTC': 1.0, 'UNI': 1.0}
     x = BlackLittermanOptimizer(tickers, views, views_confidences)
     print('Black-Litterman Optimal Weights:', x.bl_optimal_weights)

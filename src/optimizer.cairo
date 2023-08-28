@@ -6,7 +6,7 @@ use orion::numbers::fixed_point::implementations::impl_8x23::FP8x23Impl;
 use orion::numbers::fixed_point::implementations::impl_8x23::FP8x23Sub;
 use orion::numbers::fixed_point::implementations::impl_8x23::FP8x23Mul;
 use orion::numbers::fixed_point::implementations::impl_8x23::FP8x23Div;
-use optimizer_utils::{exponential_weights, weighted_covariance, rolling_covariance, diagonalize};
+use utils::{exponential_weights, weighted_covariance, rolling_covariance, diagonalize};
 
 #[starknet::contract]
 mod BlackLittermanOptimizer {
