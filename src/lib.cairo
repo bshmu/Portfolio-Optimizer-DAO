@@ -6,7 +6,10 @@ use traits::Into;
 use array::{ArrayTrait, SpanTrait};
 use orion::operators::tensor::core::{Tensor, TensorTrait, ExtraParams};
 use orion::operators::tensor::implementations::impl_tensor_u32::{Tensor_u32};
-use utils::optimizer_utils::{exponential_weights};
+use orion::operators::tensor::implementations::impl_tensor_fp::{Tensor_fp};
+use orion::numbers::fixed_point::core::{FixedTrait, FixedType};
+use orion::numbers::fixed_point::implementations::fp8x23::core::{FP8x23Add, FP8x23Div, FP8x23Mul, FP8x23Sub, FP8x23Impl};
+use utils::optimizer_utils::{exponential_weights, diagonalize};
 
 #[test]
 #[available_gas(99999999999999999)]
@@ -31,18 +34,35 @@ fn test() {
     let extra = Option::<ExtraParams>::None(());
 
     let mut X_test = TensorTrait::<u32>::new(shape.span(), data.span(), extra);
-    // let mut X_test_rolling_cov = rolling_covariance(X_test, 97, 4);
-    // let mut X_test_cov_1 = *X_test_rolling_cov.at(0);
+    
+    // Test exponential weights
+    // let mut ex = exponential_weights(97, 5);
+    // let mut i = 0;
+    // loop {
+    //     if i == 5 {
+    //         break ();
+    //     }
+    //     let mut ex_i: u32 = *ex.data.at(i).mag;
+    //     ex_i.print();
+    //     i += 1;
+    // };
 
-    // assert(*X_test_cov_1.data.at(0) - FixedTrait::new_unscaled(527, false) < 1);
-    let mut ex = exponential_weights(97, 5);
+    // Test diagonalize
+    let mut shape1 = ArrayTrait::<u32>::new();
+    shape1.append(2);
+    let mut data1 = ArrayTrait::<FixedType>::new();
+    data1.append(FixedTrait::new_unscaled(1, false));
+    data1.append(FixedTrait::new_unscaled(2, false));
+    let mut diag_test = TensorTrait::<FixedType>::new(shape1.span(), data1.span(), extra);
+    let mut diag_out = diagonalize(diag_test);
     let mut i = 0;
     loop {
-        if i == 5 {
+        if i == 2 {
             break ();
         }
-        let mut ex_i: u32 = *ex.data.at(i).mag;
-        ex_i.print();
+        let mut diag_out_i: u32 = *diag_out.data.at(i).mag;
+        diag_out_i.print();
         i += 1;
-    };
+    }
+
 }

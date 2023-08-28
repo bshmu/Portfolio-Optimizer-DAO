@@ -9,14 +9,13 @@ mod optimizer_utils {
     use orion::operators::tensor::implementations::impl_tensor_fp::{Tensor_fp};
 
 
-    fn exponential_weights(l: u32, lambda_unscaled: u32) -> Tensor<FixedType> {
+    fn exponential_weights(lambda_unscaled: u32, l: u32) -> Tensor<FixedType> {
         // Param l (felt252): length of vector to hold weights
         // Param lambda_unscaled (u32): factor for exponential weight calculation
         // Return (Tensor<FixedType>): 1D tensor of exponentially decaying fixed-point weights of length l
         let mut lambda = FixedTrait::new_unscaled(lambda_unscaled, false) / FixedTrait::new_unscaled(100, false); 
         let mut weights_array = ArrayTrait::<FixedType>::new(); // vector to hold weights
         let mut i: u32 = 0;
-        let one: u32 = 1;
         loop {
             if i == l {
                 break ();
@@ -33,6 +32,8 @@ mod optimizer_utils {
         weights_len.append(l);
         let mut weights_tensor = TensorTrait::<FixedType>::new(weights_len.span(), weights_array.span(), Option::<ExtraParams>::None(()));
         return weights_tensor;
+
+        // TODO: check the exponential weights output -- values are not correct
     }
 
     // fn weighted_covariance(X: Tensor<FixedType>, weights: Tensor<FixedType>) -> Tensor<FixedType> {
@@ -96,41 +97,45 @@ mod optimizer_utils {
     //     return results;
     // }
 
-    // fn diagonalize(X_input: Tensor::<FixedType>) -> Tensor::<FixedType> {
-    //     // Shape
-    //     let mut X_output_shape = ArrayTrait::<u32>::new();
-    //     let n = *X_input.shape.at(1); 
-    //     let mut i_shape: u32 = 0;
-    //     loop {
-    //         if i_shape == n {
-    //             break ();
-    //         }
-    //         X_output_shape.append(n);
-    //         i_shape += 1;
-    //     };
-        
-    //     // Data
-    //     let mut X_output_data = ArrayTrait::<FixedType>::new();
-    //     let mut i = 0;
-    //     let mut j = 0;
-    //     loop {
-    //         if i == n * n {
-    //             break ();
-    //         }
-    //         if i == n * j {
-    //             X_output_data.append(*X_input.data.at(i));
-    //             j += 1;
-    //         }
-    //         else {
-    //             X_output_data.append(FixedTrait::new(8388608, false));
-    //         }
-    //         i += 1;
-    //     };
+    fn diagonalize(X_input: Tensor::<FixedType>) -> Tensor::<FixedType> {
+        // Make sure input tensor is 1D
+        assert(X_input.shape.len() == 1, "Input tensor is not 1D.");
 
-    //     // Return final diagonal matrix
-    //     let mut X_extra = Option::<ExtraParams>::None(());
-    //     return TensorTrait::<FixedType>::new(X_output_shape.span(), X_output_data.span(), X_extra);
-    // }
+        // 2D Shape for output tensor
+        let mut X_output_shape = ArrayTrait::<u32>::new();
+        let n = *X_input.shape.at(0); 
+        X_output_shape.append(n);
+        X_output_shape.append(n);
+        
+        // Data
+        let mut X_output_data = ArrayTrait::<FixedType>::new();
+        let mut i = 0;
+        let mut j = 0;
+        loop {
+            if i == n {
+                break ();
+            }
+            loop {
+                if j == n {
+                    break ();
+                }
+                if i == j {
+                    X_output_data.append(*X_input.data.at(i));
+                }
+                else {
+                    X_output_data.append(FixedTrait::new_unscaled(0, false));
+                }
+
+                j += 1;
+            };
+            i += 1;
+        };
+
+        // Return final diagonal matrix
+        let mut X_extra = Option::<ExtraParams>::None(());
+        let X_out = TensorTrait::<FixedType>::new(X_output_shape.span(), X_output_data.span(), X_extra);
+        return X_out;
+    }
 
     // fn forward_elimination(X: Tensor::<FixedType>, y: Tensor::<FixedType>) {
     //     // Forward elimination --> Transform X to upper triangular form
