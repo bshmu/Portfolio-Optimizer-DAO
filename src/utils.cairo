@@ -32,8 +32,6 @@ mod optimizer_utils {
         weights_len.append(l);
         let mut weights_tensor = TensorTrait::<FixedType>::new(weights_len.span(), weights_array.span(), Option::<ExtraParams>::None(()));
         return weights_tensor;
-
-        // TODO: check the exponential weights output -- values are not correct
     }
 
     // fn weighted_covariance(X: Tensor<FixedType>, weights: Tensor<FixedType>) -> Tensor<FixedType> {
@@ -110,11 +108,11 @@ mod optimizer_utils {
         // Data
         let mut X_output_data = ArrayTrait::<FixedType>::new();
         let mut i = 0;
-        let mut j = 0;
         loop {
             if i == n {
                 break ();
             }
+            let mut j = 0;
             loop {
                 if j == n {
                     break ();
@@ -133,8 +131,7 @@ mod optimizer_utils {
 
         // Return final diagonal matrix
         let mut X_extra = Option::<ExtraParams>::None(());
-        let X_out = TensorTrait::<FixedType>::new(X_output_shape.span(), X_output_data.span(), X_extra);
-        return X_out;
+        return TensorTrait::<FixedType>::new(X_output_shape.span(), X_output_data.span(), X_extra);
     }
 
     // fn forward_elimination(X: Tensor::<FixedType>, y: Tensor::<FixedType>) {
