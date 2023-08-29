@@ -5,6 +5,7 @@ mod optimizer_utils {
     use traits::{Into, TryInto};
     use orion::numbers::fixed_point::core::{FixedTrait, FixedType};
     use orion::numbers::fixed_point::implementations::fp8x23::core::{FP8x23Add, FP8x23Div, FP8x23Mul, FP8x23Sub, FP8x23Impl};
+    use orion::operators::tensor::math::arithmetic::arithmetic_fp::core::{add, sub, mul, div};
     use orion::operators::tensor::core::{Tensor, TensorTrait, ExtraParams};
     use orion::operators::tensor::implementations::impl_tensor_fp::{Tensor_fp};
 
@@ -34,32 +35,80 @@ mod optimizer_utils {
         return weights_tensor;
     }
 
-    // fn weighted_covariance(X: Tensor<FixedType>, weights: Tensor<FixedType>) -> Tensor<FixedType> {
-    //     // Param X (Tensor<FixedType>): 2D Tensor of data to calculate covariance, shape (m,n)
-    //     // Param weights (Tensor<FixedType>): Weights for covariance matrix
-    //     // Return (Tensor<FixedType>): 2D Tensor covariance matrix, shape (n,n)
-
-    //     // Get shape of array
-    //     let m = *X.shape.at(0); // num rows
-    //     let n = *X.shape.at(1); // num columns
-    //     let l = *weights.shape.at(0); // length of weight vector
-    //     assert(n == l, 'Data/weight length mismatch');
-
-    //     // Transform weights vector into (n,n) diagonal matrix
-    //     let mut W = diagonalize(weights);
-
-    //     // Take dot product of W and X and center it
-    //     let mut X_weighted = W.matmul(@X); // np.dot(W, X)
-    //     let mut mean_weighted = weights.matmul(@X) / weights.reduce_sum(0, false); // np.dot(weights, X) / np.sum(weights)
-    //     let mut X_centered = X_weighted - mean_weighted; //  X_weighted - mean_weighted
+    fn weighted_covariance(X: Tensor<FixedType>, weights: Tensor<FixedType>) -> Tensor<FixedType> {
+        // Param X (Tensor<FixedType>): 2D Tensor of data to calculate covariance, shape (m,n)
+        // Param weights (Tensor<FixedType>): Weights for covariance matrix
+        // Return (Tensor<FixedType>): 2D Tensor covariance matrix, shape (n,n)
         
-    //     // Calculate covariance matrix
-    //     // covariance_matrix = centered_data.T.dot(centered_data) / (np.sum(weights) - 1)
-    //     let mut X_centered_T = X_centered.transpose();
-    //     let Cov_X = X_centered_T.matmul(@X_centered) / (weights.reduce_sum(0, false) - 1);
+        // Get shape of array
+        let m = *X.shape.at(0); // num rows
+        let n = *X.shape.at(1); // num columns
+        let l = *weights.shape.at(0); // length of weight vector
+        assert(m == l, 'Data/weight length mismatch');
+
+        // Transform weights vector into (l,l) diagonal matrix
+        let mut W = diagonalize(weights);
+
+        // Take dot product of W and X and center it
+        // X_weighted = np.dot(W, X), shape = (m,m)
+        let mut X_weighted = W.matmul(@X);
+
+        // mean_weighted = (np.dot(weights, X) / np.sum(weights)), shape = (n,1)
+        let mut mean_weighted_shape = weights.shape;
+        let mut mean_weighted_data = ArrayTrait::<FixedType>::new();
+        let mut weights_T = weights.reshape(target_shape: array![1,5].span());
+        let mut weights_dot_X = weights_T.matmul(@X);
+        let mut weights_sum = *weights.reduce_sum(0, false).data.at(0);
+        let mut i: u32 = 0;
+        loop {
+            if i == *mean_weighted_shape.at(0) {
+                break ();
+            }
+            mean_weighted_data.append(*weights_dot_X.data.at(i) / weights_sum);
+            i += 1;
+        };
+        let mean_weighted = TensorTrait::<FixedType>::new(mean_weighted_shape, mean_weighted_data.span(), Option::<ExtraParams>::None(()));
+
+        // X_weighted - mean_weighted, shape = (n,n)
+        let mut X_centered_shape = X_weighted.shape;
+        let mut X_centered_data = ArrayTrait::<FixedType>::new();
+        let mut row: u32 = 0;
+        loop {
+            if row == *X_centered_shape.at(0) {
+                break ();
+            }
+            let mut row_i: u32 = 0;
+            loop {
+                if row_i == *X_centered_shape.at(0) {
+                    break ();
+                }
+                X_centered_data.append(*X_weighted.data.at(row_i) - *mean_weighted.data.at(row));
+                row_i += 1;
+            };
+            row += 1;
+        };
+        let X_centered = TensorTrait::<FixedType>::new(X_centered_shape, X_centered_data.span(), Option::<ExtraParams>::None(()));
+
+        // Calculate covariance matrix
+        // covariance_matrix = centered_data.T.dot(centered_data) / (np.sum(weights) - 1)
+        let mut X_centered_T = X_centered.transpose(axes: array![1, 0].span());
+        let mut Cov_X_num =  X_centered_T.matmul(@X_centered);
+        let mut Cov_X_den = *weights.reduce_sum(0, false).data.at(0) - FixedTrait::new_unscaled(1, false);
         
-    //     return Cov_X;
-    // }
+        let mut Cov_X_shape = Cov_X_num.shape;
+        let mut Cov_X_data = ArrayTrait::<FixedType>::new();
+        i = 0;
+        loop {
+            if (i == *Cov_X_shape.at(0) * Cov_X_shape.len()) {
+                break ();
+            }
+            Cov_X_data.append(*Cov_X_num.data.at(i) / Cov_X_den);
+            i += 1;
+        };
+        let Cov_X = TensorTrait::<FixedType>::new(Cov_X_shape, Cov_X_data.span(), Option::<ExtraParams>::None(()));
+        
+        return Cov_X;
+    }
 
     // fn rolling_covariance(df: Tensor<FixedType>, lambda: u32, w: u32) -> Array<Tensor<FixedType>> {
     //     // Get shape of data
@@ -97,17 +146,17 @@ mod optimizer_utils {
 
     fn diagonalize(X_input: Tensor::<FixedType>) -> Tensor::<FixedType> {
         // Make sure input tensor is 1D
-        assert(X_input.shape.len() == 1, "Input tensor is not 1D.");
+        assert(X_input.shape.len() == 1, 'Input tensor is not 1D.');
 
         // 2D Shape for output tensor
         let mut X_output_shape = ArrayTrait::<u32>::new();
-        let n = *X_input.shape.at(0); 
+        let n = *X_input.shape.at(0);
         X_output_shape.append(n);
-        X_output_shape.append(n);
+        X_output_shape.append(n);        
         
         // Data
         let mut X_output_data = ArrayTrait::<FixedType>::new();
-        let mut i = 0;
+        let mut i: u32 = 0;
         loop {
             if i == n {
                 break ();
@@ -123,7 +172,6 @@ mod optimizer_utils {
                 else {
                     X_output_data.append(FixedTrait::new_unscaled(0, false));
                 }
-
                 j += 1;
             };
             i += 1;
