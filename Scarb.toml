@@ -3,7 +3,7 @@ name = "Quantswain"
 version = "0.1.0"
 
 [dependencies]
-orion = { git = "https://github.com/gizatechxyz/orion" }
+orion = { git = "https://github.com/gizatechxyz/orion", rev = "17de7b8" }
 
 [scripts]
 test = "scarb cairo-test -f test"
