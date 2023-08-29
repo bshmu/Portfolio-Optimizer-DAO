@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.append(r'/Users/benjaminshmulevsky/repos/Portfolio-Optimizer-DAO/') # Fix this later
+sys.path.append(r'/Users/benjaminshmulevsky/repos/Portfolio-Optimizer-DAO/')
 
 import numpy as np
 import pandas as pd
@@ -408,9 +408,9 @@ class BlackLittermanOptimizer(MeanVarianceOptimizer):
 
 # # Uncomment to create a sample BlackLittermanOptimizer object
 if __name__ == '__main__':
-    tickers = ['BTC', 'MKR', 'UNI', 'BAT']
-    views = {'BTC': (0.02, 'MKR'), 'UNI': (0.03, '')}
-    views_confidences = {'BTC': 1.0, 'UNI': 1.0}
+    tickers = ['ETH', 'MKR', 'UNI', 'BAT']
+    views = {'ETH': (0.02, 'MKR'), 'UNI': (0.03, '')}
+    views_confidences = {'ETH': 1.0, 'UNI': 1.0}
     x = BlackLittermanOptimizer(tickers, views, views_confidences)
     print('Black-Litterman Optimal Weights:', x.bl_optimal_weights)
     print('Constrained MVO weights:', x.optimal_weights)

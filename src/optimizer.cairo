@@ -1,140 +1,143 @@
-use dict::Felt252DictTrait;
-use orion::operators::tensor::core::Tensor;
-use orion::numbers::signed_integer::i32::i32;
-use orion::numbers::fixed_point::core::{FixedTrait, FixedType};
-use orion::numbers::fixed_point::implementations::impl_8x23::FP8x23Impl;
-use orion::numbers::fixed_point::implementations::impl_8x23::FP8x23Sub;
-use orion::numbers::fixed_point::implementations::impl_8x23::FP8x23Mul;
-use orion::numbers::fixed_point::implementations::impl_8x23::FP8x23Div;
-use utils::{exponential_weights, weighted_covariance, rolling_covariance, diagonalize};
-
-#[starknet::contract]
-mod BlackLittermanOptimizer {
-    use starknet::ContractAddress;
-    use starknet::get_caller_address;
-
-    struct Storage {
-        contract_owner: ContractAddress,
-        tickers: Array::<felt252>, // total list of tickers, fixed on L1
-        views_tickers: Array::<felt252>, //subset of tickers that have views associated with them, externally set from L1
-        views: LegacyMap::<felt252, (u32, felt252)>,
-        views_confidences: LegacyMap::<felt252, u32>,
-        N: u32, // num tickers
-        K: u32, // num views
-        risk_aversion: u32,
-        tau: u32,
-        risk_free: u32,
-        cov_matrix: Array<Tensor<FixedType>>,
-        decay_factor: u32,
-        window: u32,
-        bounds: (u32, u32),
-        Q: Tensor::<FixedType>,
-        P: Tensor::<FixedType>,
-        pi: Tensor::<FixedType>,
-        omega: Tensor::<FixedType>,
-        posterior_returns: Tensor::<FixedType>,
-        posterior_covariance: Tensor::<FixedType>,
-        optimal_weights: LegacyMap::<felt252, Tensor::<FixedType>>,
-        long_only: bool
-    }
-
-    // TODO: build constructor (need to set N, K, grab tickers/views from L1 contract, build covariance matrix...)
+mod portfolio_optimizer {
+    use dict::Felt252DictTrait;
+    use orion::operators::tensor::core::Tensor;
+    use orion::numbers::signed_integer::i32::i32;
+    use orion::numbers::fixed_point::core::{FixedTrait, FixedType};
+    use orion::numbers::fixed_point::implementations::impl_8x23::FP8x23Impl;
+    use orion::numbers::fixed_point::implementations::impl_8x23::FP8x23Sub;
+    use orion::numbers::fixed_point::implementations::impl_8x23::FP8x23Mul;
+    use orion::numbers::fixed_point::implementations::impl_8x23::FP8x23Div;
+    use utils::{exponential_weights, weighted_covariance, rolling_covariance, diagonalize};
 
     // Black-Litterman Model Parameters
+    // contract_owner: ContractAddress,
+    // tickers: Array::<felt252>, // total list of tickers, fixed on L1
+    // views_tickers: Array::<felt252>, //subset of tickers that have views associated with them, externally set from L1
+    // views: LegacyMap::<felt252, (u32, felt252)>,
+    // views_confidences: LegacyMap::<felt252, u32>,
+    // N: u32, // num tickers
+    // K: u32, // num views
+    // risk_aversion: u32,
+    // tau: u32,
+    // risk_free: u32,
+    // cov_matrix: Array<Tensor<FixedType>>,
+    // decay_factor: u32,
+    // window: u32,
+    // bounds: (u32, u32),
+    // Q: Tensor::<FixedType>,
+    // P: Tensor::<FixedType>,
+    // pi: Tensor::<FixedType>,
+    // omega: Tensor::<FixedType>,
+    // posterior_returns: Tensor::<FixedType>,
+    // posterior_covariance: Tensor::<FixedType>,
+    // optimal_weights: LegacyMap::<felt252, Tensor::<FixedType>>,
+    // long_only: bool
+    
+    fn get_K(views: Array::<u32>) -> u32 {
+        // Return num of views
+        return views.len();
+    }
 
-    #[view]
-    fn parse_views() -> Tensor::<FixedType> {
-        // TODO: Return Kx1 vector of views ("Q")
-        let mut Q = Tensor::<FixedType>::new(); // it's possible inputs will be u32 and need to be converted to fixed type
+    fn get_N(data: Tensor::<u32>) -> u32 {
+        // Return length of time series
+        return *data.shape.at(0);
+    }
+
+    fn parse_views(tickers: Array::<felt252>, views: Felt252Dict<(u32, felt252)>) -> Tensor::<FixedType> {
+        // Return Kx1 vector of views ("Q")
+        let K = get_K(views);
+        let mut Q = Tensor::<FixedType>::new();
         let mut Q_shape = Array::<u32>::new();
-        Q_shape.append(self.K);
+        Q_shape.append(K);
         let mut Q_data = Array::<FixedType>::new();
-        let mut i: u32 = 0;
+        let mut i = 0;
         loop {
-            if i == self.K {
+            if i == K {
                 break ();
             }
-            Q_data.append(self.views.read(*self.tickers.at(i)));
+            let mut ticker_i = *tickers.at(i);
+            let mut view_i = *views.read(ticker_i).at(0);
+            Q_data.append(FixedTrait::new_unscaled(view_i, false));
             i += 1;
         };        
-        let mut Q_extra = Option::<ExtraParams>::None(());
-        let mut Q = TensorTrait::<FixedType>::new(Q_shape.span(), Q_data.span(), Q_extra);
+        let mut Q = TensorTrait::<FixedType>::new(Q_shape.span(), Q_data.span(), Option::<ExtraParams>::None(()));
 
-        // Security check
+        // Check shape
         assert(*Q.shape.at(0)) = K;
         return Q;
     }
 
-    #[view]
-    fn parse_picks() -> Tensor::<FixedType> {
+    fn parse_picks(tickers: Array::<felt252>, views: Felt252Dict<(u32, felt252)>) -> Tensor::<FixedType> {
         // TODO: Return KxN matrix of ("P")
         // Since each ticker needs to map to a view, we will assume 0 represents no view
         // Sample views for ['BTC', 'ETH', 'UNI', 'BAT']:  
         // {'BTC': (0.02, 'ETH'), 'UNI': (0.03, '')}
         // -> [[ 1., -1.,  0.,  0.], [ 0.,  0.,  1.,  0.]]
-        let mut P = Tensor::<FixedType>::new(); // it's possible inputs will be u32 and need to be converted to fixed type
+        let K = get_K(views);
+        let N = get_N(data);
+        let mut P = Tensor::<FixedType>::new();
+        // For filling the tensor data, we will need the matrix to be NxK, and then transpose it at the end
         let mut P_shape = Array::<u32>::new();
-        P_shape.append(self.K);
         P_shape.append(self.N);
+        P_shape.append(self.K);
+        
         let mut P_data = Array::<FixedType>::new();
-
-        let mut i: u32 = 0;
+        let mut i = 0;
         loop {
-            if i == self.K {
+            if i == K {
                 break ();
             }
-            // i = 0
-            let mut view_ticker_i = self.views_tickers.read()[i]; // 'BTC'
-            let mut view_ticker_i_index = self.get_ticker_index(view_ticker_i, self.tickers);
-            let mut view_i = self.views.read(view_ticker_i)[0]; // 0.02
-            let mut view_rel_ticker_i = self.views.read(view_ticker_i)[1]; // 'ETH'
-            let mut j: u32 = 0;
+            let mut ticker_i = *tickers.at(i);
+            let mut view_i = *views.read(ticker_i).at(0);
+            let mut view_rel_ticker_i = *views.read(view_i).at(1);
+            let mut j = 0;
             if view_rel_ticker_i == '' {
+                // If absolute view, just place a 1 at the respective index and 0 everywhere else on the row
                 loop {
-                    if j == self.N {
+                    if j == N {
                         break ();
                     }
-                    else if j == view_ticker_i_index {
-                        P_data.append(FixedTrait::new(8388608, false)); // 1 in Q8.23
+                    else if j == i {
+                        P_data.append(FixedTrait::new_unscaled(1, false));
                     }
                     else {
-                        P_data.append(FixedTrait::new(0, false));
+                        P_data.append(FixedTrait::new_unscaled(0, false));
                     }
                     j += 1;
                 };
             }
             else {
-                let mut view_rel_ticker_i_index = self.get_ticker_index(view_rel_ticker_i, self.tickers);
+                // If relative view, place a 1 at the respective index, -1 at the index of the rel ticker, 0 elsewhere
+                let mut view_rel_ticker_i_index = get_ticker_index(view_rel_ticker_i, tickers);
                 loop {
-                    if j == self.N {
+                    if j == N {
                         break ();
                     }
                     else if j == view_ticker_i_index {
-                        P_data.append(FixedTrait::new(8388608, false)); // 1 in Q8.23
+                        P_data.append(FixedTrait::new_unscaled(1, false));
                     }
                     else if j == view_rel_ticker_i_index {
-                        P_data.append(FixedTrait::new(8388608, true)); // -1 in Q8.23
+                        P_data.append(FixedTrait::new_unscaled(1, true));
                     }
                     else {
-                        P_data.append(FixedTrait::new(0, false));
+                        P_data.append(FixedTrait::new_unscaled(0, false));
                     }
                     j += 1;
                 };
             }
             i += 1;
         };
+        let mut P = TensorTrait::<FixedType>::new(P_shape.span(), P_data.span(), Option::<ExtraParams>::None(()));
+        P = P.transpose(axes: array![1, 0].span());
 
-        let mut P_extra = Option::<ExtraParams>::None(());
-        let mut P = TensorTrait::<FixedType>::new(P_shape.span(), P_data.span(), P_extra);
-
-        // Security check
+        // Check shape
         assert(*P.shape.at(0)) = K;
         assert(*P.shape.at(1)) = N;
         return P;
-
     }
 
-    #[view]
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
     fn prior_returns(market_caps: Tensor::<FixedType>) -> Tensor::<FixedType> {
         let mut market_caps = self.get_market_caps();
         let mut market_weights = market_caps / market_caps.sum();
@@ -149,7 +152,6 @@ mod BlackLittermanOptimizer {
         return pi;
     }
 
-    #[view]
     fn build_omega() -> Tensor::<FixedType> {
         // TODO: build KxK diagonal "uncertainty" matrix
         let mut i = 0;
@@ -173,7 +175,6 @@ mod BlackLittermanOptimizer {
 
     // Posterior Estimates
 
-    #[view]
     fn posterior_returns() -> Tensor::<FixedType> {
         // TODO: build Nx1 posterior estimate of returns
         let mut tau_sigma_P = self.tau * self.cov_matrix.matmul(self.P.transpose());
@@ -184,7 +185,6 @@ mod BlackLittermanOptimizer {
         return post_rets;
     }
 
-    #[view]
     fn posterior_covariance() -> Tensor::<FixedType> {
         // TODO: build NxN posterior estimate of covariance matrix
         let mut tau_sigma_P = self.tau * self.cov_matrix.matmul(self.P.transpose());
@@ -197,7 +197,6 @@ mod BlackLittermanOptimizer {
 
     // Optimal Weights
 
-    #[external]
     fn optimal_weights(long_only: bool) -> Felt252Dict<u32> {
         // TODO: calculate dictionary of optimal weights
         let mut A = self.risk_aversion * self.cov_matrix;
@@ -220,9 +219,8 @@ mod BlackLittermanOptimizer {
 
     // Helper Functions
 
-    #[view]
     fn get_ticker_index(ticker: felt252, tickers: Array::<felt252>) -> u32 {
-        let mut i: u32 = 0;
+        let mut i = 0;
         loop {
             if ticker == *tickers.at(i) {
                 break ();                
@@ -230,11 +228,6 @@ mod BlackLittermanOptimizer {
             i += 1;
         };
         return i;
-    }
-
-    #[view]
-    fn get_market_caps() -> Tensor::<FixedType> {
-        // TODO: get market caps
     }
 
 }
