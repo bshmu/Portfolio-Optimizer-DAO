@@ -2,14 +2,23 @@
 // mod optimizer;
 mod utils;
 use debug::PrintTrait;
-use traits::{Into};
+use option::OptionTrait;
 use array::{ArrayTrait, SpanTrait};
-use orion::operators::tensor::core::{Tensor, TensorTrait, ExtraParams};
-use orion::operators::tensor::implementations::impl_tensor_u32::{Tensor_u32};
-use orion::operators::tensor::implementations::impl_tensor_fp::{Tensor_fp};
-use orion::numbers::fixed_point::core::{FixedTrait, FixedType};
-use orion::numbers::fixed_point::implementations::fp8x23::core::{FP8x23Add, FP8x23Div, FP8x23Mul, FP8x23Sub, FP8x23Impl};
-use utils::optimizer_utils::{exponential_weights, diagonalize, weighted_covariance};
+use traits::{Into, TryInto};
+use orion::operators::tensor::{
+    core::{Tensor, TensorTrait, ExtraParams},
+    implementations::{
+        impl_tensor_u32::{Tensor_u32},
+        impl_tensor_fp::{Tensor_fp, FixedTypeTensorMul, FixedTypeTensorSub, FixedTypeTensorDiv}
+    },
+    math::arithmetic::arithmetic_fp::core::{add, sub, mul, div}
+};
+use orion::numbers::fixed_point::{
+    core::{FixedTrait, FixedType, FixedImpl},
+    // implementations::fp8x23::core::{FP8x23Add, FP8x23Div, FP8x23Mul, FP8x23Sub, FP8x23Impl},
+    implementations::fp16x16::core::{FP16x16Add, FP16x16Div, FP16x16Mul, FP16x16Sub, FP16x16Impl},
+};
+use utils::optimizer_utils::{exponential_weights, diagonalize, weighted_covariance, rolling_covariance};
 
 #[test]
 #[available_gas(99999999999999999)]
@@ -30,14 +39,12 @@ fn test() {
     data.append(FixedTrait::new_unscaled(87, false));
     data.append(FixedTrait::new_unscaled(61, false));
     data.append(FixedTrait::new_unscaled(10, false));
-    
 
-    let extra = Option::<ExtraParams>::None(());
-
-    let mut X_test = TensorTrait::<FixedType>::new(shape.span(), data.span(), extra);
-    let mut weights = exponential_weights(97, 5);
+    let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP16x16(()))};
+    let mut X_test = TensorTrait::<FixedType>::new(shape.span(), data.span(), Option::Some(extra));
     
     // // Test exponential weights
+    // let mut weights = exponential_weights(97, 5);
     // let mut i = 0;
     // loop {
     //     if i == 2 {
@@ -67,10 +74,10 @@ fn test() {
     // };
 
     // Test covariance
-    let cov_X = weighted_covariance(X_test, weights);
+    // let cov_X = weighted_covariance(X_test, weights);
     // let mut i = 0;
     // loop {
-    //     if i == 2 {
+    //     if i == 4 {
     //         break ();
     //     }
     //     let mut cov_X_i = *cov_X.data.at(i).mag;
@@ -78,4 +85,24 @@ fn test() {
     //     i += 1;
     // };
 
+    // Test rolling covariance
+    // let rolling = rolling_covariance(X_test, 97, 3);
+    // let mut i = 0;
+    // loop {
+    //     i.print();
+    //     if i == (rolling.len() - 1) {
+    //         break ();
+    //     }
+    //     let cov_i = *rolling.at(i);
+    //     let mut j = 0;
+    //     loop {
+    //         if j == (*cov_i.shape.at(0) * *cov_i.shape.at(1)) {
+    //             break ();
+    //         }
+    //         let mut cov_i_j = *cov_i.data.at(j).mag;
+    //         cov_i_j.print();
+    //         j += 1;
+    //     };
+    //     i += 1;
+    // };
 }

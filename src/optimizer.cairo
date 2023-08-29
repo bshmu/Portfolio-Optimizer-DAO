@@ -71,8 +71,11 @@ mod portfolio_optimizer {
         // TODO: Return KxN matrix of ("P")
         // Since each ticker needs to map to a view, we will assume 0 represents no view
         // Sample views for ['BTC', 'ETH', 'UNI', 'BAT']:  
-        // {'BTC': (0.02, 'ETH'), 'UNI': (0.03, '')}
+        // {'BTC': (0.02, 'ETH'), 'ETH': (0, '') ,'UNI': (0.03, ''), 'BAT': (0, '')}
         // -> [[ 1., -1.,  0.,  0.], [ 0.,  0.,  1.,  0.]]
+
+        // TODO: Add logic to exclude appending a row if the "view" == 0.
+
         let K = get_K(views);
         let N = get_N(data);
         let mut P = Tensor::<FixedType>::new();

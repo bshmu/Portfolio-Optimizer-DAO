@@ -3,11 +3,18 @@ mod optimizer_utils {
     use option::OptionTrait;
     use array::{ArrayTrait, SpanTrait};
     use traits::{Into, TryInto};
-    use orion::numbers::fixed_point::core::{FixedTrait, FixedType, FixedImpl};
-    use orion::numbers::fixed_point::implementations::fp8x23::core::{FP8x23Add, FP8x23Div, FP8x23Mul, FP8x23Sub, FP8x23Impl};
-    use orion::operators::tensor::math::arithmetic::arithmetic_fp::core::{add, sub, mul, div};
-    use orion::operators::tensor::core::{Tensor, TensorTrait, ExtraParams};
-    use orion::operators::tensor::implementations::impl_tensor_fp::{Tensor_fp};
+    use orion::operators::tensor::{
+        core::{Tensor, TensorTrait, ExtraParams},
+        implementations::{
+            impl_tensor_u32::{Tensor_u32},
+            impl_tensor_fp::{Tensor_fp, FixedTypeTensorMul, FixedTypeTensorSub, FixedTypeTensorDiv}
+        },
+        math::arithmetic::arithmetic_fp::core::{add, sub, mul, div}
+    };
+    use orion::numbers::fixed_point::{
+        core::{FixedTrait, FixedType, FixedImpl},
+        implementations::fp16x16::core::{FP16x16Add, FP16x16Div, FP16x16Mul, FP16x16Sub, FP16x16Impl},
+    };
 
 
     fn exponential_weights(lambda_unscaled: u32, l: u32) -> Tensor<FixedType> {
@@ -31,7 +38,7 @@ mod optimizer_utils {
         // Can shape be u32 and data be FixedType?
         let mut weights_len = ArrayTrait::<u32>::new();
         weights_len.append(l);
-        let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP8x23(()))};
+        let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP16x16(()))};
         let mut weights_tensor = TensorTrait::<FixedType>::new(weights_len.span(), weights_array.span(), Option::Some(extra));
         return weights_tensor;
     }
@@ -54,14 +61,8 @@ mod optimizer_utils {
         // X_weighted = np.dot(W, X), shape = (m,n)
         let mut X_weighted = W.matmul(@X);
 
-        let mut s1 = *X_weighted.shape.at(0);
-        let mut s2 = *X_weighted.shape.at(1);
-        'X_weighted'.print();
-        s1.print();
-        s2.print();
-
         // mean_weighted = (np.dot(weights, X) / np.sum(weights)), shape = (n,1)
-        let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP8x23(()))};
+        let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP16x16(()))};
         let mut weights_T = weights.reshape(target_shape: array![1, *weights.shape.at(0)].span());
         let mut weights_dot_X = weights_T.matmul(@X);
         let mut weights_sum = *weights.reduce_sum(0, false).data.at(0);
@@ -78,10 +79,6 @@ mod optimizer_utils {
         };
 
         let mean_weighted = TensorTrait::<FixedType>::new(mean_weighted_shape.span(), mean_weighted_data.span(), Option::Some(extra));
-
-        s1 = *mean_weighted.shape.at(0);
-        'mean_weighted'.print();
-        s1.print();
 
         // X_centered = X_weighted - mean_weighted, shape = (n,n)
         let mut X_centered_shape = ArrayTrait::<u32>::new();
@@ -105,22 +102,11 @@ mod optimizer_utils {
         };
         let X_centered = TensorTrait::<FixedType>::new(X_centered_shape.span(), X_centered_data.span(), Option::Some(extra));
 
-        s1 = *X_centered.shape.at(0);
-        s2 = *X_centered.shape.at(1);
-        'X_centered'.print();
-        s1.print();
-        s2.print();
-
         // Calculate covariance matrix
         // covariance_matrix = centered_data.T.dot(centered_data) / (np.sum(weights) - 1)
         let mut X_centered_T = X_centered.transpose(axes: array![1, 0].span());
-
-        let mut Cov_X_num =  X_centered_T.matmul(@X_centered); // FAILS HERE
-        
-        'b'.print();
+        let mut Cov_X_num =  X_centered_T.matmul(@X_centered);
         let mut Cov_X_den = *weights.reduce_sum(0, false).data.at(0) - FixedTrait::new_unscaled(1, false);
-        'c'.print();
-        
         let mut Cov_X_shape = Cov_X_num.shape;
         let mut Cov_X_data = ArrayTrait::<FixedType>::new();
         i = 0;
@@ -131,9 +117,8 @@ mod optimizer_utils {
             Cov_X_data.append(*Cov_X_num.data.at(i) / Cov_X_den);
             i += 1;
         };
-        '4'.print();
-        let Cov_X = TensorTrait::<FixedType>::new(Cov_X_shape, Cov_X_data.span(), Option::Some(extra));
         
+        let Cov_X = TensorTrait::<FixedType>::new(Cov_X_shape, Cov_X_data.span(), Option::Some(extra));
         return Cov_X;
     }
 
@@ -147,12 +132,14 @@ mod optimizer_utils {
         let m = *df.shape.at(0); // num rows
         let n = *df.shape.at(1); // num columns
         let weights = exponential_weights(lambda, w);
+        let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP16x16(()))};
 
         // Loop through the data and calculate the covariance on each subset
         let mut results = ArrayTrait::<Tensor<FixedType>>::new();
-        let mut i = 0;
+        let mut row = 0;
         loop {
-            if i == (m - w + 1) {
+            row.print();
+            if row == (m - w + 1) {
                 break ();
             }
 
@@ -161,21 +148,20 @@ mod optimizer_utils {
             subset_shape.append(w);
             subset_shape.append(n);
             let mut subset_data = ArrayTrait::<FixedType>::new();
-            let mut j = i;
+            let mut i = row * n;
             loop {
-                if j == (i + w) {
+                if i == (row + w) * n {
                     break ();
                 }
-                subset_data.append(*df.data.at(j));
-                j += 1;
+                subset_data.append(*df.data.at(i));
+                i += 1;
             };
-            let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP8x23(()))};
             let mut subset = TensorTrait::<FixedType>::new(subset_shape.span(), subset_data.span(), Option::Some(extra));
 
             // Calculate covariance matrix on the subset and append
             let mut Cov_i = weighted_covariance(subset, weights);
             results.append(Cov_i);
-            i += 1;
+            row += 1;
         };
 
         return results;
@@ -215,7 +201,7 @@ mod optimizer_utils {
         };
 
         // Return final diagonal matrix
-        let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP8x23(()))};
+        let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP16x16(()))};
         return TensorTrait::<FixedType>::new(X_output_shape.span(), X_output_data.span(), Option::Some(extra));
     }
 
