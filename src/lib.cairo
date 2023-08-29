@@ -35,8 +35,7 @@ fn test() {
     let extra = Option::<ExtraParams>::None(());
 
     let mut X_test = TensorTrait::<FixedType>::new(shape.span(), data.span(), extra);
-    // let mut weights = exponential_weights(97, 5);
-    // let mut test_val = *weights.data.at(1).mag * *X_test.data.at(1).mag; // FAILS
+    let mut weights = exponential_weights(97, 5);
     
     // // Test exponential weights
     // let mut i = 0;
@@ -67,8 +66,8 @@ fn test() {
     //     i += 1;
     // };
 
-    // // Test covariance
-    // let cov_X = weighted_covariance(X_test, weights);
+    // Test covariance
+    let cov_X = weighted_covariance(X_test, weights);
     // let mut i = 0;
     // loop {
     //     if i == 2 {

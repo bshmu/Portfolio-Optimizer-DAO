@@ -3,7 +3,7 @@ mod optimizer_utils {
     use option::OptionTrait;
     use array::{ArrayTrait, SpanTrait};
     use traits::{Into, TryInto};
-    use orion::numbers::fixed_point::core::{FixedTrait, FixedType};
+    use orion::numbers::fixed_point::core::{FixedTrait, FixedType, FixedImpl};
     use orion::numbers::fixed_point::implementations::fp8x23::core::{FP8x23Add, FP8x23Div, FP8x23Mul, FP8x23Sub, FP8x23Impl};
     use orion::operators::tensor::math::arithmetic::arithmetic_fp::core::{add, sub, mul, div};
     use orion::operators::tensor::core::{Tensor, TensorTrait, ExtraParams};
@@ -31,7 +31,8 @@ mod optimizer_utils {
         // Can shape be u32 and data be FixedType?
         let mut weights_len = ArrayTrait::<u32>::new();
         weights_len.append(l);
-        let mut weights_tensor = TensorTrait::<FixedType>::new(weights_len.span(), weights_array.span(), Option::<ExtraParams>::None(()));
+        let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP8x23(()))};
+        let mut weights_tensor = TensorTrait::<FixedType>::new(weights_len.span(), weights_array.span(), Option::Some(extra));
         return weights_tensor;
     }
 
@@ -50,36 +51,51 @@ mod optimizer_utils {
         let mut W = diagonalize(weights);
 
         // Take dot product of W and X and center it
-        // X_weighted = np.dot(W, X), shape = (m,m)
+        // X_weighted = np.dot(W, X), shape = (m,n)
         let mut X_weighted = W.matmul(@X);
 
+        let mut s1 = *X_weighted.shape.at(0);
+        let mut s2 = *X_weighted.shape.at(1);
+        'X_weighted'.print();
+        s1.print();
+        s2.print();
+
         // mean_weighted = (np.dot(weights, X) / np.sum(weights)), shape = (n,1)
-        let mut mean_weighted_shape = weights.shape;
-        let mut mean_weighted_data = ArrayTrait::<FixedType>::new();
-        let mut weights_T = weights.reshape(target_shape: array![1,5].span());
-        let mut weights_dot_X = weights_T.matmul(@X); // FAILS HERE
+        let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP8x23(()))};
+        let mut weights_T = weights.reshape(target_shape: array![1, *weights.shape.at(0)].span());
+        let mut weights_dot_X = weights_T.matmul(@X);
         let mut weights_sum = *weights.reduce_sum(0, false).data.at(0);
+        let mut mean_weighted_shape = ArrayTrait::<u32>::new();
+        mean_weighted_shape.append(*weights_dot_X.shape.at(1));
+        let mut mean_weighted_data = ArrayTrait::<FixedType>::new();
         let mut i: u32 = 0;
         loop {
-            if i == *mean_weighted_shape.at(0) {
+            if i == *weights_dot_X.shape.at(1) {
                 break ();
             }
             mean_weighted_data.append(*weights_dot_X.data.at(i) / weights_sum);
             i += 1;
         };
-        let mean_weighted = TensorTrait::<FixedType>::new(mean_weighted_shape, mean_weighted_data.span(), Option::<ExtraParams>::None(()));
 
-        // X_weighted - mean_weighted, shape = (n,n)
-        let mut X_centered_shape = X_weighted.shape;
+        let mean_weighted = TensorTrait::<FixedType>::new(mean_weighted_shape.span(), mean_weighted_data.span(), Option::Some(extra));
+
+        s1 = *mean_weighted.shape.at(0);
+        'mean_weighted'.print();
+        s1.print();
+
+        // X_centered = X_weighted - mean_weighted, shape = (n,n)
+        let mut X_centered_shape = ArrayTrait::<u32>::new();
+        X_centered_shape.append(n);
+        X_centered_shape.append(n);
         let mut X_centered_data = ArrayTrait::<FixedType>::new();
         let mut row: u32 = 0;
         loop {
-            if row == *X_centered_shape.at(0) {
+            if row == n {
                 break ();
             }
             let mut row_i: u32 = 0;
             loop {
-                if row_i == *X_centered_shape.at(0) {
+                if row_i == n {
                     break ();
                 }
                 X_centered_data.append(*X_weighted.data.at(row_i) - *mean_weighted.data.at(row));
@@ -87,13 +103,23 @@ mod optimizer_utils {
             };
             row += 1;
         };
-        let X_centered = TensorTrait::<FixedType>::new(X_centered_shape, X_centered_data.span(), Option::<ExtraParams>::None(()));
+        let X_centered = TensorTrait::<FixedType>::new(X_centered_shape.span(), X_centered_data.span(), Option::Some(extra));
+
+        s1 = *X_centered.shape.at(0);
+        s2 = *X_centered.shape.at(1);
+        'X_centered'.print();
+        s1.print();
+        s2.print();
 
         // Calculate covariance matrix
         // covariance_matrix = centered_data.T.dot(centered_data) / (np.sum(weights) - 1)
         let mut X_centered_T = X_centered.transpose(axes: array![1, 0].span());
-        let mut Cov_X_num =  X_centered_T.matmul(@X_centered);
+
+        let mut Cov_X_num =  X_centered_T.matmul(@X_centered); // FAILS HERE
+        
+        'b'.print();
         let mut Cov_X_den = *weights.reduce_sum(0, false).data.at(0) - FixedTrait::new_unscaled(1, false);
+        'c'.print();
         
         let mut Cov_X_shape = Cov_X_num.shape;
         let mut Cov_X_data = ArrayTrait::<FixedType>::new();
@@ -105,7 +131,8 @@ mod optimizer_utils {
             Cov_X_data.append(*Cov_X_num.data.at(i) / Cov_X_den);
             i += 1;
         };
-        let Cov_X = TensorTrait::<FixedType>::new(Cov_X_shape, Cov_X_data.span(), Option::<ExtraParams>::None(()));
+        '4'.print();
+        let Cov_X = TensorTrait::<FixedType>::new(Cov_X_shape, Cov_X_data.span(), Option::Some(extra));
         
         return Cov_X;
     }
@@ -142,7 +169,8 @@ mod optimizer_utils {
                 subset_data.append(*df.data.at(j));
                 j += 1;
             };
-            let mut subset = TensorTrait::<FixedType>::new(subset_shape.span(), subset_data.span(), Option::<ExtraParams>::None(()));
+            let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP8x23(()))};
+            let mut subset = TensorTrait::<FixedType>::new(subset_shape.span(), subset_data.span(), Option::Some(extra));
 
             // Calculate covariance matrix on the subset and append
             let mut Cov_i = weighted_covariance(subset, weights);
@@ -187,8 +215,8 @@ mod optimizer_utils {
         };
 
         // Return final diagonal matrix
-        let mut X_extra = Option::<ExtraParams>::None(());
-        return TensorTrait::<FixedType>::new(X_output_shape.span(), X_output_data.span(), X_extra);
+        let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP8x23(()))};
+        return TensorTrait::<FixedType>::new(X_output_shape.span(), X_output_data.span(), Option::Some(extra));
     }
 
     // fn forward_elimination(X: Tensor::<FixedType>, y: Tensor::<FixedType>) {
