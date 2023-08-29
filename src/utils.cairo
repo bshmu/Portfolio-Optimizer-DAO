@@ -11,8 +11,8 @@ mod optimizer_utils {
 
 
     fn exponential_weights(lambda_unscaled: u32, l: u32) -> Tensor<FixedType> {
-        // Param l (felt252): length of vector to hold weights
         // Param lambda_unscaled (u32): factor for exponential weight calculation
+        // Param l (felt252): length of vector to hold weights
         // Return (Tensor<FixedType>): 1D tensor of exponentially decaying fixed-point weights of length l
         let mut lambda = FixedTrait::new_unscaled(lambda_unscaled, false) / FixedTrait::new_unscaled(100, false); 
         let mut weights_array = ArrayTrait::<FixedType>::new(); // vector to hold weights
@@ -57,7 +57,7 @@ mod optimizer_utils {
         let mut mean_weighted_shape = weights.shape;
         let mut mean_weighted_data = ArrayTrait::<FixedType>::new();
         let mut weights_T = weights.reshape(target_shape: array![1,5].span());
-        let mut weights_dot_X = weights_T.matmul(@X);
+        let mut weights_dot_X = weights_T.matmul(@X); // FAILS HERE
         let mut weights_sum = *weights.reduce_sum(0, false).data.at(0);
         let mut i: u32 = 0;
         loop {
@@ -110,39 +110,48 @@ mod optimizer_utils {
         return Cov_X;
     }
 
-    // fn rolling_covariance(df: Tensor<FixedType>, lambda: u32, w: u32) -> Array<Tensor<FixedType>> {
-    //     // Get shape of data
-    //     let mut m = *df.shape.at(0); // num rows
-    //     let mut n = *df.shape.at(1); // num columns
-    //     let mut weights = exponential_weights(w);
-    //     let mut results = ArrayTrait::<Tensor<FixedType>>::new();
+    fn rolling_covariance(df: Tensor<FixedType>, lambda: u32, w: u32) -> Array<Tensor<FixedType>> {
+        // Param df (Tensor<FixedType>): time series of historical data, shape (m,n)
+        // Param lambda (u32): factor for exponential weight calculation
+        // Param w (felt252): length of rolling window
+        // Return Array<Tensor<FixedType>> -- array of rolling covariance matrices
 
-    //     // Loop through the data and calculate the covariance on each subset
-    //     let mut i = 0;
-    //     loop {
-    //         if i == (n - w + 1) {
-    //             break ();
-    //         }
+        // Get shape of data
+        let m = *df.shape.at(0); // num rows
+        let n = *df.shape.at(1); // num columns
+        let weights = exponential_weights(lambda, w);
 
-    //         // Get subset of data
-    //         let mut subset_array = ArrayTrait::<FixedType>::new();
-    //         let mut j = 0;
-    //         loop {
-    //             if j == (w - 1) {
-    //                 break ();
-    //             }
-    //             subset_array.append(*df.data.at(j));
-    //             j += 1;
-    //         };
+        // Loop through the data and calculate the covariance on each subset
+        let mut results = ArrayTrait::<Tensor<FixedType>>::new();
+        let mut i = 0;
+        loop {
+            if i == (m - w + 1) {
+                break ();
+            }
 
-    //         // Calculate covariance matrix and append
-    //         let mut Cov_i = weighted_covariance(subset, weights);
-    //         results.append(Cov_i);
-    //         i += 1;
-    //     };
+            // Get subset of data
+            let mut subset_shape = ArrayTrait::<u32>::new();
+            subset_shape.append(w);
+            subset_shape.append(n);
+            let mut subset_data = ArrayTrait::<FixedType>::new();
+            let mut j = i;
+            loop {
+                if j == (i + w) {
+                    break ();
+                }
+                subset_data.append(*df.data.at(j));
+                j += 1;
+            };
+            let mut subset = TensorTrait::<FixedType>::new(subset_shape.span(), subset_data.span(), Option::<ExtraParams>::None(()));
 
-    //     return results;
-    // }
+            // Calculate covariance matrix on the subset and append
+            let mut Cov_i = weighted_covariance(subset, weights);
+            results.append(Cov_i);
+            i += 1;
+        };
+
+        return results;
+    }
 
     fn diagonalize(X_input: Tensor::<FixedType>) -> Tensor::<FixedType> {
         // Make sure input tensor is 1D

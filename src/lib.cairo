@@ -36,19 +36,7 @@ fn test() {
 
     let mut X_test = TensorTrait::<FixedType>::new(shape.span(), data.span(), extra);
     let mut weights = exponential_weights(97, 5);
-    let mut weights_T = weights.reshape(target_shape: array![1,5].span());
-    
-    // let mut val1 = *weights.data.at(0).mag * *X_test.data.at(0).mag;
-    // let mut val2 = *weights.data.at(1).mag * *X_test.data.at(1).mag;
-    // val2.print();
-    // let mut val3 = *weights.data.at(2).mag * *X_test.data.at(2).mag;
-    // val3.print();
-    // let mut val4 = *weights.data.at(3).mag * *X_test.data.at(3).mag;
-    // val4.print();
-    // let mut val5 = *weights.data.at(4).mag * *X_test.data.at(4).mag;
-    // val5.print();
-    // let val = val1 + val2 + val3 + val4 + val5;
-    // val.print();
+    let mut test_val = *weights.data.at(1).mag * *X_test.data.at(1).mag; // FAILS
     
     // // Test exponential weights
     // let mut i = 0;
@@ -79,16 +67,16 @@ fn test() {
     //     i += 1;
     // };
 
-    // // Test covariance
-    // let cov_X = weighted_covariance(X_test, weights);
-    // let mut i = 0;
-    // loop {
-    //     if i == 2 {
-    //         break ();
-    //     }
-    //     let mut cov_X_i = *cov_X.data.at(i).mag;
-    //     cov_X_i.print();
-    //     i += 1;
-    // };
+    // Test covariance
+    let cov_X = weighted_covariance(X_test, weights);
+    let mut i = 0;
+    loop {
+        if i == 2 {
+            break ();
+        }
+        let mut cov_X_i = *cov_X.data.at(i).mag;
+        cov_X_i.print();
+        i += 1;
+    };
 
 }
