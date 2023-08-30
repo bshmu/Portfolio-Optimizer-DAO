@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 // interface of ERC20 movements/events
 interface IERC20Master {
@@ -91,12 +92,9 @@ interface IUniswapV2Factory {
     function getPair(address token0, address token1) external returns (address);
 }
 
-contract OptimizerDAO is ERC20 {
-    // May be able to delete membersTokenCount as tally is taken care of in ERC contract
-    uint public treasuryEth;
-    uint public startingEth;
-    uint public lastSnapshotEth;
-
+contract OptimizerDAO is ERC20, Ownable {
+    uint256 currentEthReserve;
+    uint256 lastSnapshotEth;
     address private constant UNISWAP_V2_ROUTER =
         0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
     address private constant WETH = 0xc778417E063141139Fce010982780140Aa0cD5Ab;
@@ -105,22 +103,6 @@ contract OptimizerDAO is ERC20 {
 
     mapping(string => address) private tokenAddresses;
     mapping(string => address) private shortTokenAddresses;
-
-    // Address's included in mappings. 1st set is the longs & 2nd is shorts
-    /**
-  address private constant WETH = 0xc778417E063141139Fce010982780140Aa0cD5Ab;
-  address private constant BAT = 0xDA5B056Cfb861282B4b59d29c9B395bcC238D29B;
-  address private constant WBTC = 0x577D296678535e4903D59A4C929B718e1D575e0A;
-  address private constant UNI = 0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984;
-  address private constant USDT = 0x2fb298bdbef468638ad6653ff8376575ea41e768;
-
-  sWETH = 0x982cd41387dd65e659279C4EFCF05c25c4B586D6
-  sBAT = 0xf760954e01e53c3f7F08733ca1dC62B14b4BF50e
-  sWBTC = 0xA18533Ba93407a54BB1bcaDB7e9f3D34e46039F9
-  sUNI = 0x95552cA5cc9f329E5376659eaD39F880307B7A13
-  sUSDT = 0x1c0b9527210B427ad9bdfF41bb3a3b78C9ceE7d9
-
-  */
 
     //
     mapping(string => uint) public assetWeightings;
@@ -147,69 +129,66 @@ contract OptimizerDAO is ERC20 {
     constructor() ERC20("Optimizer DAO Token", "ODP") {
         // On DAO creation, a vote/proposal is created which automatically creates a new one every x amount of time
         Proposal storage newProposal = proposals.push();
-        string[5] memory _tokens = ["WETH", "BAT", "WBTC", "UNI", "USDT"];
-        address[5] memory _addresses = [
-            0xc778417E063141139Fce010982780140Aa0cD5Ab,
-            0xDA5B056Cfb861282B4b59d29c9B395bcC238D29B,
-            0x577D296678535e4903D59A4C929B718e1D575e0A,
-            0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984,
-            0x2fB298BDbeF468638AD6653FF8376575ea41e768
+        string[2] memory _tokens = ["ETH", "UNI"];
+        address[2] memory _addresses = [
+            0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6,
+            0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984
         ];
 
-        string[5] memory _shortTokens = [
-            "sWETH",
-            "sBAT",
-            "sWBTC",
-            "sUNI",
-            "sUSDT"
-        ];
-        address[5] memory _shortAddresses = [
-            0x982cd41387dd65e659279C4EFCF05c25c4B586D6,
-            0xf760954e01e53c3f7F08733ca1dC62B14b4BF50e,
-            0xA18533Ba93407a54BB1bcaDB7e9f3D34e46039F9,
-            0x95552cA5cc9f329E5376659eaD39F880307B7A13,
-            0x1c0b9527210B427ad9bdfF41bb3a3b78C9ceE7d9
-        ];
+        // string[5] memory _shortTokens = [
+        //     "sWETH",
+        //     "sBAT",
+        //     "sWBTC",
+        //     "sUNI",
+        //     "sUSDT"
+        // ];
+        // address[5] memory _shortAddresses = [
+        //     0x982cd41387dd65e659279C4EFCF05c25c4B586D6,
+        //     0xf760954e01e53c3f7F08733ca1dC62B14b4BF50e,
+        //     0xA18533Ba93407a54BB1bcaDB7e9f3D34e46039F9,
+        //     0x95552cA5cc9f329E5376659eaD39F880307B7A13,
+        //     0x1c0b9527210B427ad9bdfF41bb3a3b78C9ceE7d9
+        // ];
 
         // initializes arrays with proper short/long addresses
         for (uint i = 0; i < _tokens.length; i++) {
             tokenAddresses[_tokens[i]] = _addresses[i];
-            shortTokenAddresses[_shortTokens[i]] = _shortAddresses[i];
+            // shortTokenAddresses[_shortTokens[i]] = _shortAddresses[i];
         }
     }
 
     function joinDAO() public payable {
         // Minimum buy in at 0.1 Eth
-        require(msg.value >= 100000000 gwei, "Minimum buy in is 0.1 ether");
+        require(msg.value >= 0.1 ether, "Minimum buy in is 0.1 ether");
 
-        if (treasuryEth == 0) {
+        uint256 initialBalance = address(this).balance - msg.value;
+
+        if (initialBalance == 0) {
             // If there is nothing in the treasury, provide liquidity to treasury
             // LP tokens are initially provided on a 1:1 basis
-            treasuryEth = msg.value;
-            startingEth = treasuryEth;
-
-            _mint(msg.sender, treasuryEth);
+            currentEthReserve = msg.value;
+            _mint(msg.sender, currentEthReserve * 10 ** 18);
         } else {
             // DAO members token count is diluted as more members join / add Eth
-            treasuryEth += msg.value;
-            startingEth = treasuryEth;
-            // I don't know how the proportionOfTokens and ethReserve works 
-            uint ethReserve = treasuryEth - msg.value;
-            uint proportionOfTokens = (msg.value * totalSupply()) / ethReserve;
-            _mint(msg.sender, proportionOfTokens);
+            initialBalance += msg.value;
+
+            uint previousEthBalance = initialBalance - msg.value;
+            uint proportionOfTokens = (msg.value * totalSupply()) /
+                previousEthBalance;
+            _mint(msg.sender, proportionOfTokens * 10 ** 18);
         }
     }
 
-    function leaveDAO() public {
-        uint tokenBalance = balanceOf(msg.sender);
-        require(tokenBalance > 0);
+    // function leaveDAO() public {
+    //     uint tokenBalance = balanceOf(msg.sender);
+    //     require(tokenBalance > 0);
 
-        // User gets back the relative % of the
-        uint ethToWithdraw = (tokenBalance / totalSupply()) * treasuryEth;
-        _burn(msg.sender, tokenBalance);
-        payable(msg.sender).transfer(ethToWithdraw);
-        treasuryEth -= ethToWithdraw;
-    }
+    //     // User gets back the relative % of the
+    //     uint ethToWithdraw = (tokenBalance / totalSupply()) * treasuryEth;
+    //     _burn(msg.sender, tokenBalance);
+    //     payable(msg.sender).transfer(ethToWithdraw);
+    //     treasuryEth -= ethToWithdraw;
+    // }
 
     // this function allows the user to choose token of their choice and their respective actions
     function submitVote(
