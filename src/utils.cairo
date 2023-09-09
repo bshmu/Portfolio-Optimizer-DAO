@@ -205,68 +205,142 @@ mod optimizer_utils {
         return TensorTrait::<FixedType>::new(X_output_shape.span(), X_output_data.span(), Option::Some(extra));
     }
 
-    // fn forward_elimination(X: Tensor::<FixedType>, y: Tensor::<FixedType>) {
-    //     // Forward elimination --> Transform X to upper triangular form
-    //     let n = *X.shape.at(0);
-    //     let mut row = 0;
-    //     let mut matrix = ArrayTrait::new();
-    //     loop {
-    //         if (row == n) {
-    //             break ();
-    //         }
+    fn forward_elimination(X: Tensor::<FixedType>) -> Tensor::<FixedType> {
+        // Param X (Tensor::<FixedType>): 2D tensor
+        // Returns Tensor::<FixedType> -- X in upper triangular form
 
-    //         // For each column, find the row with largest absolute value
-    //         let mut max_row = row;
-    //         let mut i = row + 1;
-    //         loop {
-    //             if (i == n) {
-    //                 break ();
-    //             }
+        // Forward elimination --> Transform X to upper triangular form
+        let n = *X.shape.at(0);
+        let mut row = 0;
+        let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP16x16(()))};
+        let mut XUT = X;
 
-    //             if (X.at(indices: !array[i, row].span()).abs() > X.at(indices: !array[max_row, row].span()).abs()) {
-    //                 max_row = i;
-    //             }
+        // Construct XUT
+        let mut XUT = loop {
+            if (row == n) {
+                break XUT;
+            }
 
-    //             i += 1;
-    //         };
+            'Row:'.print();
+            row.print();
 
-    //         // Swap the max row with the current row to make sure the largest value is on the diagonal
-    //         // need to replicate X[row], X[max_row] = X[max_row], X[row]
-    //         // How do this using Orion??
-    //         X.at(indices: !array[row].span()) = X.at(indices: !array[max_row].span());
-    //         X.at(indices: !array[max_row].span()) = X.at(indices: !array[row].span());
-    //         y.at(indices: !array[row].span()) = y.at(indices: !array[max_row].span());
-    //         y.at(indices: !array[max_row].span()) = y.at(indices: !array[row].span());
-            
+            // First loop rearranges the matrix
+            // For each column, find the row with largest absolute value
+            let mut max_row = row;
+            let mut i = row + 1;
+            max_row = loop {
+                if (i == n) {
+                    break max_row;
+                }
+                if (X.at(indices: array![i, row].span()).mag > X.at(indices: array![max_row, row].span()).mag) {
+                    max_row = i;
+                }
+                i += 1;
+            };
 
-    //         // Check for singularity
-    //         assert(X.at(indices: !array[row, row].span()) != 0, 'matrix is singular');
-            
-    //         // Eliminate values below diagonal
-    //         let mut j = row + 1;
-    //         loop {
-    //             if (j == n) {
-    //                 break ();
-    //             }
+            'Max row:'.print();
+            max_row.print();
 
-    //             let mut factor = X.at(indices: !array[j, row].span()) / X.at(indices: !array[row, row].span());
-    //             let mut k = row;
-    //             loop {
-    //                 if (k == n) {
-    //                     break ();
-    //                 }
-    //                 X.at(indices: !array[j, k].span()) -= factor * X.at(indices: !array[row, k].span());
+            // Move the max row to the top of the matrix
+            let mut XUT_intermediate_data = ArrayTrait::<FixedType>::new();
+            i = 0;
+            loop {
+                if i == n {
+                    break ();
+                }
+                let mut j = 0; 
+                loop {
+                    if j == n {
+                        break ();
+                    }
+                    if i == max_row {
+                        XUT_intermediate_data.append(X.at(indices: array![row, j].span()));
+                    }
+                    else if i == row {
+                        XUT_intermediate_data.append(X.at(indices: array![max_row, j].span()));
+                    }
+                    else {
+                        XUT_intermediate_data.append(X.at(indices: array![i, j].span()));
+                    }
+                    j += 1;
+                };
+                i += 1;
+            };
+            let mut XUT_intermediate = TensorTrait::<FixedType>::new(X.shape, XUT_intermediate_data.span(), Option::Some(extra));
 
-    //                 k += 1;
-    //             };
-    //             y.at(indices: !array[j].span()) -= factor * y.at(indices: !array[row].span());
+            // Check for singularity
+            assert(XUT_intermediate.at(indices: array![row, row].span()).mag != 0, 'matrix is singular');
 
-    //             j += 1;
-    //         };
+            // test_tensor(XUT_intermediate);
 
-    //         row += 1;
-    //     };
-    // }
+            // Remove zeros below diagonal
+            let mut XUT_final_data = ArrayTrait::<FixedType>::new();
+            i = 0;
+            loop {
+                if i == n {
+                    'len(XUT):'.print();
+                    XUT_final_data.len().print();
+                    break ();
+                }
+                else if i >= row + 1 {
+                    let mut factor = XUT_intermediate.at(indices: array![i, row].span()) / XUT_intermediate.at(indices: array![row, row].span());
+                    let mut j = 0;
+                    loop {
+                        if j == n {
+                            break ();
+                        }
+                        if j >= row {
+                            let mut val = XUT_intermediate.at(indices: array![i, j].span()) - (factor * XUT_intermediate.at(indices: array![row, j].span()));
+                            XUT_final_data.append(val);
+                        }
+                        else {
+                            XUT_final_data.append(XUT_intermediate.at(indices: array![i, j].span()));
+                        }
+                        j += 1;
+                    };
+                }
+                else {
+                    let mut j = 0;
+                    loop {
+                        if j == n {
+                            break ();
+                        }
+                        XUT_final_data.append(XUT_intermediate.at(indices: array![i, j].span()));
+                        j += 1;
+                    };
+                }
+                i += 1;
+            };
+            XUT = TensorTrait::<FixedType>::new(X.shape, XUT_final_data.span(), Option::Some(extra));
+            test_tensor(XUT);
+            row += 1;
+        };
+        return XUT;
+    }
+
+    fn test_tensor(X: Tensor::<FixedType>) {
+        'Test...'.print();
+        'Len...'.print();
+        X.data.len().print();
+        'Vals...'.print();
+        // Print x by rows
+        let mut i = 0;
+        loop {
+            if i == *X.shape.at(0) {
+                break();
+            }
+            let mut j = 0;
+            loop {
+                if j == *X.shape.at(1) {
+                    break ();
+                }
+                let mut val = X.at(indices: array![i, j].span());
+                val.mag.print();
+                j += 1;
+            };
+            i += 1;
+        };
+    }
 
     // fn back_substitution(X: Tensor::<FixedType>, y: Tensor::<FixedType>) {
     //     // Uses back substitution to solve the system for the upper triangular matrix found in forward_elimination()

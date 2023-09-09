@@ -18,30 +18,35 @@ use orion::numbers::fixed_point::{
     // implementations::fp8x23::core::{FP8x23Add, FP8x23Div, FP8x23Mul, FP8x23Sub, FP8x23Impl},
     implementations::fp16x16::core::{FP16x16Add, FP16x16Div, FP16x16Mul, FP16x16Sub, FP16x16Impl},
 };
-use utils::optimizer_utils::{exponential_weights, diagonalize, weighted_covariance, rolling_covariance};
+use utils::optimizer_utils::{exponential_weights, 
+                             diagonalize, 
+                             weighted_covariance, 
+                             rolling_covariance,
+                             forward_elimination,
+                             test_tensor};
 
 #[test]
 #[available_gas(99999999999999999)]
 fn test() {
-    // Build test 5x2 matrix with randomly generated values
-    let mut shape = ArrayTrait::<u32>::new();
-    shape.append(5);
-    shape.append(2);
-
-    let mut data = ArrayTrait::<FixedType>::new();
-    data.append(FixedTrait::new_unscaled(0, false));
-    data.append(FixedTrait::new_unscaled(46, false));
-    data.append(FixedTrait::new_unscaled(57, false));
-    data.append(FixedTrait::new_unscaled(89, false));
-    data.append(FixedTrait::new_unscaled(21, false));
-    data.append(FixedTrait::new_unscaled(63, false));
-    data.append(FixedTrait::new_unscaled(59, false));
-    data.append(FixedTrait::new_unscaled(87, false));
-    data.append(FixedTrait::new_unscaled(61, false));
-    data.append(FixedTrait::new_unscaled(10, false));
-
     let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP16x16(()))};
-    let mut X_test = TensorTrait::<FixedType>::new(shape.span(), data.span(), Option::Some(extra));
+
+    // Build test 5x2 matrix with randomly generated values
+    // let mut shape = ArrayTrait::<u32>::new();
+    // shape.append(5);
+    // shape.append(2);
+
+    // let mut data = ArrayTrait::<FixedType>::new();
+    // data.append(FixedTrait::new_unscaled(0, false));
+    // data.append(FixedTrait::new_unscaled(46, false));
+    // data.append(FixedTrait::new_unscaled(57, false));
+    // data.append(FixedTrait::new_unscaled(89, false));
+    // data.append(FixedTrait::new_unscaled(21, false));
+    // data.append(FixedTrait::new_unscaled(63, false));
+    // data.append(FixedTrait::new_unscaled(59, false));
+    // data.append(FixedTrait::new_unscaled(87, false));
+    // data.append(FixedTrait::new_unscaled(61, false));
+    // data.append(FixedTrait::new_unscaled(10, false));
+    // let mut X_test = TensorTrait::<FixedType>::new(shape.span(), data.span(), Option::Some(extra));
     
     // // Test exponential weights
     // let mut weights = exponential_weights(97, 5);
@@ -105,4 +110,25 @@ fn test() {
     //     };
     //     i += 1;
     // };
+
+    // Test forward elimination
+    // Build test 3x3 matrix
+    let mut shape = ArrayTrait::<u32>::new();
+    shape.append(3);
+    shape.append(3);
+
+    let mut data = ArrayTrait::<FixedType>::new();
+    data.append(FixedTrait::new_unscaled(2, false));
+    data.append(FixedTrait::new_unscaled(1, false));
+    data.append(FixedTrait::new_unscaled(1, true));
+    data.append(FixedTrait::new_unscaled(3, true));
+    data.append(FixedTrait::new_unscaled(1, true));
+    data.append(FixedTrait::new_unscaled(2, false));
+    data.append(FixedTrait::new_unscaled(2, true));
+    data.append(FixedTrait::new_unscaled(1, false));
+    data.append(FixedTrait::new_unscaled(2, false));
+
+    let mut X = TensorTrait::<FixedType>::new(shape.span(), data.span(), Option::Some(extra));
+    let mut XUT = forward_elimination(X);
+
 }
