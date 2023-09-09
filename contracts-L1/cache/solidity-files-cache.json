@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/byung/Desktop/productive/Developer/starknet_hackerhouse/Portfolio-Optimizer-DAO/contracts-L1/contracts/OptimizerDAO.sol": {
-      "lastModificationDate": 1693246902548,
-      "contentHash": "8e2515c34da54a156626cfac5392a73f",
+      "lastModificationDate": 1693357940886,
+      "contentHash": "693b2c2b0616945745f36dc1320c2cc3",
       "sourceName": "contracts/OptimizerDAO.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -31,7 +31,8 @@
       "imports": [
         "hardhat/console.sol",
         "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol"
+        "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
       ],
       "versionPragmas": [
         "^0.8.0"
@@ -297,6 +298,43 @@
       ],
       "artifacts": [
         "IUniswapV3SwapCallback"
+      ]
+    },
+    "/Users/byung/Desktop/productive/Developer/starknet_hackerhouse/Portfolio-Optimizer-DAO/contracts-L1/node_modules/@openzeppelin/contracts/access/Ownable.sol": {
+      "lastModificationDate": 1693247559206,
+      "contentHash": "5a20b2cad87ddb61c7a3a6af21289e28",
+      "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Ownable"
       ]
     }
   }
