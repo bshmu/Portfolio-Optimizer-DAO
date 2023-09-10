@@ -205,24 +205,53 @@ mod optimizer_utils {
         return TensorTrait::<FixedType>::new(X_output_shape.span(), X_output_data.span(), Option::Some(extra));
     }
 
-    fn forward_elimination(X: Tensor::<FixedType>) -> Tensor::<FixedType> {
+    fn forward_elimination(X: Tensor::<FixedType>, y: Tensor::<FixedType>) -> (Tensor::<FixedType>, Tensor::<FixedType>) {
         // Param X (Tensor::<FixedType>): 2D tensor
-        // Returns Tensor::<FixedType> -- X in upper triangular form
+        // Param Y (Tensor::<FixedType>): 1D tensor
+        // Returns (Tensor::<FixedType>, Tensor::<FixedType>) -- X in upper triangular form, y adjusted
 
         // Forward elimination --> Transform X to upper triangular form
         let n = *X.shape.at(0);
+        let l = *y.shape.at(0);
+        assert(n == l, 'num_rows(X) != len(y)');
         let mut row = 0;
         let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP16x16(()))};
-        let mut XUT = X;
+        
+        // Initialize XUT
+        let mut XUT_initial_data = ArrayTrait::<FixedType>::new();
+        let mut i = 0;
+        loop {
+            if i == X.data.len() {
+                break ();
+            }
+            XUT_initial_data.append(FixedTrait::new_unscaled(0, false));
+            i += 1;
+        };
+        let mut XUT = TensorTrait::<FixedType>::new(X.shape, XUT_initial_data.span(), Option::Some(extra));
+
+
+        // Initialize y_out
+        let mut y_out_initial = ArrayTrait::<FixedType>::new();
+        i = 0;
+        loop {
+            if i == l {
+                break ();
+            }
+            y_out_initial.append(FixedTrait::new_unscaled(0, false));
+            i += 1;
+        };
+        let mut y_out = TensorTrait::<FixedType>::new(y.shape, y_out_initial.span(), Option::Some(extra));
+
+        let mut Xy = (XUT, y_out);
 
         // Construct XUT
-        let mut XUT = loop {
+        Xy = loop {
             if (row == n) {
-                break XUT;
+                break Xy;
             }
 
-            'Row:'.print();
-            row.print();
+            // 'Row:'.print();
+            // row.print();
 
             // First loop rearranges the matrix
             // For each column, find the row with largest absolute value
@@ -238,8 +267,8 @@ mod optimizer_utils {
                 i += 1;
             };
 
-            'Max row:'.print();
-            max_row.print();
+            // 'Max row:'.print();
+            // max_row.print();
 
             // Move the max row to the top of the matrix
             let mut XUT_intermediate_data = ArrayTrait::<FixedType>::new();
@@ -268,18 +297,40 @@ mod optimizer_utils {
             };
             let mut XUT_intermediate = TensorTrait::<FixedType>::new(X.shape, XUT_intermediate_data.span(), Option::Some(extra));
 
+            // Rearrange the y vector
+            let mut y_out_intermediate_data = ArrayTrait::<FixedType>::new();
+            i = 0;
+            loop {
+                if i == n {
+                    break ();
+                }   
+                if i == max_row {
+                    y_out_intermediate_data.append(y.at(indices: array![row].span()));
+                }
+                else if i == row {
+                    y_out_intermediate_data.append(y.at(indices: array![max_row].span()));
+                }
+                else {
+                    y_out_intermediate_data.append(y.at(indices: array![i].span()));
+                }
+                i += 1;
+            };
+            let mut y_out_intermediate = TensorTrait::<FixedType>::new(y.shape, y_out_intermediate_data.span(), Option::Some(extra));
+
             // Check for singularity
             assert(XUT_intermediate.at(indices: array![row, row].span()).mag != 0, 'matrix is singular');
 
             // test_tensor(XUT_intermediate);
+            // test_tensor(y_out_intermediate);
 
             // Remove zeros below diagonal
             let mut XUT_final_data = ArrayTrait::<FixedType>::new();
+            let mut y_out_final_data = ArrayTrait::<FixedType>::new();
             i = 0;
             loop {
                 if i == n {
-                    'len(XUT):'.print();
-                    XUT_final_data.len().print();
+                    // 'len(XUT):'.print();
+                    // XUT_final_data.len().print();
                     break ();
                 }
                 else if i >= row + 1 {
@@ -298,6 +349,8 @@ mod optimizer_utils {
                         }
                         j += 1;
                     };
+                    let mut val_y = y_out_intermediate.at(indices: array![i].span()) - (factor * y_out_intermediate.at(indices: array![row].span()));
+                    y_out_final_data.append(val_y);
                 }
                 else {
                     let mut j = 0;
@@ -308,38 +361,19 @@ mod optimizer_utils {
                         XUT_final_data.append(XUT_intermediate.at(indices: array![i, j].span()));
                         j += 1;
                     };
+                    y_out_final_data.append(y_out_intermediate.at(indices: array![i].span()));
                 }
                 i += 1;
             };
             XUT = TensorTrait::<FixedType>::new(X.shape, XUT_final_data.span(), Option::Some(extra));
-            test_tensor(XUT);
+            y_out = TensorTrait::<FixedType>::new(y.shape, y_out_final_data.span(), Option::Some(extra));
+
+            Xy = (XUT, y_out);
+            
             row += 1;
         };
-        return XUT;
-    }
 
-    fn test_tensor(X: Tensor::<FixedType>) {
-        'Test...'.print();
-        'Len...'.print();
-        X.data.len().print();
-        'Vals...'.print();
-        // Print x by rows
-        let mut i = 0;
-        loop {
-            if i == *X.shape.at(0) {
-                break();
-            }
-            let mut j = 0;
-            loop {
-                if j == *X.shape.at(1) {
-                    break ();
-                }
-                let mut val = X.at(indices: array![i, j].span());
-                val.mag.print();
-                j += 1;
-            };
-            i += 1;
-        };
+        return Xy;
     }
 
     // fn back_substitution(X: Tensor::<FixedType>, y: Tensor::<FixedType>) {
@@ -394,4 +428,38 @@ mod optimizer_utils {
     //     return back_substitution(X, y);
     // }
 
+
+    fn test_tensor(X: Tensor::<FixedType>) {
+            // 'Test...'.print();
+            // 'Len...'.print();
+            // X.data.len().print();
+            // 'Vals...'.print();
+            // Print x by rows
+            let mut i = 0;
+            loop {
+                if i == *X.shape.at(0) {
+                    break();
+                }
+                if X.shape.len() == 1 {
+                    let mut val = X.at(indices: array![i].span());
+                    val.mag.print();
+                }
+                else if X.shape.len() == 2 {
+                    let mut j = 0;
+                    loop {
+                        if j == *X.shape.at(1) {
+                            break ();
+                        }
+                        let mut val = X.at(indices: array![i, j].span());
+                        val.mag.print();
+                        j += 1;
+                    };
+                }
+                else {
+                    'Too many dims!'.print();
+                    break ();
+                }
+                i += 1;
+            };
+        }
 }

@@ -3,9 +3,12 @@ def forward_elimination(matrix, vector, n):
     Performs forward elimination to transform matrix to upper triangular form.
     """
     for row in range(n):
-        print(f"Before iteration {row}:")
+        print(f"Matrix before iteration {row}:")
         for r in matrix:
             print(r)
+        print(f"Vector before iteration {row}:")
+        for s in vector:
+            print(s)
 
         max_row = row
         for i in range(row + 1, n):
@@ -14,9 +17,12 @@ def forward_elimination(matrix, vector, n):
         matrix[row], matrix[max_row] = matrix[max_row], matrix[row]
         vector[row], vector[max_row] = vector[max_row], vector[row]
         
-        print(f"Mid iteration {row}:")
+        print(f"Matrix mid iteration {row}:")
         for r in matrix:
             print(r)
+        print(f"Vector mid iteration {row}:")
+        for s in vector:
+            print(s)
 
         # Check for singularity
         if matrix[row][row] == 0:
@@ -28,9 +34,12 @@ def forward_elimination(matrix, vector, n):
                 matrix[i][j] -= factor * matrix[row][j]
             vector[i] -= factor * vector[row]
         
-        print(f"After iteration {row}:")
+        print(f"Matrix after iteration {row}:")
         for r in matrix:
             print(r)
+        print(f"Vector mid iteration {row}:")
+        for s in vector:
+            print(s)
         print("\n")
 
 def back_substitution(matrix, vector, n):

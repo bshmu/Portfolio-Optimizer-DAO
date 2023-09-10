@@ -127,8 +127,20 @@ fn test() {
     data.append(FixedTrait::new_unscaled(2, true));
     data.append(FixedTrait::new_unscaled(1, false));
     data.append(FixedTrait::new_unscaled(2, false));
-
     let mut X = TensorTrait::<FixedType>::new(shape.span(), data.span(), Option::Some(extra));
-    let mut XUT = forward_elimination(X);
+
+    let mut y = TensorTrait::<FixedType>::new(array![3].span(), 
+                                              array![FixedTrait::new_unscaled(8, false),
+                                                     FixedTrait::new_unscaled(11, true),
+                                                     FixedTrait::new_unscaled(3, true)].span(),
+                                              Option::Some(extra));
+
+
+    let mut Xy = forward_elimination(X, y);
+    let (XUT, y_out) = Xy;
+    'Test XUT...'.print();
+    test_tensor(XUT);
+    'Test y_out...'.print();
+    test_tensor(y_out);
 
 }
