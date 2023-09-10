@@ -3,12 +3,12 @@ def forward_elimination(matrix, vector, n):
     Performs forward elimination to transform matrix to upper triangular form.
     """
     for row in range(n):
-        print(f"Matrix before iteration {row}:")
-        for r in matrix:
-            print(r)
-        print(f"Vector before iteration {row}:")
-        for s in vector:
-            print(s)
+        # print(f"Matrix before iteration {row}:")
+        # for r in matrix:
+        #     print(r)
+        # print(f"Vector before iteration {row}:")
+        # for s in vector:
+        #     print(s)
 
         max_row = row
         for i in range(row + 1, n):
@@ -17,12 +17,12 @@ def forward_elimination(matrix, vector, n):
         matrix[row], matrix[max_row] = matrix[max_row], matrix[row]
         vector[row], vector[max_row] = vector[max_row], vector[row]
         
-        print(f"Matrix mid iteration {row}:")
-        for r in matrix:
-            print(r)
-        print(f"Vector mid iteration {row}:")
-        for s in vector:
-            print(s)
+        # print(f"Matrix mid iteration {row}:")
+        # for r in matrix:
+        #     print(r)
+        # print(f"Vector mid iteration {row}:")
+        # for s in vector:
+        #     print(s)
 
         # Check for singularity
         if matrix[row][row] == 0:
@@ -34,24 +34,32 @@ def forward_elimination(matrix, vector, n):
                 matrix[i][j] -= factor * matrix[row][j]
             vector[i] -= factor * vector[row]
         
-        print(f"Matrix after iteration {row}:")
-        for r in matrix:
-            print(r)
-        print(f"Vector mid iteration {row}:")
-        for s in vector:
-            print(s)
-        print("\n")
+        # print(f"Matrix after iteration {row}:")
+        # for r in matrix:
+        #     print(r)
+        # print(f"Vector mid iteration {row}:")
+        # for s in vector:
+        #     print(s)
+        # print("\n")
 
 def back_substitution(matrix, vector, n):
     """
     Performs back substitution to solve the system for the upper triangular matrix.
     """
+    print(matrix)
+    print(vector)
     x = [0 for _ in range(n)]
     for i in range(n - 1, -1, -1):
         x[i] = vector[i]
+        print('i=', i)
+        print('x_i:', x[i])
         for j in range(i + 1, n):
+            print('j=', j)
+            print('x_j:', x[j])
             x[i] -= matrix[i][j] * x[j]
+            print('x_i:', x[i])
         x[i] /= matrix[i][i]
+        print('x_i:', x[i])
     return x
 
 def gaussian_elimination(matrix, vector):
@@ -80,4 +88,4 @@ A = [
 b = [8, -11, -3]
 
 forward_elimination(A, b, len(b))
-
+back_substitution(A, b, len(b))

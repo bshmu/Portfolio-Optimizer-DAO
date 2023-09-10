@@ -13,7 +13,7 @@ mod optimizer_utils {
     };
     use orion::numbers::fixed_point::{
         core::{FixedTrait, FixedType, FixedImpl},
-        implementations::fp16x16::core::{FP16x16Add, FP16x16Div, FP16x16Mul, FP16x16Sub, FP16x16Impl},
+        implementations::fp16x16::core::{FP16x16Add, FP16x16Div, FP16x16DivEq, FP16x16Mul, FP16x16Sub, FP16x16SubEq, FP16x16Impl},
     };
 
 
@@ -207,7 +207,7 @@ mod optimizer_utils {
 
     fn forward_elimination(X: Tensor::<FixedType>, y: Tensor::<FixedType>) -> (Tensor::<FixedType>, Tensor::<FixedType>) {
         // Param X (Tensor::<FixedType>): 2D tensor
-        // Param Y (Tensor::<FixedType>): 1D tensor
+        // Param y (Tensor::<FixedType>): 1D tensor
         // Returns (Tensor::<FixedType>, Tensor::<FixedType>) -- X in upper triangular form, y adjusted
 
         // Forward elimination --> Transform X to upper triangular form
@@ -376,58 +376,70 @@ mod optimizer_utils {
         return Xy;
     }
 
-    // fn back_substitution(X: Tensor::<FixedType>, y: Tensor::<FixedType>) {
-    //     // Uses back substitution to solve the system for the upper triangular matrix found in forward_elimination()
+    fn back_substitution(X: Tensor::<FixedType>, y: Tensor::<FixedType>) -> Tensor::<FixedType> {
+        // Param X (Tensor::<FixedType>): 2D tensor
+        // Param y (Tensor::<FixedType>): 1D tensor
+        // Return sln (Tensor::<FixedType>): Uses back substitution to solve the system for the upper triangular matrix
 
-    //     // Initialize a tensor of zeros that will store the solutions to the system
-    //     let n = *X.shape.at(0);
-    //     let mut sln_data = ArrayTrait::new();
-    //     let mut c = 0;
-    //     loop {
-    //         if c == n {
-    //             break ();
-    //         }
-    //         sln_data.append(0);
-    //         c += 1;
-    //     };
-    //     let mut sln = TensorTrait::<u32>::new(shape: !array[n].span(), data: sln_data.span(),Option::<ExtraParams>::None(()));
+        // Initialize a tensor of zeros that will store the solutions to the system
+        let n = *X.shape.at(0);
+        let l = *y.shape.at(0);
+        assert(n == l, 'num_rows(X) != len(y)');
+        let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP16x16(()))};
 
-    //     // Backward iteration
-    //     let mut row = n;
-    //     loop {
-    //         if row == 0 {
-    //             break ();
-    //         }
+        // Initialize sln vector
+        let mut sln_data_initial = ArrayTrait::<FixedType>::new();
+        let mut c = 0;
+        loop {
+            if c == n {
+                break ();
+            }
+            sln_data_initial.append(FixedTrait::new_unscaled(0, false));
+            c += 1;
+        };
+        let mut sln = TensorTrait::<FixedType>::new(array![n].span(), sln_data_initial.span(), Option::Some(extra));
 
-    //         // Begin by assuming the solution x[row] for the current row is the corresponding value in the vector y
-    //         sln.at(indices: !array[row].span()) = y.at(indices: !array[row].span());
+        // Backward iteration
+        let mut sln_data = ArrayTrait::<FixedType>::new();
+        c = n + 1;
+        loop {
+            if c == 0 {
+                break ();
+            }
+            let mut i = c - 1;
 
-    //         // Iterate over columns to the right of the diagonal for the current row
-    //         let mut i = row + 1;
-    //         loop {
-    //             if i == n {
-    //                 break ();
-    //             }
-    //             // Subtract the product of the known solution x[i] and the matrix coefficient from the current solution x[row]
-    //             sln.at(indices: !array[row].span()) -= X.at(indices: !array[row, i].span()) * sln.at(indices: !array[i].span());
-    //         };
+            // Begin by assuming the solution sln[i] for the current row is the corresponding value in the vector y
+            let mut sln_i = y.at(indices: array![i].span());
 
-    //         // Normalize to get the actual value
-    //         sln.at(indices: !array[row].span()) /= X.at(indices: !array[row, row].span())
-    //         row -= 1;
-    //     };
+            // Iterate over columns to the right of the diagonal for the current row
+            let mut j = i + 1;
+            loop {
+                if j == n {
+                    break ();
+                }
+                // Subtract the product of the known solution sln[j] and the matrix coefficient from the current solution sln[i]
+                // How can we access previous solutions in the middle of the loop???
+                let mut val = X.at(indices: array![i, j].span()) * *sln_data.at(j - (i + 1));
+                sln_i -= val;
+            };
 
-    //     // Return the solution
-    //     return sln;
-    // }
+            // Normalize to get the actual value
+            sln_i /= X.at(indices: array![i, i].span());
+            sln_data.append(sln_i);
+            
+            c -= 1;
+        };
 
-    // fn linalg_solve(X: Tensor::<FixedType>, y: Tensor::<FixedType>) -> Tensor::<FixedType> {
-    //     // Solve the system of linear equations using Gaussian elimination
-    //     let n = *X.shape.at(0);
-    //     forward_elimination(X, y);
-    //     return back_substitution(X, y);
-    // }
+        // Return the solution
+        return sln;
+    }
 
+    fn linalg_solve(X: Tensor::<FixedType>, y: Tensor::<FixedType>) -> Tensor::<FixedType> {
+        // Solve the system of linear equations using Gaussian elimination
+        let Xy = forward_elimination(X, y);
+        let (XUT, y_out) = Xy; 
+        return back_substitution(XUT, y_out);
+    }
 
     fn test_tensor(X: Tensor::<FixedType>) {
             // 'Test...'.print();
