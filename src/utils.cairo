@@ -319,17 +319,16 @@ mod optimizer_utils {
         // TODO: Map back the vector into a tensor
     }
 
-    fn linalg<
+    fn linalg_solve<
         impl FixedDict: Felt252DictTrait<FixedType>,
         impl Vec: VecTrait<Felt252Vec<FixedType>, usize>,
         impl VecDrop: Drop<Felt252Vec<FixedType>>,
         impl VecCopy: Copy<Felt252Vec<FixedType>>,
     >(X: Tensor<FixedType>, y: Tensor<FixedType>) -> Tensor<FixedType> {
         // TODO: Map X and y to matrix and vector objects
-        
+        let n = *y.shape.at(0);
         forward_elimination(X, y, n);
         return back_substitution(X, y, n);
-
     }
 
     fn test_tensor(X: Tensor::<FixedType>) {

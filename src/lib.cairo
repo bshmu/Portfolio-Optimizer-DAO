@@ -26,6 +26,8 @@ use utils::optimizer_utils::{exponential_weights,
                              rolling_covariance,
                              Matrix,
                              forward_elimination,
+                             back_substitution,
+                             linalg_solve,
                              test_tensor};
 
 #[test]
@@ -144,7 +146,7 @@ fn test<impl TDrop: Drop<FixedType>,
     y_items.insert(2, FixedTrait::new_unscaled(3, true));
     let mut y: Felt252Vec<FixedType> = Felt252Vec {items: y_items, len: 3};
     
-
-    forward_elimination(ref X, ref y, 3);
+    let mut sol = linalg_solve(ref X, ref y, 3);
+    test_tensor(sol);
     
 }
