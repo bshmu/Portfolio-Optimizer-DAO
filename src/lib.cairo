@@ -5,6 +5,7 @@ use debug::PrintTrait;
 use option::OptionTrait;
 use array::{ArrayTrait, SpanTrait};
 use traits::{Into, TryInto};
+use dict::Felt252DictTrait;
 use orion::operators::tensor::{
     core::{Tensor, TensorTrait, ExtraParams},
     implementations::{
@@ -18,16 +19,23 @@ use orion::numbers::fixed_point::{
     // implementations::fp8x23::core::{FP8x23Add, FP8x23Div, FP8x23Mul, FP8x23Sub, FP8x23Impl},
     implementations::fp16x16::core::{FP16x16Add, FP16x16Div, FP16x16Mul, FP16x16Sub, FP16x16Impl},
 };
+use alexandria_data_structures::vec::{VecTrait, Felt252VecImpl, Felt252Vec};
 use utils::optimizer_utils::{exponential_weights, 
                              diagonalize, 
                              weighted_covariance, 
                              rolling_covariance,
+                             Matrix,
                              forward_elimination,
                              test_tensor};
 
 #[test]
 #[available_gas(99999999999999999)]
-fn test() {
+fn test<impl TDrop: Drop<FixedType>,
+        impl FixedDict: Felt252DictTrait<FixedType>,
+        impl Vec: VecTrait<Felt252Vec<FixedType>, usize>,
+        impl VecDrop: Drop<Felt252Vec<FixedType>>,
+        impl VecCopy: Copy<Felt252Vec<FixedType>>>() {
+    
     let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP16x16(()))};
 
     // Build test 5x2 matrix with randomly generated values
@@ -113,34 +121,30 @@ fn test() {
 
     // Test forward elimination
     // Build test 3x3 matrix
-    let mut shape = ArrayTrait::<u32>::new();
-    shape.append(3);
-    shape.append(3);
+    // TODO: Fix this so that we can test the new functions...
+    
+    let mut X_data_items: Felt252Dict<FixedType> = Default::default();
+    X_data_items.insert(0, FixedTrait::new_unscaled(2, false));
+    X_data_items.insert(1, FixedTrait::new_unscaled(1, false));
+    X_data_items.insert(2, FixedTrait::new_unscaled(1, true));
+    X_data_items.insert(3, FixedTrait::new_unscaled(3, true));
+    X_data_items.insert(4, FixedTrait::new_unscaled(1, true));
+    X_data_items.insert(5, FixedTrait::new_unscaled(2, false));
+    X_data_items.insert(6, FixedTrait::new_unscaled(2, true));
+    X_data_items.insert(7, FixedTrait::new_unscaled(1, false));
+    X_data_items.insert(8, FixedTrait::new_unscaled(2, false));
+    let mut X_data: Felt252Vec<FixedType> = Felt252Vec {items: X_data_items, len: 3};
+    let mut X = Matrix {rows: 3, 
+                        cols: 3, 
+                        data: X_data};
+    
+    let mut y_items: Felt252Dict<FixedType> = Default::default();
+    y_items.insert(0, FixedTrait::new_unscaled(8, false));
+    y_items.insert(1, FixedTrait::new_unscaled(11, true));
+    y_items.insert(2, FixedTrait::new_unscaled(3, true));
+    let mut y: Felt252Vec<FixedType> = Felt252Vec {items: y_items, len: 3};
+    
 
-    let mut data = ArrayTrait::<FixedType>::new();
-    data.append(FixedTrait::new_unscaled(2, false));
-    data.append(FixedTrait::new_unscaled(1, false));
-    data.append(FixedTrait::new_unscaled(1, true));
-    data.append(FixedTrait::new_unscaled(3, true));
-    data.append(FixedTrait::new_unscaled(1, true));
-    data.append(FixedTrait::new_unscaled(2, false));
-    data.append(FixedTrait::new_unscaled(2, true));
-    data.append(FixedTrait::new_unscaled(1, false));
-    data.append(FixedTrait::new_unscaled(2, false));
-    let mut X = TensorTrait::<FixedType>::new(shape.span(), data.span(), Option::Some(extra));
-
-    let mut y = TensorTrait::<FixedType>::new(array![3].span(), 
-                                              array![FixedTrait::new_unscaled(8, false),
-                                                     FixedTrait::new_unscaled(11, true),
-                                                     FixedTrait::new_unscaled(3, true)].span(),
-                                              Option::Some(extra));
-
-
-    let mut Xy = forward_elimination(X, y);
-    let (XUT, y_out) = Xy;
-    'Test XUT...'.print();
-    test_tensor(XUT);
-    'Test y_out...'.print();
-    test_tensor(y_out);
-
+    forward_elimination(ref X, ref y, 3);
+    
 }

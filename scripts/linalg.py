@@ -46,20 +46,12 @@ def back_substitution(matrix, vector, n):
     """
     Performs back substitution to solve the system for the upper triangular matrix.
     """
-    print(matrix)
-    print(vector)
     x = [0 for _ in range(n)]
     for i in range(n - 1, -1, -1):
         x[i] = vector[i]
-        print('i=', i)
-        print('x_i:', x[i])
         for j in range(i + 1, n):
-            print('j=', j)
-            print('x_j:', x[j])
             x[i] -= matrix[i][j] * x[j]
-            print('x_i:', x[i])
         x[i] /= matrix[i][i]
-        print('x_i:', x[i])
     return x
 
 def gaussian_elimination(matrix, vector):
