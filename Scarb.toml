@@ -1,9 +1,9 @@
 [package]
-name = "Portfolio Optimizer DAO"
+name = "PortfolioOptimizerDAO"
 version = "0.1.0"
 
 [dependencies]
-orion = { git = "https://github.com/gizatechxyz/orion" }
+orion = { git = "https://github.com/gizatechxyz/orion", rev="v0.1.1" }
 alexandria_math = { git = "https://github.com/keep-starknet-strange/alexandria.git" }
 
 [scripts]

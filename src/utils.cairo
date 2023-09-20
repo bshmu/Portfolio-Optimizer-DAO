@@ -4,26 +4,50 @@ mod optimizer_utils {
     use array::{ArrayTrait, SpanTrait};
     use traits::{Into, TryInto, Index};
     use dict::Felt252DictTrait;
-    use orion::operators::tensor::{
-        core::{Tensor, TensorTrait, ExtraParams},
-        implementations::{
-            impl_tensor_u32::{Tensor_u32},
-            impl_tensor_fp::{Tensor_fp, FixedTypeTensorMul, FixedTypeTensorSub, FixedTypeTensorDiv}
-        },
-        math::arithmetic::arithmetic_fp::core::{add, sub, mul, div}
-    };
-    use orion::numbers::fixed_point::{
-        core::{FixedTrait, FixedType, FixedImpl},
-        implementations::fp16x16::core::{FP16x16Add, FP16x16Div, FP16x16DivEq, FP16x16Mul, FP16x16Sub, FP16x16SubEq, FP16x16Impl},
-    };
-    use alexandria_data_structures::vec::{VecTrait, Felt252VecImpl, Felt252Vec};
+    use nullable::{NullableTrait, nullable_from_box, match_nullable, FromNullableResult};
+    use orion::operators::tensor::{Tensor, TensorTrait, FP16x16Tensor, FP16x16TensorMul, FP16x16TensorSub, FP16x16TensorDiv};
+    use orion::numbers::fixed_point::implementations::fp16x16::core::{FP16x16, FP16x16Add, FP16x16Div, FP16x16Mul, FP16x16Sub, FP16x16Impl};
+    use orion::operators::tensor::core::ravel_index;
+    use alexandria_data_structures::vec::{Felt252Vec, NullableVecImpl, NullableVec, VecTrait};
 
-    fn exponential_weights(lambda_unscaled: u32, l: u32) -> Tensor<FixedType> {
+    struct MutTensor<T> {
+        shape: Span<usize>,
+        data: NullableVec<T>,
+    } 
+
+    trait MutTensorTrait<T> {
+        fn new(shape: Span<usize>, data: NullableVec<T>) -> MutTensor<T>;
+        fn at(ref self: @MutTensor<T>, indices: Span<usize>) -> T;
+        fn set(ref self: @MutTensor<T>, indices: Span<usize>, value: T);
+        // to_tensor
+    }
+
+    impl MutTensorImpl<
+        T, impl TDrop: Drop<T>, impl TCopy: Copy<T>, impl TCopyVec: Copy<NullableVec<T>>
+    > of MutTensorTrait<T> {
+        fn new(shape: Span<usize>, data: NullableVec<T>) -> MutTensor<T> {
+            MutTensor { shape, data }
+        }
+
+        fn at(ref self: @MutTensor<T>, indices: Span<usize>) -> T {
+            assert(indices.len() == (*self.shape).len(), 'indices not match dimensions');
+            let mut data = *self.data;
+            NullableVecImpl::get(ref data, ravel_index(*self.shape, indices)).unwrap()
+        }
+
+        fn set(ref self: @MutTensor<T>, indices: Span<usize>, value: T) {
+            assert(indices.len() == (*self.shape).len(), 'indices not match dimensions');
+            let mut data = *self.data;
+            NullableVecImpl::set(ref data, ravel_index(*self.shape, indices), value)
+        }
+    }
+
+    fn exponential_weights(lambda_unscaled: u32, l: u32) -> Tensor<FP16x16> {
         // Param lambda_unscaled (u32): factor for exponential weight calculation
         // Param l (felt252): length of vector to hold weights
-        // Return (Tensor<FixedType>): 1D tensor of exponentially decaying fixed-point weights of length l
+        // Return (Tensor<FP16x16>): 1D tensor of exponentially decaying fixed-point weights of length l
         let mut lambda = FixedTrait::new_unscaled(lambda_unscaled, false) / FixedTrait::new_unscaled(100, false); 
-        let mut weights_array = ArrayTrait::<FixedType>::new(); // vector to hold weights
+        let mut weights_array = ArrayTrait::<FP16x16>::new(); // vector to hold weights
         let mut i: u32 = 0;
         loop {
             if i == l {
@@ -36,18 +60,18 @@ mod optimizer_utils {
         };
 
         // Convert the weights array into a tensor
-        // Can shape be u32 and data be FixedType?
+        // Can shape be u32 and data be FP16x16?
         let mut weights_len = ArrayTrait::<u32>::new();
         weights_len.append(l);
         let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP16x16(()))};
-        let mut weights_tensor = TensorTrait::<FixedType>::new(weights_len.span(), weights_array.span(), Option::Some(extra));
+        let mut weights_tensor = TensorTrait::<FP16x16>::new(weights_len.span(), weights_array.span(), Option::Some(extra));
         return weights_tensor;
     }
 
-    fn weighted_covariance(X: Tensor<FixedType>, weights: Tensor<FixedType>) -> Tensor<FixedType> {
-        // Param X (Tensor<FixedType>): 2D Tensor of data to calculate covariance, shape (m,n)
-        // Param weights (Tensor<FixedType>): Weights for covariance matrix
-        // Return (Tensor<FixedType>): 2D Tensor covariance matrix, shape (n,n)
+    fn weighted_covariance(X: Tensor<FP16x16>, weights: Tensor<FP16x16>) -> Tensor<FP16x16> {
+        // Param X (Tensor<FP16x16>): 2D Tensor of data to calculate covariance, shape (m,n)
+        // Param weights (Tensor<FP16x16>): Weights for covariance matrix
+        // Return (Tensor<FP16x16>): 2D Tensor covariance matrix, shape (n,n)
         
         // Get shape of array
         let m = *X.shape.at(0); // num rows
@@ -69,7 +93,7 @@ mod optimizer_utils {
         let mut weights_sum = *weights.reduce_sum(0, false).data.at(0);
         let mut mean_weighted_shape = ArrayTrait::<u32>::new();
         mean_weighted_shape.append(*weights_dot_X.shape.at(1));
-        let mut mean_weighted_data = ArrayTrait::<FixedType>::new();
+        let mut mean_weighted_data = ArrayTrait::<FP16x16>::new();
         let mut i: u32 = 0;
         loop {
             if i == *weights_dot_X.shape.at(1) {
@@ -79,13 +103,13 @@ mod optimizer_utils {
             i += 1;
         };
 
-        let mean_weighted = TensorTrait::<FixedType>::new(mean_weighted_shape.span(), mean_weighted_data.span(), Option::Some(extra));
+        let mean_weighted = TensorTrait::<FP16x16>::new(mean_weighted_shape.span(), mean_weighted_data.span(), Option::Some(extra));
 
         // X_centered = X_weighted - mean_weighted, shape = (n,n)
         let mut X_centered_shape = ArrayTrait::<u32>::new();
         X_centered_shape.append(n);
         X_centered_shape.append(n);
-        let mut X_centered_data = ArrayTrait::<FixedType>::new();
+        let mut X_centered_data = ArrayTrait::<FP16x16>::new();
         let mut row: u32 = 0;
         loop {
             if row == n {
@@ -101,7 +125,7 @@ mod optimizer_utils {
             };
             row += 1;
         };
-        let X_centered = TensorTrait::<FixedType>::new(X_centered_shape.span(), X_centered_data.span(), Option::Some(extra));
+        let X_centered = TensorTrait::<FP16x16>::new(X_centered_shape.span(), X_centered_data.span(), Option::Some(extra));
 
         // Calculate covariance matrix
         // covariance_matrix = centered_data.T.dot(centered_data) / (np.sum(weights) - 1)
@@ -109,7 +133,7 @@ mod optimizer_utils {
         let mut Cov_X_num =  X_centered_T.matmul(@X_centered);
         let mut Cov_X_den = *weights.reduce_sum(0, false).data.at(0) - FixedTrait::new_unscaled(1, false);
         let mut Cov_X_shape = Cov_X_num.shape;
-        let mut Cov_X_data = ArrayTrait::<FixedType>::new();
+        let mut Cov_X_data = ArrayTrait::<FP16x16>::new();
         i = 0;
         loop {
             if (i == *Cov_X_shape.at(0) * Cov_X_shape.len()) {
@@ -119,15 +143,15 @@ mod optimizer_utils {
             i += 1;
         };
         
-        let Cov_X = TensorTrait::<FixedType>::new(Cov_X_shape, Cov_X_data.span(), Option::Some(extra));
+        let Cov_X = TensorTrait::<FP16x16>::new(Cov_X_shape, Cov_X_data.span(), Option::Some(extra));
         return Cov_X;
     }
 
-    fn rolling_covariance(df: Tensor<FixedType>, lambda: u32, w: u32) -> Array<Tensor<FixedType>> {
-        // Param df (Tensor<FixedType>): time series of historical data, shape (m,n)
+    fn rolling_covariance(df: Tensor<FP16x16>, lambda: u32, w: u32) -> Array<Tensor<FP16x16>> {
+        // Param df (Tensor<FP16x16>): time series of historical data, shape (m,n)
         // Param lambda (u32): factor for exponential weight calculation
         // Param w (felt252): length of rolling window
-        // Return Array<Tensor<FixedType>> -- array of rolling covariance matrices
+        // Return Array<Tensor<FP16x16>> -- array of rolling covariance matrices
 
         // Get shape of data
         let m = *df.shape.at(0); // num rows
@@ -136,7 +160,7 @@ mod optimizer_utils {
         let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP16x16(()))};
 
         // Loop through the data and calculate the covariance on each subset
-        let mut results = ArrayTrait::<Tensor<FixedType>>::new();
+        let mut results = ArrayTrait::<Tensor<FP16x16>>::new();
         let mut row = 0;
         loop {
             row.print();
@@ -148,7 +172,7 @@ mod optimizer_utils {
             let mut subset_shape = ArrayTrait::<u32>::new();
             subset_shape.append(w);
             subset_shape.append(n);
-            let mut subset_data = ArrayTrait::<FixedType>::new();
+            let mut subset_data = ArrayTrait::<FP16x16>::new();
             let mut i = row * n;
             loop {
                 if i == (row + w) * n {
@@ -157,7 +181,7 @@ mod optimizer_utils {
                 subset_data.append(*df.data.at(i));
                 i += 1;
             };
-            let mut subset = TensorTrait::<FixedType>::new(subset_shape.span(), subset_data.span(), Option::Some(extra));
+            let mut subset = TensorTrait::<FP16x16>::new(subset_shape.span(), subset_data.span(), Option::Some(extra));
 
             // Calculate covariance matrix on the subset and append
             let mut Cov_i = weighted_covariance(subset, weights);
@@ -168,7 +192,7 @@ mod optimizer_utils {
         return results;
     }
 
-    fn diagonalize(X_input: Tensor::<FixedType>) -> Tensor::<FixedType> {
+    fn diagonalize(X_input: Tensor::<FP16x16>) -> Tensor::<FP16x16> {
         // Make sure input tensor is 1D
         assert(X_input.shape.len() == 1, 'Input tensor is not 1D.');
 
@@ -179,7 +203,7 @@ mod optimizer_utils {
         X_output_shape.append(n);        
         
         // Data
-        let mut X_output_data = ArrayTrait::<FixedType>::new();
+        let mut X_output_data = ArrayTrait::<FP16x16>::new();
         let mut i: u32 = 0;
         loop {
             if i == n {
@@ -203,27 +227,27 @@ mod optimizer_utils {
 
         // Return final diagonal matrix
         let extra = ExtraParams {fixed_point: Option::Some(FixedImpl::FP16x16(()))};
-        return TensorTrait::<FixedType>::new(X_output_shape.span(), X_output_data.span(), Option::Some(extra));
+        return TensorTrait::<FP16x16>::new(X_output_shape.span(), X_output_data.span(), Option::Some(extra));
     }
 
     #[derive(Copy, Drop)]
     struct Matrix<
-        impl FixedDict: Felt252DictTrait<FixedType>,
-        impl Vec: VecTrait<Felt252Vec<FixedType>, usize>,
-        impl VecDrop: Drop<Felt252Vec<FixedType>>,
-        impl VecCopy: Copy<Felt252Vec<FixedType>>,
+        impl FixedDict: Felt252DictTrait<FP16x16>,
+        impl Vec: VecTrait<NullableVec<FP16x16>, usize>,
+        impl VecDrop: Drop<NullableVec<FP16x16>>,
+        impl VecCopy: Copy<NullableVec<FP16x16>>,
     > {
         rows: usize,
         cols: usize,
-        data: Felt252Vec<FixedType>,
+        data: NullableVec<FP16x16>,
     }
 
     fn forward_elimination<
-        impl FixedDict: Felt252DictTrait<FixedType>,
-        impl Vec: VecTrait<Felt252Vec<FixedType>, usize>,
-        impl VecDrop: Drop<Felt252Vec<FixedType>>,
-        impl VecCopy: Copy<Felt252Vec<FixedType>>,
-    >(ref matrix: Matrix, ref vector: Felt252Vec<FixedType>, n: usize) {
+        impl FixedDict: Felt252DictTrait<FP16x16>,
+        impl Vec: VecTrait<NullableVec<FP16x16>, usize>,
+        impl VecDrop: Drop<NullableVec<FP16x16>>,
+        impl VecCopy: Copy<NullableVec<FP16x16>>,
+    >(ref matrix: Matrix, ref vector: NullableVec<FP16x16>, n: usize) {
         let mut row: usize = 0;
         loop {
             if row == n {
@@ -280,25 +304,27 @@ mod optimizer_utils {
     }
 
     fn back_substitution<
-        impl FixedDict: Felt252DictTrait<FixedType>,
-        impl Vec: VecTrait<Felt252Vec<FixedType>, usize>,
-        impl VecDrop: Drop<Felt252Vec<FixedType>>,
-        impl VecCopy: Copy<Felt252Vec<FixedType>>,
-    >(ref matrix: Matrix, ref vector: Felt252Vec<FixedType>, n: usize) -> Tensor<FixedType> {
-        // Initialize array of zeros
-        let mut x_items: Felt252Dict<FixedType> = Default::default();
-        let mut i = 0;
-        loop {
-            if i == n {
-                break ();
-            }
-            x_items.insert(i.into(), FixedTrait::new_unscaled(0, false));
-            i += 1;
-        };
-        let mut x: Felt252Vec<FixedType> = Felt252Vec {items: x_items, len: n};
+        impl FixedDict: Felt252DictTrait<FP16x16>,
+        impl Vec: VecTrait<NullableVec<FP16x16>, usize>,
+        impl VecDrop: Drop<NullableVec<FP16x16>>,
+        impl VecCopy: Copy<NullableVec<FP16x16>>,
+    >(ref matrix: Matrix, ref vector: NullableVec<FP16x16>, n: usize) -> Tensor<FP16x16> {
+        // // Initialize array of zeros
+        // let mut x_items: Felt252Dict<FP16x16> = Default::default();
+        // let mut i = 0;
+        // loop {
+        //     if i == n {
+        //         break ();
+        //     }
+        //     x_items.insert(i.into(), FixedTrait::new_unscaled(0, false));
+        //     i += 1;
+        // };
+        // let mut x: Felt252Vec<FP16x16> = Felt252Vec {items: x_items, len: n};
 
         // Loop through the array and assign the values
-        i = n - 1;
+        let mut x_items: Felt252Dict<Nullable<FP16x16>> = Default::default();
+        let mut x: NullableVec<FP16x16> = NullableVec {items: x_items, len: n};
+        let mut i: usize = n - 1;
         loop {
             x.set(x.at(i), vector.at(i));
             let mut j = i + 1;
@@ -306,7 +332,7 @@ mod optimizer_utils {
                 if j == n {
                     break ();
                 }
-                x.set(x.at(i - 1), matrix.data.at(i * matrix.cols + j) * x.at(j));
+                x.set(x.at(i), matrix.data.at(i * matrix.cols + j) * x.at(j));
                 j += 1;
             };
             x.set(x.at(i), x.at(i) / matrix.data.at(i * matrix.cols + i));
@@ -320,18 +346,18 @@ mod optimizer_utils {
     }
 
     fn linalg_solve<
-        impl FixedDict: Felt252DictTrait<FixedType>,
-        impl Vec: VecTrait<Felt252Vec<FixedType>, usize>,
-        impl VecDrop: Drop<Felt252Vec<FixedType>>,
-        impl VecCopy: Copy<Felt252Vec<FixedType>>,
-    >(X: Tensor<FixedType>, y: Tensor<FixedType>) -> Tensor<FixedType> {
+        impl FixedDict: Felt252DictTrait<FP16x16>,
+        impl Vec: VecTrait<Felt252Vec<FP16x16>, usize>,
+        impl VecDrop: Drop<Felt252Vec<FP16x16>>,
+        impl VecCopy: Copy<Felt252Vec<FP16x16>>,
+    >(X: Tensor<FP16x16>, y: Tensor<FP16x16>) -> Tensor<FP16x16> {
         // TODO: Map X and y to matrix and vector objects
         let n = *y.shape.at(0);
         forward_elimination(X, y, n);
         return back_substitution(X, y, n);
     }
 
-    fn test_tensor(X: Tensor::<FixedType>) {
+    fn test_tensor(X: Tensor::<FP16x16>) {
         // 'Test...'.print();
         // 'Len...'.print();
         // X.data.len().print();
@@ -366,3 +392,6 @@ mod optimizer_utils {
     }
 
 }
+
+// TODO:
+// 1) Create nullable version of the dictionary
