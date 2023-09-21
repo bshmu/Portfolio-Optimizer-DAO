@@ -9,7 +9,7 @@ use dict::Felt252DictTrait;
 use nullable::{NullableTrait, nullable_from_box, match_nullable, FromNullableResult};
 use orion::operators::tensor::{Tensor, TensorTrait, FP16x16Tensor, FP16x16TensorMul, FP16x16TensorSub, FP16x16TensorDiv};
 use orion::numbers::fixed_point::implementations::fp16x16::core::{FP16x16, FP16x16Add, FP16x16Div, FP16x16Mul, FP16x16Sub, FP16x16Impl};
-use alexandria_data_structures::vec::{VecTrait, Felt252VecImpl, Felt252Vec};
+use alexandria_data_structures::vec::{Felt252Vec, NullableVecImpl, NullableVec, VecTrait};
 // use utils::optimizer_utils::{exponential_weights, 
 //                              diagonalize, 
 //                              weighted_covariance, 
@@ -24,9 +24,9 @@ use alexandria_data_structures::vec::{VecTrait, Felt252VecImpl, Felt252Vec};
 #[available_gas(99999999999999999)]
 fn test<impl TDrop: Drop<FP16x16>,
         impl FixedDict: Felt252DictTrait<FP16x16>,
-        impl Vec: VecTrait<Felt252Vec<FP16x16>, usize>,
-        impl VecDrop: Drop<Felt252Vec<FP16x16>>,
-        impl VecCopy: Copy<Felt252Vec<FP16x16>>>() {
+        impl Vec: VecTrait<NullableVec<FP16x16>, usize>,
+        impl VecDrop: Drop<NullableVec<FP16x16>>,
+        impl VecCopy: Copy<NullableVec<FP16x16>>>() {
     
 
     // Build test 5x2 matrix with randomly generated values
@@ -113,18 +113,18 @@ fn test<impl TDrop: Drop<FP16x16>,
     // Test forward elimination
     // Build test 3x3 matrix
     // TODO: Fix this so that we can test the new functions...
-    
-    // let mut X_data_items: Felt252Dict<Nullable<FP16x16>> = Default::default();
+    let mut x_items: Felt252Dict<Nullable<FP16x16>> = Default::default();
+    let mut x: NullableVec<FP16x16> = NullableVec {items: x_items, len: 9};
 
-    // X_data_items.insert(0, NullableTrait::new(FP16x16 { mag: 2, sign: false }));
-    // X_data_items.insert(1, NullableTrait::new(FP16x16 { mag: 1, sign: false }));
-    // X_data_items.insert(2, NullableTrait::new(FP16x16 { mag: 1, sign: true }));
-    // X_data_items.insert(3, NullableTrait::new(FP16x16 { mag: 3, sign: true }));
-    // X_data_items.insert(4, NullableTrait::new(FP16x16 { mag: 1, sign: true }));
-    // X_data_items.insert(5, NullableTrait::new(FP16x16 { mag: 2, sign: false }));
-    // X_data_items.insert(6, NullableTrait::new(FP16x16 { mag: 2, sign: true }));
-    // X_data_items.insert(7, NullableTrait::new(FP16x16 { mag: 1, sign: false }));
-    // X_data_items.insert(8, NullableTrait::new(FP16x16 { mag: 2, sign: false })); 
+    // x.set(0, FP16x16 { mag: 2, sign: false });
+    // x.insert(1, NullableTrait::new(FP16x16 { mag: 1, sign: false }));
+    // x.insert(2, NullableTrait::new(FP16x16 { mag: 1, sign: true }));
+    // x.insert(3, NullableTrait::new(FP16x16 { mag: 3, sign: true }));
+    // x.insert(4, NullableTrait::new(FP16x16 { mag: 1, sign: true }));
+    // x.insert(5, NullableTrait::new(FP16x16 { mag: 2, sign: false }));
+    // x.insert(6, NullableTrait::new(FP16x16 { mag: 2, sign: true }));
+    // x.insert(7, NullableTrait::new(FP16x16 { mag: 1, sign: false }));
+    // x.insert(8, NullableTrait::new(FP16x16 { mag: 2, sign: false })); 
     
     // let val = match match_nullable(val) {
     //     FromNullableResult::Null(()) => panic_with_felt252('No value found'),

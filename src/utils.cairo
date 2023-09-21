@@ -10,35 +10,52 @@ mod optimizer_utils {
     use orion::operators::tensor::core::ravel_index;
     use alexandria_data_structures::vec::{Felt252Vec, NullableVecImpl, NullableVec, VecTrait};
 
-    struct MutTensor<T> {
+    struct MutTensor<FP16x16> {
         shape: Span<usize>,
-        data: NullableVec<T>,
+        data: NullableVec<FP16x16>,
     } 
 
-    trait MutTensorTrait<T> {
-        fn new(shape: Span<usize>, data: NullableVec<T>) -> MutTensor<T>;
-        fn at(ref self: @MutTensor<T>, indices: Span<usize>) -> T;
-        fn set(ref self: @MutTensor<T>, indices: Span<usize>, value: T);
-        // to_tensor
+    trait MutTensorTrait<FP16x16> {
+        fn new(shape: Span<usize>, data: NullableVec<FP16x16>) -> MutTensor<FP16x16>;
+        fn at(ref self: @MutTensor<FP16x16>, indices: Span<usize>) -> FP16x16;
+        fn set(ref self: @MutTensor<FP16x16>, indices: Span<usize>, value: FP16x16);
+        fn to_tensor(ref self: @MutTensor<FP16x16>, indices: Span<usize>) -> Tensor<FP16x16>;
     }
 
-    impl MutTensorImpl<
-        T, impl TDrop: Drop<T>, impl TCopy: Copy<T>, impl TCopyVec: Copy<NullableVec<T>>
-    > of MutTensorTrait<T> {
-        fn new(shape: Span<usize>, data: NullableVec<T>) -> MutTensor<T> {
+    impl NullableVecCopy of Copy<NullableVec<FP16x16>>;
+    impl NullableDictCopy of Copy<Felt252Dict<Nullable<FP16x16>>>;
+    impl MutTensorImpl<> of MutTensorTrait<FP16x16> {
+        fn new(shape: Span<usize>, data: NullableVec<FP16x16>) -> MutTensor<FP16x16> {
             MutTensor { shape, data }
         }
 
-        fn at(ref self: @MutTensor<T>, indices: Span<usize>) -> T {
-            assert(indices.len() == (*self.shape).len(), 'indices not match dimensions');
+        fn at(ref self: @MutTensor<FP16x16>, indices: Span<usize>) -> FP16x16 {
+            assert(indices.len() == (*self.shape).len(), 'Indices do not match dimensions');
             let mut data = *self.data;
             NullableVecImpl::get(ref data, ravel_index(*self.shape, indices)).unwrap()
         }
 
-        fn set(ref self: @MutTensor<T>, indices: Span<usize>, value: T) {
-            assert(indices.len() == (*self.shape).len(), 'indices not match dimensions');
+        fn set(ref self: @MutTensor<FP16x16>, indices: Span<usize>, value: FP16x16) {
+            assert(indices.len() == (*self.shape).len(), 'Indices do not match dimensions');
             let mut data = *self.data;
             NullableVecImpl::set(ref data, ravel_index(*self.shape, indices), value)
+        }
+
+        fn to_tensor(ref self: @MutTensor<FP16x16>, indices: Span<usize>) -> Tensor<FP16x16> {
+            assert(indices.len() == (*self.shape).len(), 'Indices do not match dimensions');
+            let mut tensor_data = ArrayTrait::<FP16x16>::new();
+            let mut i: u32 = 0;
+            let n = self.data.len();
+            let mut data = *self.data;
+            loop {
+                if i == n {
+                    break ();
+                }     
+                let mut val = FP16x16 { mag: data.at(i).mag, sign: data.at(i).sign };
+                tensor_data.append(val);
+                i += 1;
+            };
+            return TensorTrait::<FP16x16>::new(*self.shape, tensor_data.span());
         }
     }
 
