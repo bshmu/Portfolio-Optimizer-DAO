@@ -64,7 +64,7 @@ mod optimizer_utils {
         impl FixedDict: Felt252DictTrait<FP16x16>,
         impl Vec: VecTrait<NullableVec<FP16x16>, usize>,
         impl VecDrop: Drop<NullableVec<FP16x16>>,
-        impl VecCopy: Copy<NullableVec<FP16x16>>,
+        // impl VecCopy: Copy<NullableVec<FP16x16>>,
     > {
         rows: usize,
         cols: usize,
@@ -90,8 +90,8 @@ mod optimizer_utils {
                     break;
                 };
 
-                let lhs = matrix.data.at(i * matrix.cols + row);
-                let rhs = matrix.data.at(max_row * matrix.cols + row);
+                let mut lhs: FP16x16 = matrix.data.at(i * matrix.cols + row);
+                let mut rhs: FP16x16 = matrix.data.at(max_row * matrix.cols + row);
                 if lhs > rhs {
                     max_row = i
                 };
@@ -99,13 +99,19 @@ mod optimizer_utils {
                 i += 1;
             };
 
-            matrix.data.set(row, matrix.data.at(max_row));
-            matrix.data.set(max_row, matrix.data.at(row));
-            vector.set(row, vector.at(max_row));
-            vector.set(max_row, vector.at(row));
+            let mut matrix_new_val: FP16x16 = matrix.data.at(max_row);
+            let mut matrix_old_val: FP16x16 = matrix.data.at(row);
+            let mut vector_new_val: FP16x16 = vector.at(max_row);
+            let mut vector_old_val: FP16x16 = vector.at(row);
+
+            matrix.data.set(row, matrix_new_val);
+            matrix.data.set(max_row, matrix_old_val);
+            vector.set(row, vector_new_val);
+            vector.set(max_row, vector_old_val);
 
             // Check for singularity
-            if matrix.data.at(row * matrix.cols + row) == 0 {
+            let mut matrix_check_val: usize = row * matrix.cols + row;
+            if matrix_check_val == 0 {
                 panic(array!['Matrix is singular.'])
             }
 
@@ -123,20 +129,19 @@ mod optimizer_utils {
                     matrix.data.set(matrix.data.at(i * matrix.cols + j), matrix.data.at(i * matrix.cols + j) - (factor * matrix.data.at(row * matrix.cols + j)));
                     j += 1;
                 };
-                vector.set(vector.at(i), vector.at(i) - (factor * vector.at(row)));
+                let mut vector_set_val: FP16x16 =  vector.at(row);
+                vector.set(vector.at(i), vector.at(i) - (factor * vector_set_val));
                 i += 1;
             };
             row += 1;
         }
-
-        // TODO: Map back the vector into a tensor
     }
 
     fn back_substitution<
         impl FixedDict: Felt252DictTrait<FP16x16>,
         impl Vec: VecTrait<NullableVec<FP16x16>, usize>,
         impl VecDrop: Drop<NullableVec<FP16x16>>,
-        impl VecCopy: Copy<NullableVec<FP16x16>>,
+        // impl VecCopy: Copy<NullableVec<FP16x16>>,
     >(ref matrix: Matrix, ref vector: NullableVec<FP16x16>, n: usize) -> Tensor<FP16x16> {
 
         // Initialize the vector for the tensor data
@@ -146,16 +151,18 @@ mod optimizer_utils {
         // Loop through the array and assign the values
         let mut i: usize = n - 1;
         loop {
-            x_data.set(x_data.at(i), vector.at(i));
+            x_data.set(x_data.at(i), i);
             let mut j = i + 1;
             loop {
                 if j == n {
                     break ();
                 }
-                x_data.set(x_data.at(i), matrix.data.at(i * matrix.cols + j) * x_data.at(j));
+                let mut x_data_val_0: FP16x16 = matrix.data.at(i * matrix.cols + j) * x_data.at(j);
+                x_data.set(x_data.at(i), x_data_val_0);
                 j += 1;
             };
-            x_data.set(x_data.at(i), x_data.at(i) / matrix.data.at(i * matrix.cols + i));
+            let mut x_data_val_1: FP16x16 = x_data.at(i) / matrix.data.at(i * matrix.cols + i);
+            x_data.set(x_data.at(i), x_data_val_1);
             if i == 0 {
                 break ();
             }
@@ -163,7 +170,7 @@ mod optimizer_utils {
         };
 
         // Map back the vector into a tensor
-        let mut x_mut: @MutTensor<FP16x16> = @MutTensor {shape: array![x_data.len()].span(), data: x_data};
+        let mut x_mut: @MutTensor<FP16x16> = @MutTensor {shape: array![n].span(), data: x_data};
         let x = x_mut.to_tensor(indices: *x_mut.shape);
         return x;
     }
@@ -174,10 +181,37 @@ mod optimizer_utils {
         impl VecDrop: Drop<Felt252Vec<FP16x16>>,
         impl VecCopy: Copy<Felt252Vec<FP16x16>>,
     >(X: Tensor<FP16x16>, y: Tensor<FP16x16>) -> Tensor<FP16x16> {
-        // TODO: Map X and y to matrix and vector objects
+
+        // Assert X and y are the same length
+        let n = *X.shape.at(0);
+        assert(n == *y.shape.at(0), 'Matrix/vector dim mismatch');
+        
+        // Map X and y to Matrix and NullableVec objexts
+        let mut x_items: Felt252Dict<Nullable<FP16x16>> = Default::default();
+        let mut x_data: NullableVec<FP16x16> = NullableVec {items: x_items, len: n};
+        let mut y_items: Felt252Dict<Nullable<FP16x16>> = Default::default();
+        let mut y_data: NullableVec<FP16x16> = NullableVec {items: y_items, len: n};
+        let mut i: usize = 0;
+        loop {
+            if i == n {
+                break ();
+            }
+            let mut j: usize = 0;
+            loop {
+                if j == n {
+                    break ();
+                }
+                x_data.set(i, *X.data.at(i));
+                j += 1;
+            };
+            y_data.set(i, *y.data.at(i));
+            i += 1;
+        };
+        let mut X_matrix = Matrix {rows: n, cols: n, data: x_data};
+
         let n = *y.shape.at(0);
-        forward_elimination(X, y, n);
-        return back_substitution(X, y, n);
+        forward_elimination(ref X_matrix, ref y_data, n);
+        return back_substitution(ref X_matrix, ref y_data, n);
     }
 
     fn test_tensor(X: Tensor::<FP16x16>) {
