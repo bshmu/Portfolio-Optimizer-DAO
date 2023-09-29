@@ -5,43 +5,46 @@ mod optimizer_utils {
     use traits::{Into, TryInto, Index};
     use dict::Felt252DictTrait;
     use nullable::{NullableTrait, nullable_from_box, match_nullable, FromNullableResult};
-    use orion::operators::tensor::{Tensor, TensorTrait, FP16x16Tensor, FP16x16TensorMul, FP16x16TensorSub, FP16x16TensorDiv};
-    use orion::numbers::fixed_point::implementations::fp16x16::core::{FP16x16, FP16x16Add, FP16x16Div, FP16x16Mul, FP16x16Sub, FP16x16Impl};
+    use orion::operators::tensor::{
+        Tensor, TensorTrait, FP16x16Tensor, FP16x16TensorMul, FP16x16TensorSub, FP16x16TensorDiv
+    };
+    use orion::numbers::fixed_point::implementations::fp16x16::core::{
+        FP16x16, FP16x16Add, FP16x16Div, FP16x16Mul, FP16x16Sub, FP16x16Impl
+    };
     use orion::operators::tensor::core::ravel_index;
     use alexandria_data_structures::vec::{Felt252Vec, NullableVecImpl, NullableVec, VecTrait};
 
-    struct MutTensor<FP16x16> {
-        shape: Span<usize>,
-        data: NullableVec<FP16x16>,
-    } 
 
-    trait MutTensorTrait<FP16x16> {
-        fn new(shape: Span<usize>, data: NullableVec<FP16x16>) -> MutTensor<FP16x16>;
-        fn at(ref self: @MutTensor<FP16x16>, indices: Span<usize>) -> FP16x16;
-        fn set(ref self: @MutTensor<FP16x16>, indices: Span<usize>, value: FP16x16);
-        fn to_tensor(ref self: @MutTensor<FP16x16>, indices: Span<usize>) -> Tensor<FP16x16>;
-    }
-
+    impl Felt252DictNullableDrop of Drop<Felt252Dict<Nullable<FP16x16>>>;
+    impl MutTensorDrop of Drop<MutTensor>;
+    impl NullableVecDrop of Drop<NullableVec<FP16x16>>;
     impl NullableVecCopy of Copy<NullableVec<FP16x16>>;
     impl NullableDictCopy of Copy<Felt252Dict<Nullable<FP16x16>>>;
-    impl MutTensorImpl<> of MutTensorTrait<FP16x16> {
-        fn new(shape: Span<usize>, data: NullableVec<FP16x16>) -> MutTensor<FP16x16> {
+
+    struct MutTensor {
+        shape: Span<usize>,
+        data: NullableVec<FP16x16>,
+    }
+
+    #[generate_trait]
+    impl FP16x16MutTensorImpl of MutTensorTrait {
+        fn new(shape: Span<usize>, data: NullableVec<FP16x16>) -> MutTensor {
             MutTensor { shape, data }
         }
 
-        fn at(ref self: @MutTensor<FP16x16>, indices: Span<usize>) -> FP16x16 {
+        fn at(ref self: @MutTensor, indices: Span<usize>) -> FP16x16 {
             assert(indices.len() == (*self.shape).len(), 'Indices do not match dimensions');
             let mut data = *self.data;
             NullableVecImpl::get(ref data, ravel_index(*self.shape, indices)).unwrap()
         }
 
-        fn set(ref self: @MutTensor<FP16x16>, indices: Span<usize>, value: FP16x16) {
+        fn set(ref self: @MutTensor, indices: Span<usize>, value: FP16x16) {
             assert(indices.len() == (*self.shape).len(), 'Indices do not match dimensions');
             let mut data = *self.data;
             NullableVecImpl::set(ref data, ravel_index(*self.shape, indices), value)
         }
 
-        fn to_tensor(ref self: @MutTensor<FP16x16>, indices: Span<usize>) -> Tensor<FP16x16> {
+        fn to_tensor(ref self: @MutTensor, indices: Span<usize>) -> Tensor<FP16x16> {
             assert(indices.len() == (*self.shape).len(), 'Indices do not match dimensions');
             let mut tensor_data = ArrayTrait::<FP16x16>::new();
             let mut i: u32 = 0;
@@ -59,24 +62,19 @@ mod optimizer_utils {
         }
     }
 
+
     #[derive(Copy, Drop)]
-    struct Matrix<
-        impl FixedDict: Felt252DictTrait<FP16x16>,
-        impl Vec: VecTrait<NullableVec<FP16x16>, usize>,
-        impl VecDrop: Drop<NullableVec<FP16x16>>,
-        // impl VecCopy: Copy<NullableVec<FP16x16>>,
-    > {
+    struct Matrix {
         rows: usize,
         cols: usize,
         data: NullableVec<FP16x16>,
     }
 
     fn forward_elimination<
-        impl FixedDict: Felt252DictTrait<FP16x16>,
-        impl Vec: VecTrait<NullableVec<FP16x16>, usize>,
-        impl VecDrop: Drop<NullableVec<FP16x16>>,
-        impl VecCopy: Copy<NullableVec<FP16x16>>,
-    >(ref matrix: Matrix, ref vector: NullableVec<FP16x16>, n: usize) {
+        impl FixedDict: Felt252DictTrait<FP16x16>, impl Vec: VecTrait<NullableVec<FP16x16>, usize>,
+    >(
+        ref matrix: Matrix, ref vector: NullableVec<FP16x16>, n: usize
+    ) {
         let mut row: usize = 0;
         loop {
             if row == n {
@@ -120,16 +118,23 @@ mod optimizer_utils {
                 if i == n {
                     break;
                 };
-                let factor = matrix.data.at(i * matrix.cols + row) / matrix.data.at(row * matrix.cols + row);
+                let factor = matrix.data.at(i * matrix.cols + row)
+                    / matrix.data.at(row * matrix.cols + row);
                 let mut j = row;
                 loop {
                     if j == n {
                         break;
                     }
-                    matrix.data.set(matrix.data.at(i * matrix.cols + j), matrix.data.at(i * matrix.cols + j) - (factor * matrix.data.at(row * matrix.cols + j)));
+                    matrix
+                        .data
+                        .set(
+                            matrix.data.at(i * matrix.cols + j),
+                            matrix.data.at(i * matrix.cols + j)
+                                - (factor * matrix.data.at(row * matrix.cols + j))
+                        );
                     j += 1;
                 };
-                let mut vector_set_val: FP16x16 =  vector.at(row);
+                let mut vector_set_val: FP16x16 = vector.at(row);
                 vector.set(vector.at(i), vector.at(i) - (factor * vector_set_val));
                 i += 1;
             };
@@ -138,15 +143,13 @@ mod optimizer_utils {
     }
 
     fn back_substitution<
-        impl FixedDict: Felt252DictTrait<FP16x16>,
-        impl Vec: VecTrait<NullableVec<FP16x16>, usize>,
-        impl VecDrop: Drop<NullableVec<FP16x16>>,
-        // impl VecCopy: Copy<NullableVec<FP16x16>>,
-    >(ref matrix: Matrix, ref vector: NullableVec<FP16x16>, n: usize) -> Tensor<FP16x16> {
-
+        impl FixedDict: Felt252DictTrait<FP16x16>, impl Vec: VecTrait<NullableVec<FP16x16>, usize>,
+    >(
+        ref matrix: Matrix, ref vector: NullableVec<FP16x16>, n: usize
+    ) -> Tensor<FP16x16> {
         // Initialize the vector for the tensor data
         let mut x_items: Felt252Dict<Nullable<FP16x16>> = Default::default();
-        let mut x_data: NullableVec<FP16x16> = NullableVec {items: x_items, len: n};
+        let mut x_data: NullableVec<FP16x16> = NullableVec { items: x_items, len: n };
 
         // Loop through the array and assign the values
         let mut i: usize = n - 1;
@@ -166,31 +169,29 @@ mod optimizer_utils {
             if i == 0 {
                 break ();
             }
-            i -= 1;   
+            i -= 1;
         };
 
         // Map back the vector into a tensor
-        let mut x_mut: @MutTensor<FP16x16> = @MutTensor {shape: array![n].span(), data: x_data};
+        let mut x_mut: @MutTensor = @MutTensor { shape: array![n].span(), data: x_data };
         let x = x_mut.to_tensor(indices: *x_mut.shape);
         return x;
     }
 
     fn linalg_solve<
-        impl FixedDict: Felt252DictTrait<FP16x16>,
-        impl Vec: VecTrait<Felt252Vec<FP16x16>, usize>,
-        impl VecDrop: Drop<Felt252Vec<FP16x16>>,
-        impl VecCopy: Copy<Felt252Vec<FP16x16>>,
-    >(X: Tensor<FP16x16>, y: Tensor<FP16x16>) -> Tensor<FP16x16> {
-
+        impl FixedDict: Felt252DictTrait<FP16x16>, impl Vec: VecTrait<NullableVec<FP16x16>, usize>,
+    >(
+        X: Tensor<FP16x16>, y: Tensor<FP16x16>
+    ) -> Tensor<FP16x16> {
         // Assert X and y are the same length
         let n = *X.shape.at(0);
         assert(n == *y.shape.at(0), 'Matrix/vector dim mismatch');
-        
+
         // Map X and y to Matrix and NullableVec objexts
         let mut x_items: Felt252Dict<Nullable<FP16x16>> = Default::default();
-        let mut x_data: NullableVec<FP16x16> = NullableVec {items: x_items, len: n};
+        let mut x_data: NullableVec<FP16x16> = NullableVec { items: x_items, len: n };
         let mut y_items: Felt252Dict<Nullable<FP16x16>> = Default::default();
-        let mut y_data: NullableVec<FP16x16> = NullableVec {items: y_items, len: n};
+        let mut y_data: NullableVec<FP16x16> = NullableVec { items: y_items, len: n };
         let mut i: usize = 0;
         loop {
             if i == n {
@@ -207,7 +208,7 @@ mod optimizer_utils {
             y_data.set(i, *y.data.at(i));
             i += 1;
         };
-        let mut X_matrix = Matrix {rows: n, cols: n, data: x_data};
+        let mut X_matrix = Matrix { rows: n, cols: n, data: x_data };
 
         let n = *y.shape.at(0);
         forward_elimination(ref X_matrix, ref y_data, n);
@@ -224,13 +225,12 @@ mod optimizer_utils {
         let mut i = 0;
         loop {
             if i == *X.shape.at(0) {
-                break();
+                break ();
             }
             if X.shape.len() == 1 {
                 let mut val = X.at(indices: array![i].span());
                 val.mag.print();
-            }
-            else if X.shape.len() == 2 {
+            } else if X.shape.len() == 2 {
                 let mut j = 0;
                 loop {
                     if j == *X.shape.at(1) {
@@ -240,13 +240,11 @@ mod optimizer_utils {
                     val.mag.print();
                     j += 1;
                 };
-            }
-            else {
+            } else {
                 'Too many dims!'.print();
                 break ();
             }
             i += 1;
         };
     }
-
 }
