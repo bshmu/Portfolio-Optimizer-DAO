@@ -1,0 +1,1082 @@
+type felt252 = felt252 [storable: true, drop: true, dup: true, zero_sized: false];
+type u32 = u32 [storable: true, drop: true, dup: true, zero_sized: false];
+type Unit = Struct<ut@Tuple> [storable: true, drop: true, dup: true, zero_sized: true];
+type core::option::Option::<core::integer::u32> = Enum<ut@core::option::Option::<core::integer::u32>, u32, Unit> [storable: true, drop: true, dup: true, zero_sized: false];
+type u64 = u64 [storable: true, drop: true, dup: true, zero_sized: false];
+type Box<u32> = Box<u32> [storable: true, drop: true, dup: true, zero_sized: false];
+type core::option::Option::<core::box::Box::<@core::integer::u32>> = Enum<ut@core::option::Option::<core::box::Box::<@core::integer::u32>>, Box<u32>, Unit> [storable: true, drop: true, dup: true, zero_sized: false];
+type Array<u32> = Array<u32> [storable: true, drop: true, dup: false, zero_sized: false];
+type Snapshot<Array<u32>> = Snapshot<Array<u32>> [storable: true, drop: true, dup: true, zero_sized: false];
+type core::array::Span::<core::integer::u32> = Struct<ut@core::array::Span::<core::integer::u32>, Snapshot<Array<u32>>> [storable: true, drop: true, dup: true, zero_sized: false];
+type Tuple<core::array::Span::<core::integer::u32>, u32, u32, core::array::Span::<core::integer::u32>, Unit> = Struct<ut@Tuple, core::array::Span::<core::integer::u32>, u32, u32, core::array::Span::<core::integer::u32>, Unit> [storable: true, drop: true, dup: true, zero_sized: false];
+type core::panics::Panic = Struct<ut@core::panics::Panic> [storable: true, drop: true, dup: true, zero_sized: true];
+type Array<felt252> = Array<felt252> [storable: true, drop: true, dup: false, zero_sized: false];
+type Tuple<core::panics::Panic, Array<felt252>> = Struct<ut@Tuple, core::panics::Panic, Array<felt252>> [storable: true, drop: true, dup: false, zero_sized: false];
+type core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())> = Enum<ut@core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>, Tuple<core::array::Span::<core::integer::u32>, u32, u32, core::array::Span::<core::integer::u32>, Unit>, Tuple<core::panics::Panic, Array<felt252>>> [storable: true, drop: true, dup: false, zero_sized: false];
+type Box<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16> = Box<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16> [storable: true, drop: true, dup: true, zero_sized: false];
+type Tuple<Box<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> = Struct<ut@Tuple, Box<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> [storable: true, drop: true, dup: true, zero_sized: false];
+type core::panics::PanicResult::<(core::box::Box::<@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>,)> = Enum<ut@core::panics::PanicResult::<(core::box::Box::<@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>,)>, Tuple<Box<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>, Tuple<core::panics::Panic, Array<felt252>>> [storable: true, drop: true, dup: false, zero_sized: false];
+type core::result::Result::<core::integer::u32, core::integer::u32> = Enum<ut@core::result::Result::<core::integer::u32, core::integer::u32>, u32, u32> [storable: true, drop: true, dup: true, zero_sized: false];
+type core::bool = Enum<ut@core::bool, Unit, Unit> [storable: true, drop: true, dup: true, zero_sized: false];
+type orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16 = Struct<ut@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16, u32, core::bool> [storable: true, drop: true, dup: true, zero_sized: false];
+type Tuple<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16> = Struct<ut@Tuple, orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16> [storable: true, drop: true, dup: true, zero_sized: false];
+type core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)> = Enum<ut@core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>, Tuple<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>, Tuple<core::panics::Panic, Array<felt252>>> [storable: true, drop: true, dup: false, zero_sized: false];
+type Tuple<u32> = Struct<ut@Tuple, u32> [storable: true, drop: true, dup: true, zero_sized: false];
+type core::panics::PanicResult::<(core::integer::u32,)> = Enum<ut@core::panics::PanicResult::<(core::integer::u32,)>, Tuple<u32>, Tuple<core::panics::Panic, Array<felt252>>> [storable: true, drop: true, dup: false, zero_sized: false];
+type core::panics::PanicResult::<(orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)> = Enum<ut@core::panics::PanicResult::<(orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>, Tuple<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>, Tuple<core::panics::Panic, Array<felt252>>> [storable: true, drop: true, dup: false, zero_sized: false];
+type Tuple<Box<u32>> = Struct<ut@Tuple, Box<u32>> [storable: true, drop: true, dup: true, zero_sized: false];
+type core::panics::PanicResult::<(core::box::Box::<@core::integer::u32>,)> = Enum<ut@core::panics::PanicResult::<(core::box::Box::<@core::integer::u32>,)>, Tuple<Box<u32>>, Tuple<core::panics::Panic, Array<felt252>>> [storable: true, drop: true, dup: false, zero_sized: false];
+type BuiltinCosts = BuiltinCosts [storable: true, drop: true, dup: true, zero_sized: false];
+type Array<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16> = Array<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16> [storable: true, drop: true, dup: false, zero_sized: false];
+type Snapshot<Array<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> = Snapshot<Array<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> [storable: true, drop: true, dup: true, zero_sized: false];
+type core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16> = Struct<ut@core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>, Snapshot<Array<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>> [storable: true, drop: true, dup: true, zero_sized: false];
+type orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16> = Struct<ut@orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>, core::array::Span::<core::integer::u32>, core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> [storable: true, drop: true, dup: true, zero_sized: false];
+type Uninitialized<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> = Uninitialized<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> [storable: false, drop: true, dup: false, zero_sized: false];
+type Tuple<Unit> = Struct<ut@Tuple, Unit> [storable: true, drop: true, dup: true, zero_sized: true];
+type core::panics::PanicResult::<((),)> = Enum<ut@core::panics::PanicResult::<((),)>, Tuple<Unit>, Tuple<core::panics::Panic, Array<felt252>>> [storable: true, drop: true, dup: false, zero_sized: false];
+type Tuple<u32, Unit> = Struct<ut@Tuple, u32, Unit> [storable: true, drop: true, dup: true, zero_sized: false];
+type core::panics::PanicResult::<(core::integer::u32, ())> = Enum<ut@core::panics::PanicResult::<(core::integer::u32, ())>, Tuple<u32, Unit>, Tuple<core::panics::Panic, Array<felt252>>> [storable: true, drop: true, dup: false, zero_sized: false];
+type GasBuiltin = GasBuiltin [storable: true, drop: false, dup: false, zero_sized: false];
+type RangeCheck = RangeCheck [storable: true, drop: false, dup: false, zero_sized: false];
+
+libfunc disable_ap_tracking = disable_ap_tracking;
+libfunc felt252_const<28718570324184478050558184104549407403566> = felt252_const<28718570324184478050558184104549407403566>;
+libfunc store_temp<felt252> = store_temp<felt252>;
+libfunc function_call<user@core::debug::Felt252PrintImpl::print> = function_call<user@core::debug::Felt252PrintImpl::print>;
+libfunc drop<Unit> = drop<Unit>;
+libfunc felt252_const<83998523928110> = felt252_const<83998523928110>;
+libfunc struct_deconstruct<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> = struct_deconstruct<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>;
+libfunc dup<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> = dup<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>;
+libfunc struct_deconstruct<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> = struct_deconstruct<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>;
+libfunc array_len<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16> = array_len<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>;
+libfunc store_temp<u32> = store_temp<u32>;
+libfunc function_call<user@core::debug::U32PrintImpl::print> = function_call<user@core::debug::U32PrintImpl::print>;
+libfunc felt252_const<24313966413884974> = felt252_const<24313966413884974>;
+libfunc u32_const<0> = u32_const<0>;
+libfunc struct_construct<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> = struct_construct<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>;
+libfunc store_temp<RangeCheck> = store_temp<RangeCheck>;
+libfunc store_temp<GasBuiltin> = store_temp<GasBuiltin>;
+libfunc store_temp<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> = store_temp<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>;
+libfunc function_call<user@PortfolioOptimizerDAO::utils::optimizer_utils::test_tensor[expr99]> = function_call<user@PortfolioOptimizerDAO::utils::optimizer_utils::test_tensor[expr99]>;
+libfunc enum_match<core::panics::PanicResult::<(core::integer::u32, ())>> = enum_match<core::panics::PanicResult::<(core::integer::u32, ())>>;
+libfunc branch_align = branch_align;
+libfunc drop<Tuple<u32, Unit>> = drop<Tuple<u32, Unit>>;
+libfunc struct_construct<Unit> = struct_construct<Unit>;
+libfunc struct_construct<Tuple<Unit>> = struct_construct<Tuple<Unit>>;
+libfunc enum_init<core::panics::PanicResult::<((),)>, 0> = enum_init<core::panics::PanicResult::<((),)>, 0>;
+libfunc store_temp<core::panics::PanicResult::<((),)>> = store_temp<core::panics::PanicResult::<((),)>>;
+libfunc enum_init<core::panics::PanicResult::<((),)>, 1> = enum_init<core::panics::PanicResult::<((),)>, 1>;
+libfunc function_call<user@core::debug::print_felt252> = function_call<user@core::debug::print_felt252>;
+libfunc store_temp<Unit> = store_temp<Unit>;
+libfunc u32_to_felt252 = u32_to_felt252;
+libfunc alloc_local<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> = alloc_local<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>;
+libfunc finalize_locals = finalize_locals;
+libfunc get_builtin_costs = get_builtin_costs;
+libfunc store_temp<BuiltinCosts> = store_temp<BuiltinCosts>;
+libfunc withdraw_gas_all = withdraw_gas_all;
+libfunc dup<core::array::Span::<core::integer::u32>> = dup<core::array::Span::<core::integer::u32>>;
+libfunc struct_deconstruct<core::array::Span::<core::integer::u32>> = struct_deconstruct<core::array::Span::<core::integer::u32>>;
+libfunc store_temp<Snapshot<Array<u32>>> = store_temp<Snapshot<Array<u32>>>;
+libfunc function_call<user@core::array::array_at::<core::integer::u32>> = function_call<user@core::array::array_at::<core::integer::u32>>;
+libfunc enum_match<core::panics::PanicResult::<(core::box::Box::<@core::integer::u32>,)>> = enum_match<core::panics::PanicResult::<(core::box::Box::<@core::integer::u32>,)>>;
+libfunc struct_deconstruct<Tuple<Box<u32>>> = struct_deconstruct<Tuple<Box<u32>>>;
+libfunc unbox<u32> = unbox<u32>;
+libfunc snapshot_take<u32> = snapshot_take<u32>;
+libfunc rename<u32> = rename<u32>;
+libfunc drop<u32> = drop<u32>;
+libfunc u32_eq = u32_eq;
+libfunc array_len<u32> = array_len<u32>;
+libfunc u32_const<1> = u32_const<1>;
+libfunc drop<Uninitialized<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>> = drop<Uninitialized<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>>;
+libfunc u32_const<2> = u32_const<2>;
+libfunc drop<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> = drop<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>;
+libfunc drop<core::array::Span::<core::integer::u32>> = drop<core::array::Span::<core::integer::u32>>;
+libfunc felt252_const<1712551124784075295292587674268449> = felt252_const<1712551124784075295292587674268449>;
+libfunc struct_construct<Tuple<u32, Unit>> = struct_construct<Tuple<u32, Unit>>;
+libfunc enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 0> = enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 0>;
+libfunc store_temp<core::panics::PanicResult::<(core::integer::u32, ())>> = store_temp<core::panics::PanicResult::<(core::integer::u32, ())>>;
+libfunc dup<u32> = dup<u32>;
+libfunc function_call<user@PortfolioOptimizerDAO::utils::optimizer_utils::test_tensor[expr86]> = function_call<user@PortfolioOptimizerDAO::utils::optimizer_utils::test_tensor[expr86]>;
+libfunc jump = jump;
+libfunc enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 1> = enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 1>;
+libfunc store_local<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> = store_local<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>;
+libfunc snapshot_take<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> = snapshot_take<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>;
+libfunc array_new<u32> = array_new<u32>;
+libfunc array_append<u32> = array_append<u32>;
+libfunc snapshot_take<Array<u32>> = snapshot_take<Array<u32>>;
+libfunc drop<Array<u32>> = drop<Array<u32>>;
+libfunc struct_construct<core::array::Span::<core::integer::u32>> = struct_construct<core::array::Span::<core::integer::u32>>;
+libfunc store_temp<core::array::Span::<core::integer::u32>> = store_temp<core::array::Span::<core::integer::u32>>;
+libfunc function_call<user@orion::operators::tensor::implementations::tensor_fp16x16::FP16x16Tensor::at> = function_call<user@orion::operators::tensor::implementations::tensor_fp16x16::FP16x16Tensor::at>;
+libfunc enum_match<core::panics::PanicResult::<(orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>> = enum_match<core::panics::PanicResult::<(orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>>;
+libfunc struct_deconstruct<Tuple<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> = struct_deconstruct<Tuple<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>;
+libfunc struct_deconstruct<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16> = struct_deconstruct<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>;
+libfunc drop<core::bool> = drop<core::bool>;
+libfunc function_call<user@core::integer::U32Add::add> = function_call<user@core::integer::U32Add::add>;
+libfunc enum_match<core::panics::PanicResult::<(core::integer::u32,)>> = enum_match<core::panics::PanicResult::<(core::integer::u32,)>>;
+libfunc struct_deconstruct<Tuple<u32>> = struct_deconstruct<Tuple<u32>>;
+libfunc struct_deconstruct<Tuple<u32, Unit>> = struct_deconstruct<Tuple<u32, Unit>>;
+libfunc drop<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> = drop<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>;
+libfunc array_new<felt252> = array_new<felt252>;
+libfunc felt252_const<375233589013918064796019> = felt252_const<375233589013918064796019>;
+libfunc array_append<felt252> = array_append<felt252>;
+libfunc struct_construct<core::panics::Panic> = struct_construct<core::panics::Panic>;
+libfunc struct_construct<Tuple<core::panics::Panic, Array<felt252>>> = struct_construct<Tuple<core::panics::Panic, Array<felt252>>>;
+libfunc store_temp<Array<felt252>> = store_temp<Array<felt252>>;
+libfunc print = print;
+libfunc array_get<u32> = array_get<u32>;
+libfunc struct_construct<Tuple<Box<u32>>> = struct_construct<Tuple<Box<u32>>>;
+libfunc enum_init<core::panics::PanicResult::<(core::box::Box::<@core::integer::u32>,)>, 0> = enum_init<core::panics::PanicResult::<(core::box::Box::<@core::integer::u32>,)>, 0>;
+libfunc store_temp<core::panics::PanicResult::<(core::box::Box::<@core::integer::u32>,)>> = store_temp<core::panics::PanicResult::<(core::box::Box::<@core::integer::u32>,)>>;
+libfunc felt252_const<1637570914057682275393755530660268060279989363> = felt252_const<1637570914057682275393755530660268060279989363>;
+libfunc enum_init<core::panics::PanicResult::<(core::box::Box::<@core::integer::u32>,)>, 1> = enum_init<core::panics::PanicResult::<(core::box::Box::<@core::integer::u32>,)>, 1>;
+libfunc function_call<user@orion::operators::tensor::core::at_tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> = function_call<user@orion::operators::tensor::core::at_tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>;
+libfunc enum_match<core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>> = enum_match<core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>>;
+libfunc rename<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16> = rename<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>;
+libfunc struct_construct<Tuple<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> = struct_construct<Tuple<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>;
+libfunc enum_init<core::panics::PanicResult::<(orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>, 0> = enum_init<core::panics::PanicResult::<(orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>, 0>;
+libfunc store_temp<core::panics::PanicResult::<(orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>> = store_temp<core::panics::PanicResult::<(orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>>;
+libfunc enum_init<core::panics::PanicResult::<(orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>, 1> = enum_init<core::panics::PanicResult::<(orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>, 1>;
+libfunc u32_overflowing_add = u32_overflowing_add;
+libfunc enum_init<core::result::Result::<core::integer::u32, core::integer::u32>, 0> = enum_init<core::result::Result::<core::integer::u32, core::integer::u32>, 0>;
+libfunc store_temp<core::result::Result::<core::integer::u32, core::integer::u32>> = store_temp<core::result::Result::<core::integer::u32, core::integer::u32>>;
+libfunc enum_init<core::result::Result::<core::integer::u32, core::integer::u32>, 1> = enum_init<core::result::Result::<core::integer::u32, core::integer::u32>, 1>;
+libfunc felt252_const<155785504323917466144735657540098748279> = felt252_const<155785504323917466144735657540098748279>;
+libfunc rename<core::result::Result::<core::integer::u32, core::integer::u32>> = rename<core::result::Result::<core::integer::u32, core::integer::u32>>;
+libfunc function_call<user@core::result::ResultTraitImpl::<core::integer::u32, core::integer::u32>::expect::<core::integer::u32Drop>> = function_call<user@core::result::ResultTraitImpl::<core::integer::u32, core::integer::u32>::expect::<core::integer::u32Drop>>;
+libfunc struct_construct<Tuple<u32>> = struct_construct<Tuple<u32>>;
+libfunc enum_init<core::panics::PanicResult::<(core::integer::u32,)>, 0> = enum_init<core::panics::PanicResult::<(core::integer::u32,)>, 0>;
+libfunc store_temp<core::panics::PanicResult::<(core::integer::u32,)>> = store_temp<core::panics::PanicResult::<(core::integer::u32,)>>;
+libfunc enum_init<core::panics::PanicResult::<(core::integer::u32,)>, 1> = enum_init<core::panics::PanicResult::<(core::integer::u32,)>, 1>;
+libfunc dup<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> = dup<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>;
+libfunc rename<core::array::Span::<core::integer::u32>> = rename<core::array::Span::<core::integer::u32>>;
+libfunc felt252_const<11103203355862135772909702733268915078514761604523990821090607722099> = felt252_const<11103203355862135772909702733268915078514761604523990821090607722099>;
+libfunc enum_init<core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>, 1> = enum_init<core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>, 1>;
+libfunc store_temp<core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>> = store_temp<core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>>;
+libfunc function_call<user@orion::operators::tensor::core::ravel_index> = function_call<user@orion::operators::tensor::core::ravel_index>;
+libfunc rename<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> = rename<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>;
+libfunc store_temp<Snapshot<Array<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>> = store_temp<Snapshot<Array<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>>;
+libfunc function_call<user@core::array::array_at::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>> = function_call<user@core::array::array_at::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>;
+libfunc enum_match<core::panics::PanicResult::<(core::box::Box::<@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>,)>> = enum_match<core::panics::PanicResult::<(core::box::Box::<@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>,)>>;
+libfunc struct_deconstruct<Tuple<Box<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>> = struct_deconstruct<Tuple<Box<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>>;
+libfunc unbox<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16> = unbox<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>;
+libfunc enum_init<core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>, 0> = enum_init<core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>, 0>;
+libfunc enum_match<core::result::Result::<core::integer::u32, core::integer::u32>> = enum_match<core::result::Result::<core::integer::u32, core::integer::u32>>;
+libfunc drop<felt252> = drop<felt252>;
+libfunc felt252_const<796514925863220501721937994365989947287231634231001137810878771972366700> = felt252_const<796514925863220501721937994365989947287231634231001137810878771972366700>;
+libfunc function_call<user@orion::operators::tensor::core::ravel_index[expr35]> = function_call<user@orion::operators::tensor::core::ravel_index[expr35]>;
+libfunc enum_match<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>> = enum_match<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>>;
+libfunc struct_deconstruct<Tuple<core::array::Span::<core::integer::u32>, u32, u32, core::array::Span::<core::integer::u32>, Unit>> = struct_deconstruct<Tuple<core::array::Span::<core::integer::u32>, u32, u32, core::array::Span::<core::integer::u32>, Unit>>;
+libfunc array_get<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16> = array_get<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>;
+libfunc struct_construct<Tuple<Box<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>> = struct_construct<Tuple<Box<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>>;
+libfunc enum_init<core::panics::PanicResult::<(core::box::Box::<@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>,)>, 0> = enum_init<core::panics::PanicResult::<(core::box::Box::<@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>,)>, 0>;
+libfunc store_temp<core::panics::PanicResult::<(core::box::Box::<@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>,)>> = store_temp<core::panics::PanicResult::<(core::box::Box::<@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>,)>>;
+libfunc enum_init<core::panics::PanicResult::<(core::box::Box::<@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>,)>, 1> = enum_init<core::panics::PanicResult::<(core::box::Box::<@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>,)>, 1>;
+libfunc array_snapshot_pop_back<u32> = array_snapshot_pop_back<u32>;
+libfunc enum_init<core::option::Option::<core::box::Box::<@core::integer::u32>>, 0> = enum_init<core::option::Option::<core::box::Box::<@core::integer::u32>>, 0>;
+libfunc store_temp<core::option::Option::<core::box::Box::<@core::integer::u32>>> = store_temp<core::option::Option::<core::box::Box::<@core::integer::u32>>>;
+libfunc enum_init<core::option::Option::<core::box::Box::<@core::integer::u32>>, 1> = enum_init<core::option::Option::<core::box::Box::<@core::integer::u32>>, 1>;
+libfunc enum_match<core::option::Option::<core::box::Box::<@core::integer::u32>>> = enum_match<core::option::Option::<core::box::Box::<@core::integer::u32>>>;
+libfunc function_call<user@core::integer::U32Mul::mul> = function_call<user@core::integer::U32Mul::mul>;
+libfunc struct_construct<Tuple<core::array::Span::<core::integer::u32>, u32, u32, core::array::Span::<core::integer::u32>, Unit>> = struct_construct<Tuple<core::array::Span::<core::integer::u32>, u32, u32, core::array::Span::<core::integer::u32>, Unit>>;
+libfunc enum_init<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>, 0> = enum_init<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>, 0>;
+libfunc store_temp<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>> = store_temp<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>>;
+libfunc enum_init<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>, 1> = enum_init<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>, 1>;
+libfunc drop<Snapshot<Array<u32>>> = drop<Snapshot<Array<u32>>>;
+libfunc felt252_const<29721761890975875353235833581453094220424382983267374> = felt252_const<29721761890975875353235833581453094220424382983267374>;
+libfunc u32_wide_mul = u32_wide_mul;
+libfunc store_temp<u64> = store_temp<u64>;
+libfunc function_call<user@core::integer::DowncastableTryInto::<core::integer::u64, core::integer::u32, core::integer::DowncastableU64U32>::try_into> = function_call<user@core::integer::DowncastableTryInto::<core::integer::u64, core::integer::u32, core::integer::DowncastableU64U32>::try_into>;
+libfunc enum_match<core::option::Option::<core::integer::u32>> = enum_match<core::option::Option::<core::integer::u32>>;
+libfunc felt252_const<155785504327651875780457110017927835511> = felt252_const<155785504327651875780457110017927835511>;
+libfunc downcast<u64, u32> = downcast<u64, u32>;
+libfunc enum_init<core::option::Option::<core::integer::u32>, 0> = enum_init<core::option::Option::<core::integer::u32>, 0>;
+libfunc store_temp<core::option::Option::<core::integer::u32>> = store_temp<core::option::Option::<core::integer::u32>>;
+libfunc enum_init<core::option::Option::<core::integer::u32>, 1> = enum_init<core::option::Option::<core::integer::u32>, 1>;
+libfunc rename<RangeCheck> = rename<RangeCheck>;
+libfunc rename<core::option::Option::<core::integer::u32>> = rename<core::option::Option::<core::integer::u32>>;
+
+disable_ap_tracking() -> (); // 0
+felt252_const<28718570324184478050558184104549407403566>() -> ([3]); // 1
+store_temp<felt252>([3]) -> ([5]); // 2
+function_call<user@core::debug::Felt252PrintImpl::print>([5]) -> ([4]); // 3
+drop<Unit>([4]) -> (); // 4
+felt252_const<83998523928110>() -> ([6]); // 5
+store_temp<felt252>([6]) -> ([8]); // 6
+function_call<user@core::debug::Felt252PrintImpl::print>([8]) -> ([7]); // 7
+drop<Unit>([7]) -> (); // 8
+struct_deconstruct<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([2]) -> ([9], [10]); // 9
+dup<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([10]) -> ([10], [11]); // 10
+struct_deconstruct<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([11]) -> ([12]); // 11
+array_len<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>([12]) -> ([13]); // 12
+store_temp<u32>([13]) -> ([15]); // 13
+function_call<user@core::debug::U32PrintImpl::print>([15]) -> ([14]); // 14
+drop<Unit>([14]) -> (); // 15
+felt252_const<24313966413884974>() -> ([16]); // 16
+store_temp<felt252>([16]) -> ([18]); // 17
+function_call<user@core::debug::Felt252PrintImpl::print>([18]) -> ([17]); // 18
+drop<Unit>([17]) -> (); // 19
+u32_const<0>() -> ([19]); // 20
+struct_construct<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([9], [10]) -> ([20]); // 21
+store_temp<RangeCheck>([0]) -> ([24]); // 22
+store_temp<GasBuiltin>([1]) -> ([25]); // 23
+store_temp<u32>([19]) -> ([26]); // 24
+store_temp<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([20]) -> ([27]); // 25
+function_call<user@PortfolioOptimizerDAO::utils::optimizer_utils::test_tensor[expr99]>([24], [25], [26], [27]) -> ([21], [22], [23]); // 26
+enum_match<core::panics::PanicResult::<(core::integer::u32, ())>>([23]) { fallthrough([28]) 37([29]) }; // 27
+branch_align() -> (); // 28
+drop<Tuple<u32, Unit>>([28]) -> (); // 29
+struct_construct<Unit>() -> ([30]); // 30
+struct_construct<Tuple<Unit>>([30]) -> ([31]); // 31
+enum_init<core::panics::PanicResult::<((),)>, 0>([31]) -> ([32]); // 32
+store_temp<RangeCheck>([21]) -> ([33]); // 33
+store_temp<GasBuiltin>([22]) -> ([34]); // 34
+store_temp<core::panics::PanicResult::<((),)>>([32]) -> ([35]); // 35
+return([33], [34], [35]); // 36
+branch_align() -> (); // 37
+enum_init<core::panics::PanicResult::<((),)>, 1>([29]) -> ([36]); // 38
+store_temp<RangeCheck>([21]) -> ([37]); // 39
+store_temp<GasBuiltin>([22]) -> ([38]); // 40
+store_temp<core::panics::PanicResult::<((),)>>([36]) -> ([39]); // 41
+return([37], [38], [39]); // 42
+store_temp<felt252>([0]) -> ([2]); // 43
+function_call<user@core::debug::print_felt252>([2]) -> ([1]); // 44
+drop<Unit>([1]) -> (); // 45
+struct_construct<Unit>() -> ([3]); // 46
+store_temp<Unit>([3]) -> ([4]); // 47
+return([4]); // 48
+u32_to_felt252([0]) -> ([1]); // 49
+store_temp<felt252>([1]) -> ([3]); // 50
+function_call<user@core::debug::Felt252PrintImpl::print>([3]) -> ([2]); // 51
+drop<Unit>([2]) -> (); // 52
+struct_construct<Unit>() -> ([4]); // 53
+store_temp<Unit>([4]) -> ([5]); // 54
+return([5]); // 55
+alloc_local<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>() -> ([5]); // 56
+finalize_locals() -> (); // 57
+disable_ap_tracking() -> (); // 58
+get_builtin_costs() -> ([6]); // 59
+store_temp<BuiltinCosts>([6]) -> ([6]); // 60
+withdraw_gas_all([0], [1], [6]) { fallthrough([7], [8]) 243([9], [10]) }; // 61
+branch_align() -> (); // 62
+struct_deconstruct<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([3]) -> ([11], [12]); // 63
+u32_const<0>() -> ([13]); // 64
+dup<core::array::Span::<core::integer::u32>>([11]) -> ([11], [14]); // 65
+struct_deconstruct<core::array::Span::<core::integer::u32>>([14]) -> ([15]); // 66
+store_temp<RangeCheck>([7]) -> ([18]); // 67
+store_temp<Snapshot<Array<u32>>>([15]) -> ([19]); // 68
+store_temp<u32>([13]) -> ([20]); // 69
+function_call<user@core::array::array_at::<core::integer::u32>>([18], [19], [20]) -> ([16], [17]); // 70
+enum_match<core::panics::PanicResult::<(core::box::Box::<@core::integer::u32>,)>>([17]) { fallthrough([21]) 233([22]) }; // 71
+branch_align() -> (); // 72
+struct_deconstruct<Tuple<Box<u32>>>([21]) -> ([23]); // 73
+unbox<u32>([23]) -> ([24]); // 74
+snapshot_take<u32>([2]) -> ([25], [26]); // 75
+rename<u32>([24]) -> ([27]); // 76
+snapshot_take<u32>([27]) -> ([28], [29]); // 77
+drop<u32>([28]) -> (); // 78
+rename<u32>([26]) -> ([30]); // 79
+rename<u32>([29]) -> ([31]); // 80
+store_temp<u32>([31]) -> ([31]); // 81
+u32_eq([30], [31]) { fallthrough() 222() }; // 82
+branch_align() -> (); // 83
+dup<core::array::Span::<core::integer::u32>>([11]) -> ([11], [32]); // 84
+struct_deconstruct<core::array::Span::<core::integer::u32>>([32]) -> ([33]); // 85
+array_len<u32>([33]) -> ([34]); // 86
+snapshot_take<u32>([34]) -> ([35], [36]); // 87
+drop<u32>([35]) -> (); // 88
+u32_const<1>() -> ([37]); // 89
+snapshot_take<u32>([37]) -> ([38], [39]); // 90
+drop<u32>([38]) -> (); // 91
+rename<u32>([36]) -> ([40]); // 92
+rename<u32>([39]) -> ([41]); // 93
+store_temp<u32>([40]) -> ([40]); // 94
+u32_eq([40], [41]) { fallthrough() 153() }; // 95
+branch_align() -> (); // 96
+drop<Uninitialized<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>>([5]) -> (); // 97
+dup<core::array::Span::<core::integer::u32>>([11]) -> ([11], [42]); // 98
+struct_deconstruct<core::array::Span::<core::integer::u32>>([42]) -> ([43]); // 99
+array_len<u32>([43]) -> ([44]); // 100
+snapshot_take<u32>([44]) -> ([45], [46]); // 101
+drop<u32>([45]) -> (); // 102
+u32_const<2>() -> ([47]); // 103
+snapshot_take<u32>([47]) -> ([48], [49]); // 104
+drop<u32>([48]) -> (); // 105
+rename<u32>([46]) -> ([50]); // 106
+rename<u32>([49]) -> ([51]); // 107
+store_temp<u32>([50]) -> ([50]); // 108
+u32_eq([50], [51]) { fallthrough() 124() }; // 109
+branch_align() -> (); // 110
+drop<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([12]) -> (); // 111
+drop<core::array::Span::<core::integer::u32>>([11]) -> (); // 112
+felt252_const<1712551124784075295292587674268449>() -> ([52]); // 113
+store_temp<felt252>([52]) -> ([54]); // 114
+function_call<user@core::debug::Felt252PrintImpl::print>([54]) -> ([53]); // 115
+drop<Unit>([53]) -> (); // 116
+struct_construct<Unit>() -> ([55]); // 117
+struct_construct<Tuple<u32, Unit>>([25], [55]) -> ([56]); // 118
+enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 0>([56]) -> ([57]); // 119
+store_temp<RangeCheck>([16]) -> ([58]); // 120
+store_temp<GasBuiltin>([8]) -> ([59]); // 121
+store_temp<core::panics::PanicResult::<(core::integer::u32, ())>>([57]) -> ([60]); // 122
+return([58], [59], [60]); // 123
+branch_align() -> (); // 124
+u32_const<0>() -> ([61]); // 125
+dup<core::array::Span::<core::integer::u32>>([11]) -> ([11], [62]); // 126
+dup<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([12]) -> ([12], [63]); // 127
+struct_construct<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([62], [63]) -> ([64]); // 128
+store_temp<RangeCheck>([16]) -> ([68]); // 129
+store_temp<GasBuiltin>([8]) -> ([69]); // 130
+store_temp<u32>([61]) -> ([70]); // 131
+dup<u32>([25]) -> ([25], [71]); // 132
+store_temp<u32>([71]) -> ([71]); // 133
+store_temp<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([64]) -> ([72]); // 134
+function_call<user@PortfolioOptimizerDAO::utils::optimizer_utils::test_tensor[expr86]>([68], [69], [70], [71], [72]) -> ([65], [66], [67]); // 135
+enum_match<core::panics::PanicResult::<(core::integer::u32, ())>>([67]) { fallthrough([73]) 144([74]) }; // 136
+branch_align() -> (); // 137
+drop<Tuple<u32, Unit>>([73]) -> (); // 138
+struct_construct<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([11], [12]) -> ([75]); // 139
+store_temp<RangeCheck>([65]) -> ([76]); // 140
+store_temp<GasBuiltin>([66]) -> ([77]); // 141
+store_temp<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([75]) -> ([78]); // 142
+jump() { 179() }; // 143
+branch_align() -> (); // 144
+drop<u32>([25]) -> (); // 145
+drop<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([12]) -> (); // 146
+drop<core::array::Span::<core::integer::u32>>([11]) -> (); // 147
+enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 1>([74]) -> ([79]); // 148
+store_temp<RangeCheck>([65]) -> ([80]); // 149
+store_temp<GasBuiltin>([66]) -> ([81]); // 150
+store_temp<core::panics::PanicResult::<(core::integer::u32, ())>>([79]) -> ([82]); // 151
+return([80], [81], [82]); // 152
+branch_align() -> (); // 153
+struct_construct<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([11], [12]) -> ([4]); // 154
+store_local<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([5], [4]) -> ([4]); // 155
+snapshot_take<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([4]) -> ([83], [84]); // 156
+array_new<u32>() -> ([85]); // 157
+dup<u32>([25]) -> ([25], [87]); // 158
+array_append<u32>([85], [87]) -> ([86]); // 159
+snapshot_take<Array<u32>>([86]) -> ([88], [89]); // 160
+drop<Array<u32>>([88]) -> (); // 161
+struct_construct<core::array::Span::<core::integer::u32>>([89]) -> ([90]); // 162
+store_temp<RangeCheck>([16]) -> ([94]); // 163
+store_temp<GasBuiltin>([8]) -> ([95]); // 164
+store_temp<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([84]) -> ([96]); // 165
+store_temp<core::array::Span::<core::integer::u32>>([90]) -> ([97]); // 166
+function_call<user@orion::operators::tensor::implementations::tensor_fp16x16::FP16x16Tensor::at>([94], [95], [96], [97]) -> ([91], [92], [93]); // 167
+enum_match<core::panics::PanicResult::<(orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>>([93]) { fallthrough([98]) 214([99]) }; // 168
+branch_align() -> (); // 169
+struct_deconstruct<Tuple<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([98]) -> ([100]); // 170
+struct_deconstruct<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>([100]) -> ([101], [102]); // 171
+drop<core::bool>([102]) -> (); // 172
+store_temp<u32>([101]) -> ([104]); // 173
+function_call<user@core::debug::U32PrintImpl::print>([104]) -> ([103]); // 174
+drop<Unit>([103]) -> (); // 175
+store_temp<RangeCheck>([91]) -> ([76]); // 176
+store_temp<GasBuiltin>([92]) -> ([77]); // 177
+store_temp<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([83]) -> ([78]); // 178
+u32_const<1>() -> ([105]); // 179
+store_temp<RangeCheck>([76]) -> ([108]); // 180
+store_temp<u32>([25]) -> ([109]); // 181
+store_temp<u32>([105]) -> ([110]); // 182
+function_call<user@core::integer::U32Add::add>([108], [109], [110]) -> ([106], [107]); // 183
+enum_match<core::panics::PanicResult::<(core::integer::u32,)>>([107]) { fallthrough([111]) 207([112]) }; // 184
+branch_align() -> (); // 185
+struct_deconstruct<Tuple<u32>>([111]) -> ([113]); // 186
+store_temp<RangeCheck>([106]) -> ([117]); // 187
+store_temp<GasBuiltin>([77]) -> ([118]); // 188
+store_temp<u32>([113]) -> ([119]); // 189
+store_temp<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([78]) -> ([120]); // 190
+function_call<user@PortfolioOptimizerDAO::utils::optimizer_utils::test_tensor[expr99]>([117], [118], [119], [120]) -> ([114], [115], [116]); // 191
+enum_match<core::panics::PanicResult::<(core::integer::u32, ())>>([116]) { fallthrough([121]) 201([122]) }; // 192
+branch_align() -> (); // 193
+struct_deconstruct<Tuple<u32, Unit>>([121]) -> ([123], [124]); // 194
+struct_construct<Tuple<u32, Unit>>([123], [124]) -> ([125]); // 195
+enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 0>([125]) -> ([126]); // 196
+store_temp<RangeCheck>([114]) -> ([127]); // 197
+store_temp<GasBuiltin>([115]) -> ([128]); // 198
+store_temp<core::panics::PanicResult::<(core::integer::u32, ())>>([126]) -> ([129]); // 199
+return([127], [128], [129]); // 200
+branch_align() -> (); // 201
+enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 1>([122]) -> ([130]); // 202
+store_temp<RangeCheck>([114]) -> ([131]); // 203
+store_temp<GasBuiltin>([115]) -> ([132]); // 204
+store_temp<core::panics::PanicResult::<(core::integer::u32, ())>>([130]) -> ([133]); // 205
+return([131], [132], [133]); // 206
+branch_align() -> (); // 207
+drop<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([78]) -> (); // 208
+enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 1>([112]) -> ([134]); // 209
+store_temp<RangeCheck>([106]) -> ([135]); // 210
+store_temp<GasBuiltin>([77]) -> ([136]); // 211
+store_temp<core::panics::PanicResult::<(core::integer::u32, ())>>([134]) -> ([137]); // 212
+return([135], [136], [137]); // 213
+branch_align() -> (); // 214
+drop<u32>([25]) -> (); // 215
+drop<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([83]) -> (); // 216
+enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 1>([99]) -> ([138]); // 217
+store_temp<RangeCheck>([91]) -> ([139]); // 218
+store_temp<GasBuiltin>([92]) -> ([140]); // 219
+store_temp<core::panics::PanicResult::<(core::integer::u32, ())>>([138]) -> ([141]); // 220
+return([139], [140], [141]); // 221
+branch_align() -> (); // 222
+drop<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([12]) -> (); // 223
+drop<core::array::Span::<core::integer::u32>>([11]) -> (); // 224
+drop<Uninitialized<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>>([5]) -> (); // 225
+struct_construct<Unit>() -> ([142]); // 226
+struct_construct<Tuple<u32, Unit>>([25], [142]) -> ([143]); // 227
+enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 0>([143]) -> ([144]); // 228
+store_temp<RangeCheck>([16]) -> ([145]); // 229
+store_temp<GasBuiltin>([8]) -> ([146]); // 230
+store_temp<core::panics::PanicResult::<(core::integer::u32, ())>>([144]) -> ([147]); // 231
+return([145], [146], [147]); // 232
+branch_align() -> (); // 233
+drop<u32>([2]) -> (); // 234
+drop<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([12]) -> (); // 235
+drop<core::array::Span::<core::integer::u32>>([11]) -> (); // 236
+drop<Uninitialized<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>>([5]) -> (); // 237
+enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 1>([22]) -> ([148]); // 238
+store_temp<RangeCheck>([16]) -> ([149]); // 239
+store_temp<GasBuiltin>([8]) -> ([150]); // 240
+store_temp<core::panics::PanicResult::<(core::integer::u32, ())>>([148]) -> ([151]); // 241
+return([149], [150], [151]); // 242
+branch_align() -> (); // 243
+drop<Uninitialized<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>>([5]) -> (); // 244
+drop<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([3]) -> (); // 245
+drop<u32>([2]) -> (); // 246
+array_new<felt252>() -> ([152]); // 247
+felt252_const<375233589013918064796019>() -> ([153]); // 248
+store_temp<felt252>([153]) -> ([153]); // 249
+array_append<felt252>([152], [153]) -> ([154]); // 250
+struct_construct<core::panics::Panic>() -> ([155]); // 251
+struct_construct<Tuple<core::panics::Panic, Array<felt252>>>([155], [154]) -> ([156]); // 252
+enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 1>([156]) -> ([157]); // 253
+store_temp<RangeCheck>([9]) -> ([158]); // 254
+store_temp<GasBuiltin>([10]) -> ([159]); // 255
+store_temp<core::panics::PanicResult::<(core::integer::u32, ())>>([157]) -> ([160]); // 256
+return([158], [159], [160]); // 257
+array_new<felt252>() -> ([1]); // 258
+array_append<felt252>([1], [0]) -> ([2]); // 259
+store_temp<Array<felt252>>([2]) -> ([2]); // 260
+print([2]) -> (); // 261
+struct_construct<Unit>() -> ([3]); // 262
+store_temp<Unit>([3]) -> ([4]); // 263
+return([4]); // 264
+array_get<u32>([0], [1], [2]) { fallthrough([3], [4]) 272([5]) }; // 265
+branch_align() -> (); // 266
+struct_construct<Tuple<Box<u32>>>([4]) -> ([6]); // 267
+enum_init<core::panics::PanicResult::<(core::box::Box::<@core::integer::u32>,)>, 0>([6]) -> ([7]); // 268
+store_temp<RangeCheck>([3]) -> ([8]); // 269
+store_temp<core::panics::PanicResult::<(core::box::Box::<@core::integer::u32>,)>>([7]) -> ([9]); // 270
+return([8], [9]); // 271
+branch_align() -> (); // 272
+array_new<felt252>() -> ([10]); // 273
+felt252_const<1637570914057682275393755530660268060279989363>() -> ([11]); // 274
+store_temp<felt252>([11]) -> ([11]); // 275
+array_append<felt252>([10], [11]) -> ([12]); // 276
+struct_construct<core::panics::Panic>() -> ([13]); // 277
+struct_construct<Tuple<core::panics::Panic, Array<felt252>>>([13], [12]) -> ([14]); // 278
+enum_init<core::panics::PanicResult::<(core::box::Box::<@core::integer::u32>,)>, 1>([14]) -> ([15]); // 279
+store_temp<RangeCheck>([5]) -> ([16]); // 280
+store_temp<core::panics::PanicResult::<(core::box::Box::<@core::integer::u32>,)>>([15]) -> ([17]); // 281
+return([16], [17]); // 282
+alloc_local<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>() -> ([6]); // 283
+finalize_locals() -> (); // 284
+disable_ap_tracking() -> (); // 285
+get_builtin_costs() -> ([7]); // 286
+store_temp<BuiltinCosts>([7]) -> ([7]); // 287
+withdraw_gas_all([0], [1], [7]) { fallthrough([8], [9]) 404([10], [11]) }; // 288
+branch_align() -> (); // 289
+struct_deconstruct<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([4]) -> ([12], [13]); // 290
+u32_const<1>() -> ([14]); // 291
+dup<core::array::Span::<core::integer::u32>>([12]) -> ([12], [15]); // 292
+struct_deconstruct<core::array::Span::<core::integer::u32>>([15]) -> ([16]); // 293
+store_temp<RangeCheck>([8]) -> ([19]); // 294
+store_temp<Snapshot<Array<u32>>>([16]) -> ([20]); // 295
+store_temp<u32>([14]) -> ([21]); // 296
+function_call<user@core::array::array_at::<core::integer::u32>>([19], [20], [21]) -> ([17], [18]); // 297
+enum_match<core::panics::PanicResult::<(core::box::Box::<@core::integer::u32>,)>>([18]) { fallthrough([22]) 393([23]) }; // 298
+branch_align() -> (); // 299
+struct_deconstruct<Tuple<Box<u32>>>([22]) -> ([24]); // 300
+unbox<u32>([24]) -> ([25]); // 301
+snapshot_take<u32>([2]) -> ([26], [27]); // 302
+rename<u32>([25]) -> ([28]); // 303
+snapshot_take<u32>([28]) -> ([29], [30]); // 304
+drop<u32>([29]) -> (); // 305
+rename<u32>([27]) -> ([31]); // 306
+rename<u32>([30]) -> ([32]); // 307
+store_temp<u32>([32]) -> ([32]); // 308
+u32_eq([31], [32]) { fallthrough() 381() }; // 309
+branch_align() -> (); // 310
+struct_construct<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([12], [13]) -> ([5]); // 311
+store_local<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([6], [5]) -> ([5]); // 312
+snapshot_take<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([5]) -> ([33], [34]); // 313
+array_new<u32>() -> ([35]); // 314
+dup<u32>([3]) -> ([3], [37]); // 315
+array_append<u32>([35], [37]) -> ([36]); // 316
+dup<u32>([26]) -> ([26], [39]); // 317
+array_append<u32>([36], [39]) -> ([38]); // 318
+snapshot_take<Array<u32>>([38]) -> ([40], [41]); // 319
+drop<Array<u32>>([40]) -> (); // 320
+struct_construct<core::array::Span::<core::integer::u32>>([41]) -> ([42]); // 321
+store_temp<RangeCheck>([17]) -> ([46]); // 322
+store_temp<GasBuiltin>([9]) -> ([47]); // 323
+store_temp<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([34]) -> ([48]); // 324
+store_temp<core::array::Span::<core::integer::u32>>([42]) -> ([49]); // 325
+function_call<user@orion::operators::tensor::implementations::tensor_fp16x16::FP16x16Tensor::at>([46], [47], [48], [49]) -> ([43], [44], [45]); // 326
+enum_match<core::panics::PanicResult::<(orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>>([45]) { fallthrough([50]) 372([51]) }; // 327
+branch_align() -> (); // 328
+struct_deconstruct<Tuple<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([50]) -> ([52]); // 329
+struct_deconstruct<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>([52]) -> ([53], [54]); // 330
+drop<core::bool>([54]) -> (); // 331
+store_temp<u32>([53]) -> ([56]); // 332
+function_call<user@core::debug::U32PrintImpl::print>([56]) -> ([55]); // 333
+drop<Unit>([55]) -> (); // 334
+u32_const<1>() -> ([57]); // 335
+store_temp<RangeCheck>([43]) -> ([60]); // 336
+store_temp<u32>([26]) -> ([61]); // 337
+store_temp<u32>([57]) -> ([62]); // 338
+function_call<user@core::integer::U32Add::add>([60], [61], [62]) -> ([58], [59]); // 339
+enum_match<core::panics::PanicResult::<(core::integer::u32,)>>([59]) { fallthrough([63]) 364([64]) }; // 340
+branch_align() -> (); // 341
+struct_deconstruct<Tuple<u32>>([63]) -> ([65]); // 342
+store_temp<RangeCheck>([58]) -> ([69]); // 343
+store_temp<GasBuiltin>([44]) -> ([70]); // 344
+store_temp<u32>([65]) -> ([71]); // 345
+store_temp<u32>([3]) -> ([72]); // 346
+store_temp<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([33]) -> ([73]); // 347
+function_call<user@PortfolioOptimizerDAO::utils::optimizer_utils::test_tensor[expr86]>([69], [70], [71], [72], [73]) -> ([66], [67], [68]); // 348
+enum_match<core::panics::PanicResult::<(core::integer::u32, ())>>([68]) { fallthrough([74]) 358([75]) }; // 349
+branch_align() -> (); // 350
+struct_deconstruct<Tuple<u32, Unit>>([74]) -> ([76], [77]); // 351
+struct_construct<Tuple<u32, Unit>>([76], [77]) -> ([78]); // 352
+enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 0>([78]) -> ([79]); // 353
+store_temp<RangeCheck>([66]) -> ([80]); // 354
+store_temp<GasBuiltin>([67]) -> ([81]); // 355
+store_temp<core::panics::PanicResult::<(core::integer::u32, ())>>([79]) -> ([82]); // 356
+return([80], [81], [82]); // 357
+branch_align() -> (); // 358
+enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 1>([75]) -> ([83]); // 359
+store_temp<RangeCheck>([66]) -> ([84]); // 360
+store_temp<GasBuiltin>([67]) -> ([85]); // 361
+store_temp<core::panics::PanicResult::<(core::integer::u32, ())>>([83]) -> ([86]); // 362
+return([84], [85], [86]); // 363
+branch_align() -> (); // 364
+drop<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([33]) -> (); // 365
+drop<u32>([3]) -> (); // 366
+enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 1>([64]) -> ([87]); // 367
+store_temp<RangeCheck>([58]) -> ([88]); // 368
+store_temp<GasBuiltin>([44]) -> ([89]); // 369
+store_temp<core::panics::PanicResult::<(core::integer::u32, ())>>([87]) -> ([90]); // 370
+return([88], [89], [90]); // 371
+branch_align() -> (); // 372
+drop<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([33]) -> (); // 373
+drop<u32>([3]) -> (); // 374
+drop<u32>([26]) -> (); // 375
+enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 1>([51]) -> ([91]); // 376
+store_temp<RangeCheck>([43]) -> ([92]); // 377
+store_temp<GasBuiltin>([44]) -> ([93]); // 378
+store_temp<core::panics::PanicResult::<(core::integer::u32, ())>>([91]) -> ([94]); // 379
+return([92], [93], [94]); // 380
+branch_align() -> (); // 381
+drop<u32>([3]) -> (); // 382
+drop<Uninitialized<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>>([6]) -> (); // 383
+drop<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([13]) -> (); // 384
+drop<core::array::Span::<core::integer::u32>>([12]) -> (); // 385
+struct_construct<Unit>() -> ([95]); // 386
+struct_construct<Tuple<u32, Unit>>([26], [95]) -> ([96]); // 387
+enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 0>([96]) -> ([97]); // 388
+store_temp<RangeCheck>([17]) -> ([98]); // 389
+store_temp<GasBuiltin>([9]) -> ([99]); // 390
+store_temp<core::panics::PanicResult::<(core::integer::u32, ())>>([97]) -> ([100]); // 391
+return([98], [99], [100]); // 392
+branch_align() -> (); // 393
+drop<u32>([3]) -> (); // 394
+drop<u32>([2]) -> (); // 395
+drop<Uninitialized<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>>([6]) -> (); // 396
+drop<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([13]) -> (); // 397
+drop<core::array::Span::<core::integer::u32>>([12]) -> (); // 398
+enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 1>([23]) -> ([101]); // 399
+store_temp<RangeCheck>([17]) -> ([102]); // 400
+store_temp<GasBuiltin>([9]) -> ([103]); // 401
+store_temp<core::panics::PanicResult::<(core::integer::u32, ())>>([101]) -> ([104]); // 402
+return([102], [103], [104]); // 403
+branch_align() -> (); // 404
+drop<Uninitialized<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>>([6]) -> (); // 405
+drop<u32>([3]) -> (); // 406
+drop<u32>([2]) -> (); // 407
+drop<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([4]) -> (); // 408
+array_new<felt252>() -> ([105]); // 409
+felt252_const<375233589013918064796019>() -> ([106]); // 410
+store_temp<felt252>([106]) -> ([106]); // 411
+array_append<felt252>([105], [106]) -> ([107]); // 412
+struct_construct<core::panics::Panic>() -> ([108]); // 413
+struct_construct<Tuple<core::panics::Panic, Array<felt252>>>([108], [107]) -> ([109]); // 414
+enum_init<core::panics::PanicResult::<(core::integer::u32, ())>, 1>([109]) -> ([110]); // 415
+store_temp<RangeCheck>([10]) -> ([111]); // 416
+store_temp<GasBuiltin>([11]) -> ([112]); // 417
+store_temp<core::panics::PanicResult::<(core::integer::u32, ())>>([110]) -> ([113]); // 418
+return([111], [112], [113]); // 419
+disable_ap_tracking() -> (); // 420
+store_temp<RangeCheck>([0]) -> ([7]); // 421
+store_temp<GasBuiltin>([1]) -> ([8]); // 422
+store_temp<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([2]) -> ([9]); // 423
+store_temp<core::array::Span::<core::integer::u32>>([3]) -> ([10]); // 424
+function_call<user@orion::operators::tensor::core::at_tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([7], [8], [9], [10]) -> ([4], [5], [6]); // 425
+enum_match<core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>>([6]) { fallthrough([11]) 436([12]) }; // 426
+branch_align() -> (); // 427
+struct_deconstruct<Tuple<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([11]) -> ([13]); // 428
+rename<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>([13]) -> ([14]); // 429
+struct_construct<Tuple<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([14]) -> ([15]); // 430
+enum_init<core::panics::PanicResult::<(orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>, 0>([15]) -> ([16]); // 431
+store_temp<RangeCheck>([4]) -> ([17]); // 432
+store_temp<GasBuiltin>([5]) -> ([18]); // 433
+store_temp<core::panics::PanicResult::<(orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>>([16]) -> ([19]); // 434
+return([17], [18], [19]); // 435
+branch_align() -> (); // 436
+enum_init<core::panics::PanicResult::<(orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>, 1>([12]) -> ([20]); // 437
+store_temp<RangeCheck>([4]) -> ([21]); // 438
+store_temp<GasBuiltin>([5]) -> ([22]); // 439
+store_temp<core::panics::PanicResult::<(orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>>([20]) -> ([23]); // 440
+return([21], [22], [23]); // 441
+u32_overflowing_add([0], [1], [2]) { fallthrough([3], [4]) 448([5], [6]) }; // 442
+branch_align() -> (); // 443
+enum_init<core::result::Result::<core::integer::u32, core::integer::u32>, 0>([4]) -> ([7]); // 444
+store_temp<RangeCheck>([3]) -> ([8]); // 445
+store_temp<core::result::Result::<core::integer::u32, core::integer::u32>>([7]) -> ([9]); // 446
+jump() { 452() }; // 447
+branch_align() -> (); // 448
+enum_init<core::result::Result::<core::integer::u32, core::integer::u32>, 1>([6]) -> ([10]); // 449
+store_temp<RangeCheck>([5]) -> ([8]); // 450
+store_temp<core::result::Result::<core::integer::u32, core::integer::u32>>([10]) -> ([9]); // 451
+felt252_const<155785504323917466144735657540098748279>() -> ([11]); // 452
+rename<core::result::Result::<core::integer::u32, core::integer::u32>>([9]) -> ([13]); // 453
+store_temp<felt252>([11]) -> ([14]); // 454
+function_call<user@core::result::ResultTraitImpl::<core::integer::u32, core::integer::u32>::expect::<core::integer::u32Drop>>([13], [14]) -> ([12]); // 455
+enum_match<core::panics::PanicResult::<(core::integer::u32,)>>([12]) { fallthrough([15]) 464([16]) }; // 456
+branch_align() -> (); // 457
+struct_deconstruct<Tuple<u32>>([15]) -> ([17]); // 458
+struct_construct<Tuple<u32>>([17]) -> ([18]); // 459
+enum_init<core::panics::PanicResult::<(core::integer::u32,)>, 0>([18]) -> ([19]); // 460
+store_temp<RangeCheck>([8]) -> ([20]); // 461
+store_temp<core::panics::PanicResult::<(core::integer::u32,)>>([19]) -> ([21]); // 462
+return([20], [21]); // 463
+branch_align() -> (); // 464
+enum_init<core::panics::PanicResult::<(core::integer::u32,)>, 1>([16]) -> ([22]); // 465
+store_temp<RangeCheck>([8]) -> ([23]); // 466
+store_temp<core::panics::PanicResult::<(core::integer::u32,)>>([22]) -> ([24]); // 467
+return([23], [24]); // 468
+disable_ap_tracking() -> (); // 469
+dup<core::array::Span::<core::integer::u32>>([3]) -> ([3], [4]); // 470
+struct_deconstruct<core::array::Span::<core::integer::u32>>([4]) -> ([5]); // 471
+array_len<u32>([5]) -> ([6]); // 472
+dup<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([2]) -> ([2], [7]); // 473
+struct_deconstruct<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([7]) -> ([8], [9]); // 474
+drop<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([9]) -> (); // 475
+rename<core::array::Span::<core::integer::u32>>([8]) -> ([10]); // 476
+struct_deconstruct<core::array::Span::<core::integer::u32>>([10]) -> ([11]); // 477
+array_len<u32>([11]) -> ([12]); // 478
+snapshot_take<u32>([6]) -> ([13], [14]); // 479
+drop<u32>([13]) -> (); // 480
+snapshot_take<u32>([12]) -> ([15], [16]); // 481
+drop<u32>([15]) -> (); // 482
+rename<u32>([14]) -> ([17]); // 483
+rename<u32>([16]) -> ([18]); // 484
+store_temp<u32>([17]) -> ([17]); // 485
+store_temp<u32>([18]) -> ([18]); // 486
+u32_eq([17], [18]) { fallthrough() 502() }; // 487
+branch_align() -> (); // 488
+drop<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([2]) -> (); // 489
+drop<core::array::Span::<core::integer::u32>>([3]) -> (); // 490
+array_new<felt252>() -> ([19]); // 491
+felt252_const<11103203355862135772909702733268915078514761604523990821090607722099>() -> ([20]); // 492
+store_temp<felt252>([20]) -> ([20]); // 493
+array_append<felt252>([19], [20]) -> ([21]); // 494
+struct_construct<core::panics::Panic>() -> ([22]); // 495
+struct_construct<Tuple<core::panics::Panic, Array<felt252>>>([22], [21]) -> ([23]); // 496
+enum_init<core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>, 1>([23]) -> ([24]); // 497
+store_temp<RangeCheck>([0]) -> ([25]); // 498
+store_temp<GasBuiltin>([1]) -> ([26]); // 499
+store_temp<core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>>([24]) -> ([27]); // 500
+return([25], [26], [27]); // 501
+branch_align() -> (); // 502
+dup<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([2]) -> ([2], [28]); // 503
+struct_deconstruct<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([28]) -> ([29], [30]); // 504
+drop<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([30]) -> (); // 505
+rename<core::array::Span::<core::integer::u32>>([29]) -> ([31]); // 506
+store_temp<RangeCheck>([0]) -> ([35]); // 507
+store_temp<GasBuiltin>([1]) -> ([36]); // 508
+store_temp<core::array::Span::<core::integer::u32>>([31]) -> ([37]); // 509
+store_temp<core::array::Span::<core::integer::u32>>([3]) -> ([38]); // 510
+function_call<user@orion::operators::tensor::core::ravel_index>([35], [36], [37], [38]) -> ([32], [33], [34]); // 511
+enum_match<core::panics::PanicResult::<(core::integer::u32,)>>([34]) { fallthrough([39]) 539([40]) }; // 512
+branch_align() -> (); // 513
+struct_deconstruct<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([2]) -> ([41], [42]); // 514
+drop<core::array::Span::<core::integer::u32>>([41]) -> (); // 515
+rename<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([42]) -> ([43]); // 516
+struct_deconstruct<Tuple<u32>>([39]) -> ([44]); // 517
+struct_deconstruct<core::array::Span::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([43]) -> ([45]); // 518
+store_temp<RangeCheck>([32]) -> ([48]); // 519
+store_temp<Snapshot<Array<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>>([45]) -> ([49]); // 520
+store_temp<u32>([44]) -> ([50]); // 521
+function_call<user@core::array::array_at::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([48], [49], [50]) -> ([46], [47]); // 522
+enum_match<core::panics::PanicResult::<(core::box::Box::<@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>,)>>([47]) { fallthrough([51]) 533([52]) }; // 523
+branch_align() -> (); // 524
+struct_deconstruct<Tuple<Box<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>>([51]) -> ([53]); // 525
+unbox<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>([53]) -> ([54]); // 526
+struct_construct<Tuple<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([54]) -> ([55]); // 527
+enum_init<core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>, 0>([55]) -> ([56]); // 528
+store_temp<RangeCheck>([46]) -> ([57]); // 529
+store_temp<GasBuiltin>([33]) -> ([58]); // 530
+store_temp<core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>>([56]) -> ([59]); // 531
+return([57], [58], [59]); // 532
+branch_align() -> (); // 533
+enum_init<core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>, 1>([52]) -> ([60]); // 534
+store_temp<RangeCheck>([46]) -> ([61]); // 535
+store_temp<GasBuiltin>([33]) -> ([62]); // 536
+store_temp<core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>>([60]) -> ([63]); // 537
+return([61], [62], [63]); // 538
+branch_align() -> (); // 539
+drop<orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>([2]) -> (); // 540
+enum_init<core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>, 1>([40]) -> ([64]); // 541
+store_temp<RangeCheck>([32]) -> ([65]); // 542
+store_temp<GasBuiltin>([33]) -> ([66]); // 543
+store_temp<core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>>([64]) -> ([67]); // 544
+return([65], [66], [67]); // 545
+enum_match<core::result::Result::<core::integer::u32, core::integer::u32>>([0]) { fallthrough([2]) 553([3]) }; // 546
+branch_align() -> (); // 547
+drop<felt252>([1]) -> (); // 548
+struct_construct<Tuple<u32>>([2]) -> ([4]); // 549
+enum_init<core::panics::PanicResult::<(core::integer::u32,)>, 0>([4]) -> ([5]); // 550
+store_temp<core::panics::PanicResult::<(core::integer::u32,)>>([5]) -> ([6]); // 551
+return([6]); // 552
+branch_align() -> (); // 553
+drop<u32>([3]) -> (); // 554
+array_new<felt252>() -> ([7]); // 555
+array_append<felt252>([7], [1]) -> ([8]); // 556
+struct_construct<core::panics::Panic>() -> ([9]); // 557
+struct_construct<Tuple<core::panics::Panic, Array<felt252>>>([9], [8]) -> ([10]); // 558
+enum_init<core::panics::PanicResult::<(core::integer::u32,)>, 1>([10]) -> ([11]); // 559
+store_temp<core::panics::PanicResult::<(core::integer::u32,)>>([11]) -> ([12]); // 560
+return([12]); // 561
+disable_ap_tracking() -> (); // 562
+dup<core::array::Span::<core::integer::u32>>([2]) -> ([2], [4]); // 563
+struct_deconstruct<core::array::Span::<core::integer::u32>>([4]) -> ([5]); // 564
+array_len<u32>([5]) -> ([6]); // 565
+dup<core::array::Span::<core::integer::u32>>([3]) -> ([3], [7]); // 566
+struct_deconstruct<core::array::Span::<core::integer::u32>>([7]) -> ([8]); // 567
+array_len<u32>([8]) -> ([9]); // 568
+snapshot_take<u32>([6]) -> ([10], [11]); // 569
+drop<u32>([10]) -> (); // 570
+snapshot_take<u32>([9]) -> ([12], [13]); // 571
+drop<u32>([12]) -> (); // 572
+rename<u32>([11]) -> ([14]); // 573
+rename<u32>([13]) -> ([15]); // 574
+store_temp<u32>([14]) -> ([14]); // 575
+store_temp<u32>([15]) -> ([15]); // 576
+u32_eq([14], [15]) { fallthrough() 592() }; // 577
+branch_align() -> (); // 578
+drop<core::array::Span::<core::integer::u32>>([3]) -> (); // 579
+drop<core::array::Span::<core::integer::u32>>([2]) -> (); // 580
+array_new<felt252>() -> ([16]); // 581
+felt252_const<796514925863220501721937994365989947287231634231001137810878771972366700>() -> ([17]); // 582
+store_temp<felt252>([17]) -> ([17]); // 583
+array_append<felt252>([16], [17]) -> ([18]); // 584
+struct_construct<core::panics::Panic>() -> ([19]); // 585
+struct_construct<Tuple<core::panics::Panic, Array<felt252>>>([19], [18]) -> ([20]); // 586
+enum_init<core::panics::PanicResult::<(core::integer::u32,)>, 1>([20]) -> ([21]); // 587
+store_temp<RangeCheck>([0]) -> ([22]); // 588
+store_temp<GasBuiltin>([1]) -> ([23]); // 589
+store_temp<core::panics::PanicResult::<(core::integer::u32,)>>([21]) -> ([24]); // 590
+return([22], [23], [24]); // 591
+branch_align() -> (); // 592
+u32_const<0>() -> ([25]); // 593
+u32_const<1>() -> ([26]); // 594
+store_temp<RangeCheck>([0]) -> ([30]); // 595
+store_temp<GasBuiltin>([1]) -> ([31]); // 596
+store_temp<core::array::Span::<core::integer::u32>>([2]) -> ([32]); // 597
+store_temp<core::array::Span::<core::integer::u32>>([3]) -> ([33]); // 598
+store_temp<u32>([25]) -> ([34]); // 599
+store_temp<u32>([26]) -> ([35]); // 600
+function_call<user@orion::operators::tensor::core::ravel_index[expr35]>([30], [31], [32], [33], [34], [35]) -> ([27], [28], [29]); // 601
+enum_match<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>>([29]) { fallthrough([36]) 615([37]) }; // 602
+branch_align() -> (); // 603
+struct_deconstruct<Tuple<core::array::Span::<core::integer::u32>, u32, u32, core::array::Span::<core::integer::u32>, Unit>>([36]) -> ([38], [39], [40], [41], [42]); // 604
+drop<core::array::Span::<core::integer::u32>>([38]) -> (); // 605
+drop<u32>([40]) -> (); // 606
+drop<core::array::Span::<core::integer::u32>>([41]) -> (); // 607
+drop<Unit>([42]) -> (); // 608
+struct_construct<Tuple<u32>>([39]) -> ([43]); // 609
+enum_init<core::panics::PanicResult::<(core::integer::u32,)>, 0>([43]) -> ([44]); // 610
+store_temp<RangeCheck>([27]) -> ([45]); // 611
+store_temp<GasBuiltin>([28]) -> ([46]); // 612
+store_temp<core::panics::PanicResult::<(core::integer::u32,)>>([44]) -> ([47]); // 613
+return([45], [46], [47]); // 614
+branch_align() -> (); // 615
+enum_init<core::panics::PanicResult::<(core::integer::u32,)>, 1>([37]) -> ([48]); // 616
+store_temp<RangeCheck>([27]) -> ([49]); // 617
+store_temp<GasBuiltin>([28]) -> ([50]); // 618
+store_temp<core::panics::PanicResult::<(core::integer::u32,)>>([48]) -> ([51]); // 619
+return([49], [50], [51]); // 620
+array_get<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>([0], [1], [2]) { fallthrough([3], [4]) 628([5]) }; // 621
+branch_align() -> (); // 622
+struct_construct<Tuple<Box<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>>([4]) -> ([6]); // 623
+enum_init<core::panics::PanicResult::<(core::box::Box::<@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>,)>, 0>([6]) -> ([7]); // 624
+store_temp<RangeCheck>([3]) -> ([8]); // 625
+store_temp<core::panics::PanicResult::<(core::box::Box::<@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>,)>>([7]) -> ([9]); // 626
+return([8], [9]); // 627
+branch_align() -> (); // 628
+array_new<felt252>() -> ([10]); // 629
+felt252_const<1637570914057682275393755530660268060279989363>() -> ([11]); // 630
+store_temp<felt252>([11]) -> ([11]); // 631
+array_append<felt252>([10], [11]) -> ([12]); // 632
+struct_construct<core::panics::Panic>() -> ([13]); // 633
+struct_construct<Tuple<core::panics::Panic, Array<felt252>>>([13], [12]) -> ([14]); // 634
+enum_init<core::panics::PanicResult::<(core::box::Box::<@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>,)>, 1>([14]) -> ([15]); // 635
+store_temp<RangeCheck>([5]) -> ([16]); // 636
+store_temp<core::panics::PanicResult::<(core::box::Box::<@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>,)>>([15]) -> ([17]); // 637
+return([16], [17]); // 638
+get_builtin_costs() -> ([6]); // 639
+store_temp<BuiltinCosts>([6]) -> ([6]); // 640
+withdraw_gas_all([0], [1], [6]) { fallthrough([7], [8]) 813([9], [10]) }; // 641
+branch_align() -> (); // 642
+dup<core::array::Span::<core::integer::u32>>([2]) -> ([2], [11]); // 643
+struct_deconstruct<core::array::Span::<core::integer::u32>>([11]) -> ([12]); // 644
+array_len<u32>([12]) -> ([13]); // 645
+snapshot_take<u32>([13]) -> ([14], [15]); // 646
+drop<u32>([14]) -> (); // 647
+u32_const<0>() -> ([16]); // 648
+snapshot_take<u32>([16]) -> ([17], [18]); // 649
+drop<u32>([17]) -> (); // 650
+rename<u32>([15]) -> ([19]); // 651
+rename<u32>([18]) -> ([20]); // 652
+store_temp<u32>([19]) -> ([19]); // 653
+store_temp<RangeCheck>([7]) -> ([7]); // 654
+u32_eq([19], [20]) { fallthrough() 804() }; // 655
+branch_align() -> (); // 656
+struct_deconstruct<core::array::Span::<core::integer::u32>>([3]) -> ([21]); // 657
+array_snapshot_pop_back<u32>([21]) { fallthrough([22], [23]) 664([24]) }; // 658
+branch_align() -> (); // 659
+enum_init<core::option::Option::<core::box::Box::<@core::integer::u32>>, 0>([23]) -> ([25]); // 660
+store_temp<Snapshot<Array<u32>>>([22]) -> ([26]); // 661
+store_temp<core::option::Option::<core::box::Box::<@core::integer::u32>>>([25]) -> ([27]); // 662
+jump() { 669() }; // 663
+branch_align() -> (); // 664
+struct_construct<Unit>() -> ([28]); // 665
+enum_init<core::option::Option::<core::box::Box::<@core::integer::u32>>, 1>([28]) -> ([29]); // 666
+store_temp<Snapshot<Array<u32>>>([24]) -> ([26]); // 667
+store_temp<core::option::Option::<core::box::Box::<@core::integer::u32>>>([29]) -> ([27]); // 668
+enum_match<core::option::Option::<core::box::Box::<@core::integer::u32>>>([27]) { fallthrough([30]) 786([31]) }; // 669
+branch_align() -> (); // 670
+unbox<u32>([30]) -> ([32]); // 671
+rename<u32>([32]) -> ([33]); // 672
+store_temp<RangeCheck>([7]) -> ([36]); // 673
+store_temp<u32>([33]) -> ([37]); // 674
+dup<u32>([5]) -> ([5], [38]); // 675
+store_temp<u32>([38]) -> ([38]); // 676
+function_call<user@core::integer::U32Mul::mul>([36], [37], [38]) -> ([34], [35]); // 677
+enum_match<core::panics::PanicResult::<(core::integer::u32,)>>([35]) { fallthrough([39]) 775([40]) }; // 678
+branch_align() -> (); // 679
+struct_deconstruct<Tuple<u32>>([39]) -> ([41]); // 680
+store_temp<RangeCheck>([34]) -> ([44]); // 681
+store_temp<u32>([4]) -> ([45]); // 682
+store_temp<u32>([41]) -> ([46]); // 683
+function_call<user@core::integer::U32Add::add>([44], [45], [46]) -> ([42], [43]); // 684
+enum_match<core::panics::PanicResult::<(core::integer::u32,)>>([43]) { fallthrough([47]) 765([48]) }; // 685
+branch_align() -> (); // 686
+struct_construct<core::array::Span::<core::integer::u32>>([26]) -> ([49]); // 687
+struct_deconstruct<Tuple<u32>>([47]) -> ([50]); // 688
+struct_deconstruct<core::array::Span::<core::integer::u32>>([2]) -> ([51]); // 689
+store_temp<core::array::Span::<core::integer::u32>>([49]) -> ([49]); // 690
+array_snapshot_pop_back<u32>([51]) { fallthrough([52], [53]) 697([54]) }; // 691
+branch_align() -> (); // 692
+enum_init<core::option::Option::<core::box::Box::<@core::integer::u32>>, 0>([53]) -> ([55]); // 693
+store_temp<Snapshot<Array<u32>>>([52]) -> ([56]); // 694
+store_temp<core::option::Option::<core::box::Box::<@core::integer::u32>>>([55]) -> ([57]); // 695
+jump() { 702() }; // 696
+branch_align() -> (); // 697
+struct_construct<Unit>() -> ([58]); // 698
+enum_init<core::option::Option::<core::box::Box::<@core::integer::u32>>, 1>([58]) -> ([59]); // 699
+store_temp<Snapshot<Array<u32>>>([54]) -> ([56]); // 700
+store_temp<core::option::Option::<core::box::Box::<@core::integer::u32>>>([59]) -> ([57]); // 701
+enum_match<core::option::Option::<core::box::Box::<@core::integer::u32>>>([57]) { fallthrough([60]) 747([61]) }; // 702
+branch_align() -> (); // 703
+unbox<u32>([60]) -> ([62]); // 704
+rename<u32>([62]) -> ([63]); // 705
+store_temp<RangeCheck>([42]) -> ([66]); // 706
+store_temp<u32>([5]) -> ([67]); // 707
+store_temp<u32>([63]) -> ([68]); // 708
+function_call<user@core::integer::U32Mul::mul>([66], [67], [68]) -> ([64], [65]); // 709
+enum_match<core::panics::PanicResult::<(core::integer::u32,)>>([65]) { fallthrough([69]) 737([70]) }; // 710
+branch_align() -> (); // 711
+disable_ap_tracking() -> (); // 712
+struct_construct<core::array::Span::<core::integer::u32>>([56]) -> ([71]); // 713
+struct_deconstruct<Tuple<u32>>([69]) -> ([72]); // 714
+store_temp<RangeCheck>([64]) -> ([76]); // 715
+store_temp<GasBuiltin>([8]) -> ([77]); // 716
+store_temp<core::array::Span::<core::integer::u32>>([71]) -> ([78]); // 717
+store_temp<core::array::Span::<core::integer::u32>>([49]) -> ([79]); // 718
+store_temp<u32>([50]) -> ([80]); // 719
+store_temp<u32>([72]) -> ([81]); // 720
+function_call<user@orion::operators::tensor::core::ravel_index[expr35]>([76], [77], [78], [79], [80], [81]) -> ([73], [74], [75]); // 721
+enum_match<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>>([75]) { fallthrough([82]) 731([83]) }; // 722
+branch_align() -> (); // 723
+struct_deconstruct<Tuple<core::array::Span::<core::integer::u32>, u32, u32, core::array::Span::<core::integer::u32>, Unit>>([82]) -> ([84], [85], [86], [87], [88]); // 724
+struct_construct<Tuple<core::array::Span::<core::integer::u32>, u32, u32, core::array::Span::<core::integer::u32>, Unit>>([84], [85], [86], [87], [88]) -> ([89]); // 725
+enum_init<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>, 0>([89]) -> ([90]); // 726
+store_temp<RangeCheck>([73]) -> ([91]); // 727
+store_temp<GasBuiltin>([74]) -> ([92]); // 728
+store_temp<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>>([90]) -> ([93]); // 729
+return([91], [92], [93]); // 730
+branch_align() -> (); // 731
+enum_init<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>, 1>([83]) -> ([94]); // 732
+store_temp<RangeCheck>([73]) -> ([95]); // 733
+store_temp<GasBuiltin>([74]) -> ([96]); // 734
+store_temp<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>>([94]) -> ([97]); // 735
+return([95], [96], [97]); // 736
+branch_align() -> (); // 737
+disable_ap_tracking() -> (); // 738
+drop<u32>([50]) -> (); // 739
+drop<core::array::Span::<core::integer::u32>>([49]) -> (); // 740
+drop<Snapshot<Array<u32>>>([56]) -> (); // 741
+enum_init<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>, 1>([70]) -> ([98]); // 742
+store_temp<RangeCheck>([64]) -> ([99]); // 743
+store_temp<GasBuiltin>([8]) -> ([100]); // 744
+store_temp<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>>([98]) -> ([101]); // 745
+return([99], [100], [101]); // 746
+branch_align() -> (); // 747
+disable_ap_tracking() -> (); // 748
+drop<Unit>([61]) -> (); // 749
+drop<u32>([50]) -> (); // 750
+drop<core::array::Span::<core::integer::u32>>([49]) -> (); // 751
+drop<Snapshot<Array<u32>>>([56]) -> (); // 752
+drop<u32>([5]) -> (); // 753
+array_new<felt252>() -> ([102]); // 754
+felt252_const<29721761890975875353235833581453094220424382983267374>() -> ([103]); // 755
+store_temp<felt252>([103]) -> ([103]); // 756
+array_append<felt252>([102], [103]) -> ([104]); // 757
+struct_construct<core::panics::Panic>() -> ([105]); // 758
+struct_construct<Tuple<core::panics::Panic, Array<felt252>>>([105], [104]) -> ([106]); // 759
+enum_init<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>, 1>([106]) -> ([107]); // 760
+store_temp<RangeCheck>([42]) -> ([108]); // 761
+store_temp<GasBuiltin>([8]) -> ([109]); // 762
+store_temp<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>>([107]) -> ([110]); // 763
+return([108], [109], [110]); // 764
+branch_align() -> (); // 765
+disable_ap_tracking() -> (); // 766
+drop<core::array::Span::<core::integer::u32>>([2]) -> (); // 767
+drop<Snapshot<Array<u32>>>([26]) -> (); // 768
+drop<u32>([5]) -> (); // 769
+enum_init<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>, 1>([48]) -> ([111]); // 770
+store_temp<RangeCheck>([42]) -> ([112]); // 771
+store_temp<GasBuiltin>([8]) -> ([113]); // 772
+store_temp<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>>([111]) -> ([114]); // 773
+return([112], [113], [114]); // 774
+branch_align() -> (); // 775
+disable_ap_tracking() -> (); // 776
+drop<core::array::Span::<core::integer::u32>>([2]) -> (); // 777
+drop<Snapshot<Array<u32>>>([26]) -> (); // 778
+drop<u32>([5]) -> (); // 779
+drop<u32>([4]) -> (); // 780
+enum_init<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>, 1>([40]) -> ([115]); // 781
+store_temp<RangeCheck>([34]) -> ([116]); // 782
+store_temp<GasBuiltin>([8]) -> ([117]); // 783
+store_temp<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>>([115]) -> ([118]); // 784
+return([116], [117], [118]); // 785
+branch_align() -> (); // 786
+disable_ap_tracking() -> (); // 787
+drop<Unit>([31]) -> (); // 788
+drop<core::array::Span::<core::integer::u32>>([2]) -> (); // 789
+drop<Snapshot<Array<u32>>>([26]) -> (); // 790
+drop<u32>([5]) -> (); // 791
+drop<u32>([4]) -> (); // 792
+array_new<felt252>() -> ([119]); // 793
+felt252_const<29721761890975875353235833581453094220424382983267374>() -> ([120]); // 794
+store_temp<felt252>([120]) -> ([120]); // 795
+array_append<felt252>([119], [120]) -> ([121]); // 796
+struct_construct<core::panics::Panic>() -> ([122]); // 797
+struct_construct<Tuple<core::panics::Panic, Array<felt252>>>([122], [121]) -> ([123]); // 798
+enum_init<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>, 1>([123]) -> ([124]); // 799
+store_temp<RangeCheck>([7]) -> ([125]); // 800
+store_temp<GasBuiltin>([8]) -> ([126]); // 801
+store_temp<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>>([124]) -> ([127]); // 802
+return([125], [126], [127]); // 803
+branch_align() -> (); // 804
+disable_ap_tracking() -> (); // 805
+struct_construct<Unit>() -> ([128]); // 806
+struct_construct<Tuple<core::array::Span::<core::integer::u32>, u32, u32, core::array::Span::<core::integer::u32>, Unit>>([3], [4], [5], [2], [128]) -> ([129]); // 807
+enum_init<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>, 0>([129]) -> ([130]); // 808
+store_temp<RangeCheck>([7]) -> ([131]); // 809
+store_temp<GasBuiltin>([8]) -> ([132]); // 810
+store_temp<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>>([130]) -> ([133]); // 811
+return([131], [132], [133]); // 812
+branch_align() -> (); // 813
+disable_ap_tracking() -> (); // 814
+drop<u32>([4]) -> (); // 815
+drop<core::array::Span::<core::integer::u32>>([2]) -> (); // 816
+drop<core::array::Span::<core::integer::u32>>([3]) -> (); // 817
+drop<u32>([5]) -> (); // 818
+array_new<felt252>() -> ([134]); // 819
+felt252_const<375233589013918064796019>() -> ([135]); // 820
+store_temp<felt252>([135]) -> ([135]); // 821
+array_append<felt252>([134], [135]) -> ([136]); // 822
+struct_construct<core::panics::Panic>() -> ([137]); // 823
+struct_construct<Tuple<core::panics::Panic, Array<felt252>>>([137], [136]) -> ([138]); // 824
+enum_init<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>, 1>([138]) -> ([139]); // 825
+store_temp<RangeCheck>([9]) -> ([140]); // 826
+store_temp<GasBuiltin>([10]) -> ([141]); // 827
+store_temp<core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>>([139]) -> ([142]); // 828
+return([140], [141], [142]); // 829
+u32_wide_mul([1], [2]) -> ([3]); // 830
+store_temp<RangeCheck>([0]) -> ([6]); // 831
+store_temp<u64>([3]) -> ([7]); // 832
+function_call<user@core::integer::DowncastableTryInto::<core::integer::u64, core::integer::u32, core::integer::DowncastableU64U32>::try_into>([6], [7]) -> ([4], [5]); // 833
+enum_match<core::option::Option::<core::integer::u32>>([5]) { fallthrough([8]) 841([9]) }; // 834
+branch_align() -> (); // 835
+struct_construct<Tuple<u32>>([8]) -> ([10]); // 836
+enum_init<core::panics::PanicResult::<(core::integer::u32,)>, 0>([10]) -> ([11]); // 837
+store_temp<RangeCheck>([4]) -> ([12]); // 838
+store_temp<core::panics::PanicResult::<(core::integer::u32,)>>([11]) -> ([13]); // 839
+return([12], [13]); // 840
+branch_align() -> (); // 841
+drop<Unit>([9]) -> (); // 842
+array_new<felt252>() -> ([14]); // 843
+felt252_const<155785504327651875780457110017927835511>() -> ([15]); // 844
+store_temp<felt252>([15]) -> ([15]); // 845
+array_append<felt252>([14], [15]) -> ([16]); // 846
+struct_construct<core::panics::Panic>() -> ([17]); // 847
+struct_construct<Tuple<core::panics::Panic, Array<felt252>>>([17], [16]) -> ([18]); // 848
+enum_init<core::panics::PanicResult::<(core::integer::u32,)>, 1>([18]) -> ([19]); // 849
+store_temp<RangeCheck>([4]) -> ([20]); // 850
+store_temp<core::panics::PanicResult::<(core::integer::u32,)>>([19]) -> ([21]); // 851
+return([20], [21]); // 852
+downcast<u64, u32>([0], [1]) { fallthrough([2], [3]) 859([4]) }; // 853
+branch_align() -> (); // 854
+enum_init<core::option::Option::<core::integer::u32>, 0>([3]) -> ([5]); // 855
+store_temp<RangeCheck>([2]) -> ([6]); // 856
+store_temp<core::option::Option::<core::integer::u32>>([5]) -> ([7]); // 857
+jump() { 864() }; // 858
+branch_align() -> (); // 859
+struct_construct<Unit>() -> ([8]); // 860
+enum_init<core::option::Option::<core::integer::u32>, 1>([8]) -> ([9]); // 861
+store_temp<RangeCheck>([4]) -> ([6]); // 862
+store_temp<core::option::Option::<core::integer::u32>>([9]) -> ([7]); // 863
+rename<RangeCheck>([6]) -> ([10]); // 864
+rename<core::option::Option::<core::integer::u32>>([7]) -> ([11]); // 865
+return([10], [11]); // 866
+
+PortfolioOptimizerDAO::utils::optimizer_utils::test_tensor@0([0]: RangeCheck, [1]: GasBuiltin, [2]: orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>) -> (RangeCheck, GasBuiltin, core::panics::PanicResult::<((),)>);
+core::debug::Felt252PrintImpl::print@43([0]: felt252) -> (Unit);
+core::debug::U32PrintImpl::print@49([0]: u32) -> (Unit);
+PortfolioOptimizerDAO::utils::optimizer_utils::test_tensor[expr99]@56([0]: RangeCheck, [1]: GasBuiltin, [2]: u32, [3]: orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>) -> (RangeCheck, GasBuiltin, core::panics::PanicResult::<(core::integer::u32, ())>);
+core::debug::print_felt252@258([0]: felt252) -> (Unit);
+core::array::array_at::<core::integer::u32>@265([0]: RangeCheck, [1]: Snapshot<Array<u32>>, [2]: u32) -> (RangeCheck, core::panics::PanicResult::<(core::box::Box::<@core::integer::u32>,)>);
+PortfolioOptimizerDAO::utils::optimizer_utils::test_tensor[expr86]@283([0]: RangeCheck, [1]: GasBuiltin, [2]: u32, [3]: u32, [4]: orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>) -> (RangeCheck, GasBuiltin, core::panics::PanicResult::<(core::integer::u32, ())>);
+orion::operators::tensor::implementations::tensor_fp16x16::FP16x16Tensor::at@420([0]: RangeCheck, [1]: GasBuiltin, [2]: orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>, [3]: core::array::Span::<core::integer::u32>) -> (RangeCheck, GasBuiltin, core::panics::PanicResult::<(orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>);
+core::integer::U32Add::add@442([0]: RangeCheck, [1]: u32, [2]: u32) -> (RangeCheck, core::panics::PanicResult::<(core::integer::u32,)>);
+orion::operators::tensor::core::at_tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>@469([0]: RangeCheck, [1]: GasBuiltin, [2]: orion::operators::tensor::core::Tensor::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>, [3]: core::array::Span::<core::integer::u32>) -> (RangeCheck, GasBuiltin, core::panics::PanicResult::<(@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16,)>);
+core::result::ResultTraitImpl::<core::integer::u32, core::integer::u32>::expect::<core::integer::u32Drop>@546([0]: core::result::Result::<core::integer::u32, core::integer::u32>, [1]: felt252) -> (core::panics::PanicResult::<(core::integer::u32,)>);
+orion::operators::tensor::core::ravel_index@562([0]: RangeCheck, [1]: GasBuiltin, [2]: core::array::Span::<core::integer::u32>, [3]: core::array::Span::<core::integer::u32>) -> (RangeCheck, GasBuiltin, core::panics::PanicResult::<(core::integer::u32,)>);
+core::array::array_at::<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>@621([0]: RangeCheck, [1]: Snapshot<Array<orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>>, [2]: u32) -> (RangeCheck, core::panics::PanicResult::<(core::box::Box::<@orion::numbers::fixed_point::implementations::fp16x16::core::FP16x16>,)>);
+orion::operators::tensor::core::ravel_index[expr35]@639([0]: RangeCheck, [1]: GasBuiltin, [2]: core::array::Span::<core::integer::u32>, [3]: core::array::Span::<core::integer::u32>, [4]: u32, [5]: u32) -> (RangeCheck, GasBuiltin, core::panics::PanicResult::<(core::array::Span::<core::integer::u32>, core::integer::u32, core::integer::u32, core::array::Span::<core::integer::u32>, ())>);
+core::integer::U32Mul::mul@830([0]: RangeCheck, [1]: u32, [2]: u32) -> (RangeCheck, core::panics::PanicResult::<(core::integer::u32,)>);
+core::integer::DowncastableTryInto::<core::integer::u64, core::integer::u32, core::integer::DowncastableU64U32>::try_into@853([0]: RangeCheck, [1]: u64) -> (RangeCheck, core::option::Option::<core::integer::u32>);
