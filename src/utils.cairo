@@ -70,7 +70,7 @@ mod optimizer_utils {
         }
     }
 
-    fn forward_elimination<impl Vec: VecTrait<NullableVec<FP16x16>, usize>,>(ref X: MutTensor, ref y: MutTensor, n: usize) {
+    fn forward_elimination(ref X: MutTensor, ref y: MutTensor, n: usize) {
         let cols_X = X.get_cols();
         let mut row: usize = 0;
         loop {
@@ -121,40 +121,40 @@ mod optimizer_utils {
                     if j == n {
                         break;
                     }
-                    X.data.set(X.data.at(i * cols_X + j),
-                               X.data.at(i * cols_X + j) - (factor * X.data.at(row * cols_X + j)));
+                    X.data.set((i * cols_X + j), X.data.at(i * cols_X + j) - (factor * X.data.at(row * cols_X + j)));
                     j += 1;
                 };
                 let mut y_set_val: FP16x16 = y.data.at(row);
-                y.data.set(y.data.at(i), y.data.at(i) - (factor * y_set_val));
+                let mut y_i =  y.data.at(i);
+                y.data.set(i, y_i - (factor * y_set_val));
                 i += 1;
             };
             row += 1;
         }
     }
 
-    fn back_substitution<impl Vec: VecTrait<NullableVec<FP16x16>, usize>,>(ref X: MutTensor, ref y: MutTensor, n: usize) -> Tensor<FP16x16> {
+    fn back_substitution(ref X: MutTensor, ref y: MutTensor, n: usize) -> Tensor<FP16x16> {
 
         // Initialize the vector for the tensor data
-        let mut x_items: Felt252Dict<Nullable<FP16x16>> = Default::default();
-        let mut x_data: NullableVec<FP16x16> = NullableVec { items: x_items, len: n };
+        let mut X_items: Felt252Dict<Nullable<FP16x16>> = Default::default();
+        let mut X_data: NullableVec<FP16x16> = NullableVec { items: X_items, len: n };
 
         // Loop through the array and assign the values
         let cols_X = X.get_cols();
         let mut i: usize = n - 1;
         loop {
-            x_data.set(x_data.at(i), i);
+            X_data.set(i, X_data.at(i));
             let mut j = i + 1;
             loop {
                 if j == n {
                     break ();
                 }
-                let mut x_data_val_0: FP16x16 = X.data.at(i * cols_X + j) * x_data.at(j);
-                x_data.set(x_data.at(i), x_data_val_0);
+                let mut x_data_val_0: FP16x16 = X.data.at(i * cols_X + j) * X_data.at(j);
+                X_data.set(i, x_data_val_0);
                 j += 1;
             };
-            let mut x_data_val_1: FP16x16 = x_data.at(i) / X.data.at(i * cols_X + i);
-            x_data.set(x_data.at(i), x_data_val_1);
+            let mut x_data_val_1: FP16x16 = X_data.at(i) / X.data.at(i * cols_X + i);
+            X_data.set(i, x_data_val_1);
             if i == 0 {
                 break ();
             }
@@ -162,10 +162,11 @@ mod optimizer_utils {
         };
 
         // Map back the vector into a tensor
+        let X_mut = MutTensor { shape: X.shape, data: X_data };
         X.to_tensor(indices: X.shape)
     }
 
-    fn linalg_solve<impl Vec: VecTrait<NullableVec<FP16x16>, usize>,>(X: Tensor<FP16x16>, y: Tensor<FP16x16>) -> Tensor<FP16x16> {
+    fn linalg_solve(X: Tensor<FP16x16>, y: Tensor<FP16x16>) -> Tensor<FP16x16> {
         // Assert X and y are the same length
         let n = *X.shape.at(0);
         assert(n == *y.shape.at(0), 'Matrix/vector dim mismatch');
