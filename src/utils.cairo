@@ -4,12 +4,8 @@ mod optimizer_utils {
     use array::{ArrayTrait, SpanTrait};
     use traits::{Into, TryInto, Index};
     use nullable::{NullableTrait, nullable_from_box, match_nullable, FromNullableResult};
-    use orion::operators::tensor::{
-        Tensor, TensorTrait, FP16x16Tensor, FP16x16TensorMul, FP16x16TensorSub, FP16x16TensorDiv
-    };
-    use orion::numbers::fixed_point::implementations::fp16x16::core::{
-        FP16x16, FP16x16Add, FP16x16Div, FP16x16Mul, FP16x16Sub, FP16x16Impl
-    };
+    use orion::operators::tensor::{Tensor, TensorTrait, FP16x16Tensor, FP16x16TensorMul, FP16x16TensorSub, FP16x16TensorDiv};
+    use orion::numbers::fixed_point::implementations::fp16x16::core::{FP16x16, FP16x16Add, FP16x16Div, FP16x16Mul, FP16x16Sub, FP16x16Impl};
     use orion::operators::tensor::core::ravel_index;
     use alexandria_data_structures::vec::{Felt252Vec, NullableVecImpl, NullableVec, VecTrait};
 

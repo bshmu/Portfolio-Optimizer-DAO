@@ -3,8 +3,8 @@ name = "PortfolioOptimizerDAO"
 version = "0.1.0"
 
 [dependencies]
-orion = { git = "https://github.com/gizatechxyz/orion", rev="v0.1.1" }
-alexandria_math = { git = "https://github.com/keep-starknet-strange/alexandria.git" }
+orion = { git = "https://github.com/gizatechxyz/orion" }
+alexandria_data_structures = { git = "https://github.com/keep-starknet-strange/alexandria.git", rev = "f37d73d" }
 
 [scripts]
 test = "scarb cairo-test -f test"

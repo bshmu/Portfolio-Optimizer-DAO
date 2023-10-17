@@ -10,6 +10,7 @@ mod optimizer_statistics {
     use orion::numbers::fixed_point::implementations::fp16x16::core::{FP16x16, FP16x16Add, FP16x16Div, FP16x16Mul, FP16x16Sub, FP16x16Impl};
     use orion::operators::tensor::core::ravel_index;
     use alexandria_data_structures::vec::{Felt252Vec, NullableVecImpl, NullableVec, VecTrait};
+    use utils::optimizer_utils::{MutTensor};
 
     fn exponential_weights(lambda_unscaled: u32, l: u32) -> Tensor<FP16x16> {
             // Param lambda_unscaled (u32): factor for exponential weight calculation

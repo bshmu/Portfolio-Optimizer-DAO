@@ -38,7 +38,7 @@ def forward_elimination(matrix, vector, n):
         # for r in matrix:
         #     print(r)
         # print(f"Vector mid iteration {row}:")
-        # for s in vector:
+        # for s in vector:https://occ-0-448-444.1.nflxso.net/dnm/api/v6/6AYY37jfdO6hpXcMjf9Yu5cnmO0/AAAABWjN5_nVqqH2yvHfi41Gk_rbZEgcCl_EW1dTjvUWAzZ6jd97y-xoiKMHylHIYNbkYlaKzbuXoqLDDQJbOXvsQIbod4-pqPvnKT5U.webp?r=3a7
         #     print(s)
         # print("\n")
 
